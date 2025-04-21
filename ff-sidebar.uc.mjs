@@ -1,13 +1,12 @@
 /* /* // ==UserScript==
-// @name            Second Sidebar for Firefox
-// @description     A Firefox userChrome.js script for adding a second sidebar with web panels like in Vivaldi/Floorp/Zen.
-// @author          aminought
-// @homepageURL     https://github.com/aminought/firefox-second-sidebar
+// @name            Create pin unpin button in the sidebar
+// @description     Toggle pin unpin easily with a button
+// @author          BibekBhusal
 // ==/UserScript== */
 
-import { XULElement } from "./zen-second-sidebar/src/second_sidebar/xul/base/xul_element.mjs";
-import { Div } from "./zen-second-sidebar/src/second_sidebar/xul/base/div.mjs";
-import { Img } from "./zen-second-sidebar/src/second_sidebar/xul/base/img.mjs";
+import { XULElement } from "../zen-second-sidebar/src/second_sidebar/xul/base/xul_element.mjs";
+import { Div } from "../zen-second-sidebar/src/second_sidebar/xul/base/div.mjs";
+import { Img } from "../zen-second-sidebar/src/second_sidebar/xul/base/img.mjs";
 
 const api_available = typeof UC_API !== "undefined";
 function addButton() {
