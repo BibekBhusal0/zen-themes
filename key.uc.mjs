@@ -81,36 +81,30 @@ const hotkeys = [
     id: "restartBrowser",
     modifiers: "ctrl shift alt",
     key: "R",
-    command: () => {
-      Runtime.restart(true);
-    },
+    command: () => Runtime.restart(true),
   },
 
   {
     id: "testHotkey",
     modifiers: "ctrl shift alt",
     key: "T",
-    command: (param) => {
-      console.log("Test hotkey pressed! Parameter:", param);
-    },
+    command: (param) => console.log("Test hotkey pressed! Parameter:", param),
   },
 
   {
     id: "previousTab",
     modifiers: "alt",
     key: "J",
-    command: (window) => {
-      window.gBrowser.tabContainer.advanceSelectedTab(1, true);
-    },
+    command: (window) =>
+      window.gBrowser.tabContainer.advanceSelectedTab(1, true),
   },
 
   {
     id: "nextTab",
     modifiers: "alt",
     key: "K",
-    command: (window) => {
-      window.gBrowser.tabContainer.advanceSelectedTab(-1, true);
-    },
+    command: (window) =>
+      window.gBrowser.tabContainer.advanceSelectedTab(-1, true),
   },
 
   {
@@ -131,18 +125,14 @@ const hotkeys = [
     id: "previousTabHistory",
     modifiers: "alt",
     key: "H",
-    command: (window) => {
-      window.gBrowser.goBack();
-    },
+    command: (window) => window.gBrowser.goBack(),
   },
 
   {
     id: "nextTabHistory",
     modifiers: "alt",
     key: "L",
-    command: (window) => {
-      window.gBrowser.goForward();
-    },
+    command: (window) => window.gBrowser.goForward(),
   },
 
   {
@@ -163,18 +153,21 @@ const hotkeys = [
     id: "toggleToolbar",
     modifiers: "alt ctrl",
     key: "T",
-    command: function() {
-      togglePref("zen.view.compact.hide-toolbar");
-    },
+    command: () => togglePref("zen.view.compact.hide-toolbar"),
   },
 
   {
     id: "toggleTabbar",
     modifiers: "alt ctrl",
     key: "A",
-    command: function() {
-      togglePref("zen.view.compact.hide-tabbar");
-    },
+    command: () => togglePref("zen.view.compact.hide-tabbar"),
+  },
+
+  {
+    id: "openSettings",
+    modifiers: "ctrl alt",
+    key: "S",
+    command: () => openTrustedLinkIn("about:preferences", "tab"),
   },
 ];
 
