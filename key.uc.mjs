@@ -176,6 +176,26 @@ const hotkeys = [
     key: "D",
     command: () => togglePref("pdf.dark.mode"),
   },
+
+  {
+    id: "openAdvancedSettings",
+    modifiers: "ctrl shift alt",
+    key: "S",
+    command: () => openTrustedLinkIn("about:config", "tab"),
+  },
+
+  {
+    id: "pasteAndGo",
+    modifiers: "ctrl shift",
+    key: "V",
+    command: () => {
+      navigator.clipboard.readText().then((text) => {
+        if (text) {
+          openTrustedLinkIn(text, "tab");
+        }
+      });
+    },
+  },
 ];
 
 if (typeof UC_API !== "undefined") {
