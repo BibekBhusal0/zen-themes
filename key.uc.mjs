@@ -169,6 +169,13 @@ const hotkeys = [
     key: "S",
     command: () => openTrustedLinkIn("about:preferences", "tab"),
   },
+
+  {
+    id: "toggleDarkMode",
+    modifiers: "ctrl alt shift",
+    key: "D",
+    command: () => togglePref("pdf.dark.mode"),
+  },
 ];
 
 if (typeof UC_API !== "undefined") {

@@ -1,5 +1,5 @@
 /* /* // ==UserScript==
-// @name            Create pin unpin button in the sidebar
+// @name            Sidebar Pin Unpin icon
 // @description     Toggle pin unpin easily with a button
 // @author          BibekBhusal
 // ==/UserScript== */
@@ -40,17 +40,13 @@ function addButton() {
     pref.setTo(!pref.value);
     render_button();
   };
-
-  if (api_available) {
-    UC_API.Prefs.addListener(config_flag, render_button);
-  }
+  UC_API.Prefs.addListener(config_flag, render_button);
 
   button.addEventListener("click", buttonClick);
   button.appendChild(img);
-  header.appendChild(button);
   const children = header.element.children;
   if (children.length > 1) {
-    header.element.insertBefore(button.element, children[children.length - 2]);
+    header.element.insertBefore(button.element, children[children.length - 1]);
   } else {
     header.appendChild(button);
   }
