@@ -174,7 +174,7 @@ const hotkeys = [
     id: "toggleDarkMode",
     modifiers: "ctrl alt shift",
     key: "D",
-    command: () => togglePref("pdf.dark.mode"),
+    command: () => togglePref("pdf.dark.mode.disabled"),
   },
 
   {
@@ -186,12 +186,18 @@ const hotkeys = [
 
   {
     id: "pasteAndGo",
-    modifiers: "ctrl shift",
+    modifiers: "alt",
     key: "V",
     command: () => {
       navigator.clipboard.readText().then((text) => {
         if (text) {
-          openTrustedLinkIn(text, "tab");
+          try {
+            new URL(text);
+            openTrustedLinkIn(text, "tab");
+          } catch (error) {
+            const searchURL = `https://duckduckgo.com/?q=${encodeURIComponent(text)}`;
+            openTrustedLinkIn(searchURL, "tab");
+          }
         }
       });
     },
