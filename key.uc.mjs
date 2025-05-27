@@ -164,17 +164,24 @@ const hotkeys = [
   },
 
   {
-    id: "openSettings",
-    modifiers: "ctrl alt",
-    key: "S",
-    command: () => openTrustedLinkIn("about:preferences", "tab"),
-  },
-
-  {
     id: "toggleDarkMode",
     modifiers: "ctrl alt shift",
     key: "D",
     command: () => togglePref("pdf.dark.mode.disabled"),
+  },
+
+  {
+    id: "toggleGameMode",
+    modifiers: "alt",
+    key: "G",
+    command: () => togglePref("natsumi.gamemode.enabled"),
+  },
+
+  {
+    id: "openSettings",
+    modifiers: "ctrl alt",
+    key: "S",
+    command: () => openTrustedLinkIn("about:preferences", "tab"),
   },
 
   {
