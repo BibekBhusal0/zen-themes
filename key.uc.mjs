@@ -4,6 +4,7 @@
 // ==/UserScript==
 
 const { Runtime, Hotkeys, Prefs } = UC_API;
+import { showToast } from "./utils/toast.mjs";
 
 const copyGithubRepo = (window) => {
   const url = window.gBrowser.currentURI.spec;
@@ -16,13 +17,13 @@ const copyGithubRepo = (window) => {
     navigator.clipboard
       .writeText(repoString)
       .then(() => {
-        console.log("Copied GitHub repo: " + repoString);
+        showToast("gh-success", "success");
       })
       .catch(() => {
-        console.log("Failed to copy GitHub repo");
+        showToast("gh-fail", "error");
       });
   } else {
-    console.log("Not a GitHub repository page");
+    showToast("gh-not-found", "error");
   }
 };
 
@@ -44,19 +45,20 @@ const alternateSearch = (window) => {
       let newURL;
       if (targetSearchEngine === "Google") {
         newURL = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+        showToast("searching-google", "success");
       } else if (targetSearchEngine === "DuckDuckGo") {
         newURL = `https://duckduckgo.com/?q=${encodeURIComponent(searchQuery)}`;
+        showToast("searching-duckduckgo", "success");
       } else {
-        console.log("Not a recognized search engine.");
+        showToast("search-fail", "error");
         return;
       }
       openTrustedLinkIn(newURL, "tab");
-      console.log(`Searching ${targetSearchEngine} for '${searchQuery}'`);
     } else {
-      console.log("No search query found.");
+      showToast("search-fail", "error");
     }
   } catch (error) {
-    console.log("Alternate search failed.");
+    showToast("search-fail", "error");
   }
 };
 
@@ -88,7 +90,10 @@ const hotkeys = [
     id: "testHotkey",
     modifiers: "ctrl shift alt",
     key: "T",
-    command: (param) => console.log("Test hotkey pressed! Parameter:", param),
+    command: (param) => {
+      console.log("Test hotkey pressed! Parameter:", param);
+      showToast("test", "info");
+    },
   },
 
   {
