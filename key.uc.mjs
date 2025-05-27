@@ -27,7 +27,7 @@ const copyGithubRepo = (window) => {
   }
 };
 
-const alternateSearch = (window) => {
+const alternateSearch = (window, split) => {
   try {
     const currentURL = window.gBrowser.currentURI.spec;
     let searchQuery = null;
@@ -43,6 +43,7 @@ const alternateSearch = (window) => {
     }
     if (searchQuery) {
       let newURL;
+      const previousTab = window.gBrowser.selectedTab;
       if (targetSearchEngine === "Google") {
         newURL = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
         showToast("searching-google", "success");
@@ -54,6 +55,8 @@ const alternateSearch = (window) => {
         return;
       }
       openTrustedLinkIn(newURL, "tab");
+      const currentTab = window.gBrowser.selectedTab;
+      if (previousTab && split) gZenViewSplitter.splitTabs([ currentTab, previousTab ], 'vsep', 1); 
     } else {
       showToast("search-fail", "error");
     }
@@ -148,10 +151,17 @@ const hotkeys = [
   },
 
   {
-    id: "alternateSearch",
+    id: "alternateSearchSplit",
     modifiers: "alt",
     key: "Y",
-    command: alternateSearch,
+    command: (window) => alternateSearch(window, true),
+  },
+
+  {
+    id: "alternateSearch",
+    modifiers: "alt ctrl",
+    key: "Y",
+    command: (window) => alternateSearch(window, false),
   },
 
   {
