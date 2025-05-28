@@ -56,7 +56,7 @@ const alternateSearch = (window, split) => {
       }
       openTrustedLinkIn(newURL, "tab");
       const currentTab = window.gBrowser.selectedTab;
-      if (previousTab && split) gZenViewSplitter.splitTabs([ currentTab, previousTab ], 'vsep', 1); 
+      if (previousTab && split) gZenViewSplitter.splitTabs([currentTab, previousTab], 'vsep', 1);
     } else {
       showToast("search-fail", "error");
     }
@@ -64,6 +64,21 @@ const alternateSearch = (window, split) => {
     showToast("search-fail", "error");
   }
 };
+
+const pasteAndGo = () => {
+  navigator.clipboard.readText().then((text) => {
+    if (text) {
+      try {
+        new URL(text);
+        openTrustedLinkIn(text, "tab");
+      } catch (error) {
+        const searchURL = `https://duckduckgo.com/?q=${encodeURIComponent(text)}`;
+        showToast("searching-duckduckgo", "success");
+        openTrustedLinkIn(searchURL, "tab");
+      }
+    }
+  });
+}
 
 const togglePref = (prefName) => {
   const pref = Prefs.get(prefName);
@@ -210,19 +225,7 @@ const hotkeys = [
     id: "pasteAndGo",
     modifiers: "alt",
     key: "V",
-    command: () => {
-      navigator.clipboard.readText().then((text) => {
-        if (text) {
-          try {
-            new URL(text);
-            openTrustedLinkIn(text, "tab");
-          } catch (error) {
-            const searchURL = `https://duckduckgo.com/?q=${encodeURIComponent(text)}`;
-            openTrustedLinkIn(searchURL, "tab");
-          }
-        }
-      });
-    },
+    command: pasteAndGo,
   },
 ];
 
