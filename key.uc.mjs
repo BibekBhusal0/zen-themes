@@ -56,7 +56,8 @@ const alternateSearch = (window, split) => {
       }
       openTrustedLinkIn(newURL, "tab");
       const currentTab = window.gBrowser.selectedTab;
-      if (previousTab && split) gZenViewSplitter.splitTabs([currentTab, previousTab], 'vsep', 1);
+      if (previousTab && split)
+        gZenViewSplitter.splitTabs([currentTab, previousTab], "vsep", 1);
     } else {
       showToast("search-fail", "error");
     }
@@ -78,7 +79,7 @@ const pasteAndGo = () => {
       }
     }
   });
-}
+};
 
 const togglePref = (prefName) => {
   const pref = Prefs.get(prefName);
@@ -128,6 +129,20 @@ const hotkeys = [
     key: "K",
     command: (window) =>
       window.gBrowser.tabContainer.advanceSelectedTab(-1, true),
+  },
+
+  {
+    id: "moveTabNext",
+    modifiers: "ctrl alt",
+    key: "j",
+    command: (window) => window.gBrowser.moveTabForward(),
+  },
+
+  {
+    id: "moveTabPrev",
+    modifiers: "ctrl alt",
+    key: "k",
+    command: (window) => window.gBrowser.moveTabBackward(),
   },
 
   {
