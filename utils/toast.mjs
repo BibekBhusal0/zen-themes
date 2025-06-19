@@ -9,6 +9,7 @@ const greetings = {
   "no-search-query-found": "No search query found.",
   "search-fail": "Failed to search.",
   "minimize-memory-usage": "Memory use Minimized",
+  "tabs-closed": "Tabs Closed",
 };
 
 const priorities = {
