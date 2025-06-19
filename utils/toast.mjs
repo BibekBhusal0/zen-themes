@@ -1,4 +1,4 @@
-const greetings = {
+const messages = {
   test: "This is toast.",
   "gh-success": "Copied Github Repo.",
   "gh-fail": "Failed to copy Github Repo.",
@@ -42,7 +42,7 @@ function injectToastStyles() {
 
   const style = document.createElement("style");
 
-  const messageStyles = Object.entries(greetings).map(([key, message]) => {
+  const messageStyles = Object.entries(messages).map(([key, message]) => {
     const id = `toast-${key}`;
     return `
       label[data-l10n-id="${id}"]::after {
@@ -54,7 +54,7 @@ function injectToastStyles() {
   const iconStyles = Object.entries(priorities).map(([priority, icon]) => {
     if (icon.icon) {
       return `
-      label[data-l10n-args*='"priority":"${priority}"']
+      .toast-priority-${priority}
       {
         &::before {
           content: "";
@@ -73,7 +73,7 @@ function injectToastStyles() {
     `;
     } else {
       return `
-      label[data-l10n-args*='"priority":"${priority}"']::before {
+      .toast-priority-${priority}::before {
         content: "${icon.emoji}";
         margin-right: 0.4em;
       }
@@ -88,7 +88,7 @@ function injectToastStyles() {
 
 export function showToast(key = "hello", priority, extraOptions = {}) {
   injectToastStyles();
-  const validKey = greetings.hasOwnProperty(key) ? key : "test";
+  const validKey = messages.hasOwnProperty(key) ? key : "test";
   const validPriority =
     priority && priorities.hasOwnProperty(priority) ? priority : null;
 
@@ -100,4 +100,11 @@ export function showToast(key = "hello", priority, extraOptions = {}) {
   if (validPriority) options.priority = validPriority;
 
   gZenUIManager.showToast(`toast-${validKey}`, options);
+
+  const toastElement = document.querySelector(
+    `label[data-l10n-id="toast-${validKey}"]`,
+  );
+  if (toastElement && validPriority) {
+    toastElement.classList.add(`toast-priority-${validPriority}`);
+  }
 }
