@@ -8,6 +8,7 @@ const greetings = {
   "searching-duckduckgo": "Searching in DuckDuckGo",
   "no-search-query-found": "No search query found.",
   "search-fail": "Failed to search.",
+  "minimize-memory-usage": "Memory use Minimized",
 };
 
 const priorities = {

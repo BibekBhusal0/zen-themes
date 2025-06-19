@@ -81,6 +81,16 @@ const pasteAndGo = () => {
   });
 };
 
+function MinimizeMemoryUse() {
+  const observerService = Cc["@mozilla.org/observer-service;1"].getService(
+    Ci.nsIObserverService,
+  );
+  for (let i = 0; i < 3; i++) {
+    observerService.notifyObservers(null, "memory-pressure", "heap-minimize");
+  }
+  showToast("minimize-memory-usage");
+}
+
 const togglePref = (prefName) => {
   const pref = Prefs.get(prefName);
   if (!pref || pref.type !== "boolean") return;
@@ -241,6 +251,13 @@ const hotkeys = [
     modifiers: "alt",
     key: "V",
     command: pasteAndGo,
+  },
+
+  {
+    id: "MinimizeMemoryUse",
+    modifiers: "ctrl alt shift",
+    key: "M",
+    command: MinimizeMemoryUse,
   },
 ];
 
