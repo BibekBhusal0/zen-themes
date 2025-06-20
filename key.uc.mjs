@@ -17,13 +17,13 @@ const copyGithubRepo = (window) => {
     navigator.clipboard
       .writeText(repoString)
       .then(() => {
-        showToast("gh-success", "success");
+        showToast("Copied Github Repo.", "success");
       })
       .catch(() => {
-        showToast("gh-fail", "error");
+        showToast("Failed to copy Github Repo.", "error");
       });
   } else {
-    showToast("gh-not-found", "error");
+    showToast("Not a Github Repo", "error");
   }
 };
 
@@ -46,12 +46,12 @@ const alternateSearch = (window, split) => {
       const previousTab = window.gBrowser.selectedTab;
       if (targetSearchEngine === "Google") {
         newURL = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
-        showToast("searching-google", "success");
+        showToast("Searching in Google", "success");
       } else if (targetSearchEngine === "DuckDuckGo") {
         newURL = `https://duckduckgo.com/?q=${encodeURIComponent(searchQuery)}`;
-        showToast("searching-duckduckgo", "success");
+        showToast("Searching in DuckDuckGo", "success");
       } else {
-        showToast("search-fail", "error");
+        showToast("Failed to search.", "error");
         return;
       }
       openTrustedLinkIn(newURL, "tab");
@@ -59,10 +59,10 @@ const alternateSearch = (window, split) => {
       if (previousTab && split)
         gZenViewSplitter.splitTabs([currentTab, previousTab], "vsep", 1);
     } else {
-      showToast("search-fail", "error");
+      showToast("Failed to search.", "error");
     }
   } catch (error) {
-    showToast("search-fail", "error");
+    showToast("Failed to search.", "error");
   }
 };
 
@@ -74,7 +74,7 @@ const pasteAndGo = () => {
         openTrustedLinkIn(text, "tab");
       } catch (error) {
         const searchURL = `https://duckduckgo.com/?q=${encodeURIComponent(text)}`;
-        showToast("searching-duckduckgo", "success");
+        showToast("Searching in DuckDuckGo", "success");
         openTrustedLinkIn(searchURL, "tab");
       }
     }
@@ -88,7 +88,7 @@ function MinimizeMemoryUse() {
   for (let i = 0; i < 3; i++) {
     observerService.notifyObservers(null, "memory-pressure", "heap-minimize");
   }
-  showToast("minimize-memory-usage");
+  showToast("Memory use Minimized", "success");
 }
 
 const togglePref = (prefName) => {
@@ -172,7 +172,7 @@ const hotkeys = [
     key: "T",
     command: (param) => {
       console.log("Test hotkey pressed! Parameter:", param);
-      showToast("test", "info");
+      showToast("Test HotKey", "success");
     },
   },
 
@@ -317,7 +317,7 @@ const hotkeys = [
     key: "C",
     command: () => {
       clearTabs();
-      showToast("tabs-closed");
+      showToast("Tabs Closed", "success");
     },
   },
 ];

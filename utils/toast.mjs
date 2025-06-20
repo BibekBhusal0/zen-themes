@@ -1,17 +1,3 @@
-const messages = {
-  test: "This is toast.",
-  "gh-success": "Copied Github Repo.",
-  "gh-fail": "Failed to copy Github Repo.",
-  "gh-not-found": "Not a Github Repo",
-  "search-engene-not-found": "Not a recognized search engine.",
-  "searching-google": "Searching in Google",
-  "searching-duckduckgo": "Searching in DuckDuckGo",
-  "no-search-query-found": "No search query found.",
-  "search-fail": "Failed to search.",
-  "minimize-memory-usage": "Memory use Minimized",
-  "tabs-closed": "Tabs Closed",
-};
-
 const priorities = {
   warn: {
     emoji: "⚠️",
@@ -39,18 +25,7 @@ let toastStyleInjected = false;
 
 function injectToastStyles() {
   if (toastStyleInjected) return;
-
   const style = document.createElement("style");
-
-  const messageStyles = Object.entries(messages).map(([key, message]) => {
-    const id = `toast-${key}`;
-    return `
-      label[data-l10n-id="${id}"]::after {
-        content: "${message} ";
-      }
-    `;
-  });
-
   const iconStyles = Object.entries(priorities).map(([priority, icon]) => {
     if (icon.icon) {
       return `
@@ -81,30 +56,28 @@ function injectToastStyles() {
     }
   });
 
-  style.textContent = [...messageStyles, ...iconStyles].join("\n");
+  style.textContent = iconStyles.join("\n");
   document.head.appendChild(style);
   toastStyleInjected = true;
 }
 
-export function showToast(key = "hello", priority, extraOptions = {}) {
+export function showToast(
+  text = "This is toast.",
+  priority = null,
+  options = {},
+) {
   injectToastStyles();
-  const validKey = messages.hasOwnProperty(key) ? key : "test";
-  const validPriority =
-    priority && priorities.hasOwnProperty(priority) ? priority : null;
-
-  const options = {
-    custom: true,
-    ...extraOptions,
-  };
-
-  if (validPriority) options.priority = validPriority;
-
-  gZenUIManager.showToast(`toast-${validKey}`, options);
+  const validPriority = priorities.hasOwnProperty(priority) ? priority : null;
+  gZenUIManager.showToast(`custom-toast`, options);
 
   const toastElement = document.querySelector(
-    `label[data-l10n-id="toast-${validKey}"]`,
+    `label[data-l10n-id="custom-toast"]`,
   );
-  if (toastElement && validPriority) {
-    toastElement.classList.add(`toast-priority-${validPriority}`);
+  if (toastElement) {
+    toastElement.textContent = text;
+    if (validPriority)
+      toastElement.classList.add(`toast-priority-${validPriority}`);
   }
 }
+
+window.showToast = showToast
