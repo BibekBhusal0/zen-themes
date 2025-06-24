@@ -1,0 +1,25 @@
+{
+  "id": "search-engine-select",
+  "name": "Search Engine Select",
+  "description": "Adds a floating UI to switch search engines on a search results page.",
+  "homepage": "https://github.com/BibekBhusal0/zen-themes/",
+  "js": [
+    "https://raw.githubusercontent.com/BibekBhusal0/zen-themes/main/search-engine-select/search-engine-select.js"
+  ],
+  "style": "https://raw.githubusercontent.com/BibekBhusal0/zen-themes/main/search-engine-select/style.css",
+  "readme": "https://raw.githubusercontent.com/BibekBhusal0/zen-themes/main/search-engine-select/readme.md",
+  "author": "Bibek Bhusal",
+  "version": "beta-1",
+  "tags": [
+    "Search",
+    "sine",
+    "fx-autoconfig",
+    "JavaScript",
+    "Bibek Bhusal"
+  ],
+  "createdAt": "2025-06-23",
+  "updatedAt": "2025-06-24",
+  "fork": [
+    "zen"
+  ]
+}
