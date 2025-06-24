@@ -1,0 +1,121 @@
+#search-engine-switcher-container {
+  --container-padding: 7px;
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10000;
+  display: none;
+  flex-direction: row;
+  align-items: center;
+  background-color: #323234;
+  border: 1px solid #5a5a5e;
+  border-right: none;
+  border-radius: 30px 0 0 30px;
+  padding: var(--container-padding) 4px var(--container-padding) var(--container-padding);
+  gap: 2px;
+
+}
+
+#ses-engine-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  height: 100%;
+  width: 50px;
+  box-sizing: border-box;
+  transition: all 0.2s ease-in-out;
+  overflow: hidden;
+  z-index: 2;
+  max-width: 34px;
+  width: max-content;
+}
+
+#search-engine-switcher-container:hover #ses-engine-select,
+#search-engine-switcher-container.is-dragging #ses-engine-select,
+#search-engine-switcher-container.options-visible #ses-engine-select {
+  width: max-content;
+  max-width: 220px;
+  min-width: 30px;
+}
+
+#ses-engine-select img {
+  width: 20px;
+  height: 20px;
+}
+
+#ses-engine-select span {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  scale: 0;
+  transform-origin: right;
+  color: #fbfbfe;
+  transition: all 0.2s 0.1s ease-in-out;
+}
+
+#search-engine-switcher-container:hover #ses-engine-select span,
+#search-engine-switcher-container.is-dragging #ses-engine-select span,
+#search-engine-switcher-container.options-visible #ses-engine-select span {
+  opacity: 1;
+  scale: 1;
+}
+
+#ses-drag-handle {
+  height: 24px;
+  cursor: grab;
+  width: 14px;
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="%23959797" stroke-width="2"><circle cx="8" cy="4" r="1" transform="rotate(90 8 4)" /><circle cx="16" cy="4" r="1" transform="rotate(90 16 4)" /><circle cx="8" cy="12" r="1" transform="rotate(90 8 12)" /><circle cx="16" cy="12" r="1" transform="rotate(90 16 12)" /><circle cx="8" cy="20" r="1" transform="rotate(90 8 20)" /><circle cx="16" cy="20" r="1" transform="rotate(90 16 20)" /></g></svg>');
+  background-repeat: no-repeat;
+  background-position: center;
+  z-index: 1;
+  scale: 0.7;
+}
+
+#ses-engine-options {
+  position: absolute;
+  right: 0;
+  width: 220px;
+  background-color: #2b2b2e;
+  border: 1px solid #5a5a5e;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  max-height: 50vh;
+  overflow-y: auto;
+  z-index: 10001;
+  display: none;
+  color: #fbfbfe;
+  padding: 4px;
+}
+
+#ses-engine-options.popup-above {
+  bottom: 100%;
+  margin-bottom: 8px;
+}
+
+#ses-engine-options.popup-below {
+  top: 100%;
+  margin-top: 8px;
+}
+
+.ses-engine-option {
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 8px;
+  border-radius: 4px;
+}
+
+.ses-engine-option:hover {
+  background-color: #424246;
+}
+
+.ses-engine-option img {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}

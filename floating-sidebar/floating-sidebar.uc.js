@@ -1,8 +1,8 @@
-/* /* // ==UserScript==
+// ==UserScript==
 // @name            Sidebar Pin Unpin icon
 // @description     Toggle pin unpin easily with a button
 // @author          BibekBhusal
-// ==/UserScript== */
+// ==/UserScript==
 
 const api_available = typeof UC_API !== "undefined";
 function addButton() {

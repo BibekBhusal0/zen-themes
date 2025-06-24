@@ -1,6 +1,6 @@
 // ==UserScript==
 // @author         Bibek Bhusal
-// @name           SearchEngineSwitcher
+// @name           Search Engine Select
 // @description    Adds a floating UI to switch search engines on a search results page.
 // ==/UserScript==
 
@@ -187,7 +187,7 @@
       this._engineSelect.appendChild(nameSpan);
     },
 
-    handleEvent(event) {
+    handleEvent() {
       const url = gBrowser.selectedBrowser.currentURI.spec;
       this._currentSearchInfo = this.matchUrl(url);
       this.updateSwitcherVisibility();
