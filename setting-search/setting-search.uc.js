@@ -4,7 +4,8 @@
 // @ignorecache
 // ==/UserScript==
 
-(function () {
+function settingSearch() {
+  console.log("setting-search loaded");
   const groupbox = document.getElementById("zenCKSGroup");
 
   // Create search input container
@@ -35,7 +36,7 @@
   const groupCheckboxes = {};
 
   const groupHeadings = groupbox.querySelectorAll("h2[data-group]");
-  groupHeadings.forEach(h2 => {
+  groupHeadings.forEach((h2) => {
     const groupId = h2.getAttribute("data-group");
     const label = h2.textContent.trim();
 
@@ -58,7 +59,8 @@
     const rect = filterButton.getBoundingClientRect();
     filterPopover.style.top = `${rect.bottom + window.scrollY}px`;
     filterPopover.style.left = `${rect.left + window.scrollX}px`;
-    filterPopover.style.display = filterPopover.style.display === "none" ? "flex" : "none";
+    filterPopover.style.display =
+      filterPopover.style.display === "none" ? "flex" : "none";
   });
 
   document.addEventListener("click", (e) => {
@@ -78,7 +80,7 @@
     }
 
     const allOptions = groupbox.querySelectorAll("hbox.zenCKSOption");
-    allOptions.forEach(option => {
+    allOptions.forEach((option) => {
       const input = option.querySelector(".zenCKSOption-input");
       const label = option.querySelector(".zenCKSOption-label");
       const shortcutName = label?.textContent?.toLowerCase() || "";
@@ -87,21 +89,29 @@
       const matchesSearch = shortcutName.includes(searchValue);
       const matchesGroup = visibleGroups.has(group);
 
-      option.style.display = (matchesSearch && matchesGroup) ? "" : "none";
+      option.style.display = matchesSearch && matchesGroup ? "" : "none";
     });
 
-    groupHeadings.forEach(h2 => {
-      const groupId = h2.getAttribute("data-group").replace("zenCKSOption-group-", "");
-      const anyVisible = [...groupbox.querySelectorAll(`.zenCKSOption-input[data-group="${groupId}"]`)]
-        .some(input => input.closest("hbox.zenCKSOption").style.display !== "none");
+    groupHeadings.forEach((h2) => {
+      const groupId = h2
+        .getAttribute("data-group")
+        .replace("zenCKSOption-group-", "");
+      const anyVisible = [
+        ...groupbox.querySelectorAll(
+          `.zenCKSOption-input[data-group="${groupId}"]`,
+        ),
+      ].some(
+        (input) => input.closest("hbox.zenCKSOption").style.display !== "none",
+      );
 
       h2.style.display = anyVisible ? "" : "none";
     });
   }
 
   searchInput.addEventListener("input", applyFilters);
-  Object.values(groupCheckboxes).forEach(cb => {
+  Object.values(groupCheckboxes).forEach((cb) => {
     cb.addEventListener("change", applyFilters);
   });
-})();
+}
 
+setTimeout(settingSearch, 1000);
