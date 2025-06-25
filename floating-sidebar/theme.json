@@ -3,7 +3,7 @@
   "name": "Floating Sidebar",
   "description": "Make firefox sidebar Floating also option to pin/unpin the sidebar.",
   "homepage": "https://github.com/BibekBhusal0/zen-themes/",
-  "js": [ "floating-sidebar.js" ],
+  "js": [ "https://raw.githubusercontent.com/BibekBhusal0/main/floating-sidebar/floating-sidebar.js" ],
   "style": "https://raw.githubusercontent.com/BibekBhusal0/zen-themes/main/floating-sidebar/style.css",
   "readme": "https://raw.githubusercontent.com/BibekBhusal0/zen-themes/main/floating-sidebar/readme.md",
   "author": "Bibek Bhusal",
