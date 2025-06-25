@@ -1,0 +1,172 @@
+@keyframes initial-animation {
+  from {
+    top: 0;
+    opacity: 0;
+    filter: blur(5px);
+  }
+
+  to {
+    top: 20px;
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes glass-disappear {
+  0% {
+    backdrop-filter: blur(var(--natsumi-mat-mc-blur-radius));
+  }
+
+  99% {
+    backdrop-filter: blur(var(--natsumi-mat-mc-blur-radius));
+  }
+
+  100% {
+    backdrop-filter: none;
+  }
+}
+
+@media not -moz-pref("natsumi.findbar.disabled") {
+  findbar {
+    position: absolute;
+    top: 20px;
+    width: min(550px, 90%);
+    right: 20px;
+    min-height: 70px;
+    height: auto !important;
+    flex-wrap: wrap;
+    border-radius: 15px;
+    border: none !important;
+    opacity: 1;
+    animation: initial-animation 0.2s ease;
+    filter: blur(0);
+
+    &:is([hidden="true"]) {
+      visibility: inherit !important;
+      pointer-events: none !important;
+      opacity: 0 !important;
+      top: 0 !important;
+      animation: glass-disappear 0.2s linear !important;
+      animation-fill-mode: forwards !important;
+      filter: blur(5px);
+    }
+
+    .findbar-closebutton {
+      outline: none !important;
+      order: 1;
+    }
+
+    .findbar-container {
+      margin-left: 10px !important;
+      margin-bottom: 5px !important;
+      flex-wrap: wrap;
+      height: auto !important;
+      row-gap: 10px;
+
+      &> :first-child {
+        width: 100% !important;
+        margin-top: 5px !important;
+        padding-bottom: 10px !important;
+        border-bottom: 1px solid light-dark(rgba(20, 20, 20, 0.2), rgba(235, 235, 235, 0.3)) !important;
+
+        &::before {
+          content: "";
+          width: 16px !important;
+          min-width: 16px !important;
+          background-image: url(chrome://global/skin/icons/search-glass.svg) !important;
+          background-repeat: no-repeat;
+          margin-top: 4px;
+          margin-right: 15px;
+          margin-left: 5px;
+
+          @media (prefers-color-scheme: dark) {
+            filter: invert();
+          }
+        }
+
+        .findbar-textbox {
+          background: none !important;
+          padding: 0 !important;
+          font-size: 16px !important;
+          box-shadow: none !important;
+          width: 100% !important;
+          border: none !important;
+        }
+
+        toolbarbutton {
+          width: 24px !important;
+          justify-content: space-between !important;
+          padding: 4px !important;
+          margin-left: 4px !important;
+          margin-right: 0 !important;
+        }
+      }
+
+      checkbox,
+      label,
+      description {
+        margin-left: 4px !important;
+        margin-right: 6px !important;
+      }
+
+      .findbar-label {
+        display: flex;
+        flex-basis: 100% !important;
+
+        &:is([hidden="true"]) {
+          display: none;
+        }
+      }
+
+      .found-matches {
+        font-size: 14px !important;
+        margin-top: 10px !important;
+
+        &:not([hidden]) {
+          &::before {
+            background-image: url('chrome://browser/skin/zen-icons/search-page.svg') !important;
+            background-repeat: no-repeat !important;
+            padding-left: 25px !important;
+          }
+        }
+      }
+
+      .findbar-find-status {
+        display: none;
+        margin-left: 29px !important;
+
+        &:is([status="notfound"]) {
+          margin-left: 4px !important;
+          margin-top: 10px !important;
+          font-size: 14px !important;
+          font-weight: normal !important;
+          flex-basis: 100% !important;
+          display: flex;
+          align-items: center;
+          background-repeat: no-repeat !important;
+
+          &::before {
+            content: "";
+            min-width: 17px !important;
+            min-height: 17px !important;
+            background-image: url(chrome://global/skin/icons/close.svg) !important;
+            margin-right: 8px !important;
+            background-repeat: no-repeat !important;
+
+            @media (prefers-color-scheme: dark) {
+              filter: invert();
+            }
+          }
+        }
+
+        &:is([data-l10n-id]) {
+          display: flex;
+        }
+      }
+
+      .checkbox-label {
+        font-size: 12px !important;
+      }
+    }
+  }
+}
