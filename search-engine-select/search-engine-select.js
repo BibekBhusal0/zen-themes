@@ -13,7 +13,7 @@
 
   window.SearchEngineSwitcher = {
     DRAG_ENABLED: true,
-    DEBUG_MODE: true,
+    DEBUG_MODE: false,
     _container: null,
     _engineSelect: null,
     _engineOptions: null,
@@ -150,7 +150,7 @@
       if (newSearchInfo) {
         this._currentSearchInfo = newSearchInfo;
       }
-      
+
       if (this._currentSearchInfo) {
         this._show();
       } else {
@@ -244,7 +244,10 @@
       if (!this._currentSearchInfo || !this._currentSearchInfo.term) return;
 
       if (this._currentSearchInfo.engine.name === newEngine.name) {
-        if (this.DEBUG_MODE) console.log(`SES: Click on same engine ('${newEngine.name}'). Aborting.`);
+        if (this.DEBUG_MODE)
+          console.log(
+            `SES: Click on same engine ('${newEngine.name}'). Aborting.`,
+          );
         this._engineOptions.style.display = "none";
         this._container.classList.remove("options-visible");
         return;
@@ -261,7 +264,7 @@
 
       this._engineOptions.style.display = "none";
       this._container.classList.remove("options-visible");
-      
+
       this._currentSearchInfo.engine = newEngine;
       this.updateSelectedEngineDisplay();
 
@@ -436,7 +439,6 @@
       }
       window.addEventListener("resize", this, false);
     },
-
   };
 
   if (gBrowserInit.delayedStartupFinished) {
