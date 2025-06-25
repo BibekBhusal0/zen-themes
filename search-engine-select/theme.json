@@ -2,7 +2,7 @@
   "id": "search-engine-select",
   "name": "Search Engine Select",
   "description": "Adds a floating UI to switch search engines on a search results page.",
-  "homepage": "https://github.com/BibekBhusal0/zen-themes/",
+  "homepage": "https://github.com/BibekBhusal0/zen-themes/tree/main/search-engine-select",
   "js": [
     "https://raw.githubusercontent.com/BibekBhusal0/zen-themes/main/search-engine-select/search-engine-select.js"
   ],
