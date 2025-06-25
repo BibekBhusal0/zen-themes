@@ -6,6 +6,7 @@
 
 (function() {
   "use strict";
+  console.log( 'search-engine-select.js loaded ')
 
   if (window.SearchEngineSwitcher) {
     window.SearchEngineSwitcher.destroy();

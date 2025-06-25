@@ -4,6 +4,7 @@
 // @author          BibekBhusal
 // ==/UserScript==
 
+console.log("floating-sidebar.js loaded ")
 const api_available = typeof UC_API !== "undefined";
 function addButton() {
   if (!api_available) return;
