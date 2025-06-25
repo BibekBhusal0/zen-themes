@@ -54,7 +54,6 @@
           this.urlBarKeyListener,
         );
       }
-      window.removeEventListener("resize", this);
       this._container = null;
       if (this.DEBUG_MODE) console.log("SES: Destroyed successfully.");
     },
@@ -438,7 +437,6 @@
       if (window.gURLBar) {
         gURLBar.inputField.addEventListener("keydown", this.urlBarKeyListener);
       }
-      window.addEventListener("resize", this, false);
     },
   };
 
