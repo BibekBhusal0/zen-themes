@@ -30,6 +30,7 @@ const findbar = {
   show() {
     if (!this.findbar) return false;
     this.findbar.hidden = false;
+    this.findbar._findField.focus()
     return true;
   },
   hide() {
