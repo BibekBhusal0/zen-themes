@@ -24,25 +24,8 @@
         right 0.2s ease,
         opacity 0.2s ease !important;
 
-      @media -moz-pref("natsumi.sidebar.ff-sidebar-mistcrylic") or -moz-pref("natsumi.sidebar.ff-sidebar-haze") or -moz-pref("natsumi.sidebar.ff-sidebar-glass") {
-        border: 1px solid light-dark(rgba(20, 20, 20, 0.2), rgba(235, 235, 235, 0.3)) !important;
-
-        #sidebar-header {
-          margin-left: 8px;
-          margin-right: 8px;
-          padding-left: 0 !important;
-          padding-right: 0 !important;
-          border-bottom: 1px solid light-dark(rgba(20, 20, 20, 0.2), rgba(235, 235, 235, 0.3)) !important;
-        }
-      }
-
-      @media -moz-pref("natsumi.sidebar.ff-sidebar-resizable") {
-        resize: both;
-      }
-
       &[hidden] {
         display: flex;
-        left: calc(var(--natsumi-sidebar-x-offset) - 20px);
         opacity: 0;
         pointer-events: none !important;
         animation-fill-mode: forwards !important;
