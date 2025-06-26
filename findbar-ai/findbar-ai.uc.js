@@ -11,7 +11,9 @@ const findbar = {
     this.show();
     this.expanded = true;
   },
-  contract() { this.expanded = false; },
+  contract() {
+    this.expanded = false;
+  },
   toggleExpanded() {
     if (this.expanded) this.contract();
     else this.expand();
@@ -19,7 +21,6 @@ const findbar = {
 
   show() {
     if (!this.findbar) return false;
-    console.log('showing');
 
     this.findbar.hidden = false;
     return true;
@@ -46,32 +47,26 @@ const findbar = {
     this.removeListeners();
   },
 
-  addKeymaps: (e) => {
-    if (e.key === 'f') {
-      if (e.ctrlKey && !e.shiftKey && !e.altKey) {
-        console.log('show');
-        e.preventDefault();
-        e.stopPropagation();
-        findbar.show();
-      }
-      if (e.ctrlKey && e.shiftKey && !e.altKey) {
-        console.log("expand");
-        e.preventDefault();
-        e.stopPropagation();
-        findbar.expand();
-      }
+  addKeymaps: function(e) {
+    if (e.key && e.key.toLowerCase() === "f" && e.ctrlKey && !e.altKey) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!e.shiftKey) this.show();
+      else this.expand();
     }
   },
 
   addListeners() {
-    gBrowser.tabContainer.addEventListener("TabSelect", this.updateFindbar.bind(this));
-    document.addEventListener('keydown', this.addKeymaps);
+    gBrowser.tabContainer.addEventListener(
+      "TabSelect",
+      this.updateFindbar.bind(this),
+    );
+    document.addEventListener("keydown", this.addKeymaps.bind(this));
   },
   removeListeners() {
     gBrowser.tabContainer.removeEventListener("TabSelect", this.updateFindbar);
-    document.removeEventListener('keydown', this.addKeymaps);
-  }
-}
+    document.removeEventListener("keydown", this.addKeymaps);
+  },
+};
 
 findbar.init();
-
