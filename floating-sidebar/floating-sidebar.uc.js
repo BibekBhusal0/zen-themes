@@ -15,16 +15,8 @@ function addButton() {
   });
   const config_flag = "natsumi.sidebar.ff-sidebar-float";
   const pref = UC_API.Prefs.get(config_flag);
-  const render_button = () => {
-    button.className = pref.value ? "pinned" : "unpinned";
-  };
 
-  render_button();
-  const buttonClick = () => {
-    pref.setTo(!pref.value);
-    render_button();
-  };
-  UC_API.Prefs.addListener(config_flag, render_button);
+  const buttonClick = () => pref.setTo(!pref.value);
 
   button.addEventListener("click", buttonClick);
   const children = header.children;
@@ -33,7 +25,6 @@ function addButton() {
   } else {
     header.appendChild(button);
   }
-  render_button();
 }
 
 if (api_available) {
