@@ -59,6 +59,19 @@ const findbar = {
       if (!e.shiftKey) this.show();
       else this.expanded = true;
     }
+
+    if (e.key?.toLowerCase() === "escape") {
+      if (this.expanded) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.expanded = false;
+      }
+      else if (this.findbar && !this.findbar.hidden) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.hide();
+      }
+    }
   },
 
   addListeners() {
