@@ -1,22 +1,27 @@
+// prefs keys
+const EXPANDED = "extension.findbar-ai.expanded";
+
 const findbar = {
   enabled: true,
-  expanded: false,
   findbar: null,
 
   async updateFindbar() {
     this.findbar = await gBrowser.getFindBar();
   },
 
-  expand() {
-    this.show();
-    this.expanded = true;
+  get expanded() {
+    return UC_API.Prefs.get(EXPANDED).value || false;
   },
-  contract() {
-    this.expanded = false;
+  set expanded(value) {
+    if (typeof value === "boolean") UC_API.Prefs.set(EXPANDED, value);
   },
   toggleExpanded() {
-    if (this.expanded) this.contract();
-    else this.expand();
+    this.expanded = !this.expanded;
+  },
+  handleExpandChange(expanded) {
+    if (!this.findbar) return false;
+    if (expanded.value) this.show();
+    return true;
   },
 
   show() {
@@ -52,7 +57,7 @@ const findbar = {
       e.preventDefault();
       e.stopPropagation();
       if (!e.shiftKey) this.show();
-      else this.expand();
+      else this.expanded = true;
     }
   },
 
@@ -62,11 +67,14 @@ const findbar = {
       this.updateFindbar.bind(this),
     );
     document.addEventListener("keydown", this.addKeymaps.bind(this));
+    UC_API.Prefs.addListener(EXPANDED, this.handleExpandChange.bind(this));
   },
   removeListeners() {
     gBrowser.tabContainer.removeEventListener("TabSelect", this.updateFindbar);
     document.removeEventListener("keydown", this.addKeymaps);
+    UC_API.Prefs.removeListeners(EXPANDED, this.handleExpandChange);
   },
 };
 
 findbar.init();
+window.findbar = findbar;
