@@ -3,7 +3,6 @@
     display: none;
   }
 
-  /*noinspection CssInvalidFunction*/
   #sidebar-box {
     position: absolute;
     height: calc(100% - 40px);
@@ -21,7 +20,6 @@
     @media -moz-pref("natsumi.sidebar.ff-sidebar-mistcrylic") or -moz-pref("natsumi.sidebar.ff-sidebar-haze") or -moz-pref("natsumi.sidebar.ff-sidebar-glass") {
       border: 1px solid light-dark(rgba(20, 20, 20, 0.2), rgba(235, 235, 235, 0.3)) !important;
 
-      /*noinspection CssInvalidFunction*/
       #sidebar-header {
         margin-left: 8px;
         margin-right: 8px;
@@ -41,6 +39,47 @@
       opacity: 0;
       pointer-events: none !important;
       animation-fill-mode: forwards !important;
+    }
+  }
+}
+
+@-moz-document url-prefix("chrome:") {
+  #sidebar-pin-unpin {
+    width: 22px;
+    height: 22px;
+    position: relative;
+    background: transparent;
+    border-radius: 3px;
+    margin-right: 10px;
+    overflow: visible;
+
+    &:hover {
+      background: #66666666;
+    }
+
+    &::before {
+      width: 100%;
+      height: 100%;
+      content: "";
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    &.pinned::before {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pin-icon lucide-pin"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.20V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>');
+    }
+
+    &.unpinned::before {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pin-off-icon lucide-pin-off"><path d="M12 17v5"/><path d="M15 9.34V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H7.89"/><path d="m2 2 20 20"/><path d="M9 9v1.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.20V16a1 1 0 0 0 1 1h11"/></svg>');
+    }
+  }
+
+  #sidebar-close {
+    width: 22px;
+    height: 22px;
+
+    &:hover {
+      background: #ff000066;
     }
   }
 }
