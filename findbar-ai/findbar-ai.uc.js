@@ -1,6 +1,9 @@
 // prefs keys
 const EXPANDED = "extension.findbar-ai.expanded";
 
+// set expanded to false initially
+UC_API.Prefs.set(EXPANDED, false);
+
 const findbar = {
   enabled: true,
   findbar: null,
@@ -26,17 +29,14 @@ const findbar = {
 
   show() {
     if (!this.findbar) return false;
-
     this.findbar.hidden = false;
     return true;
   },
-
   hide() {
     if (!this.findbar) return false;
     this.findbar.hidden = true;
     return true;
   },
-
   toggleVisibility() {
     if (!this.findbar) return;
     if (this.findbar.hidden) this.show();
@@ -65,8 +65,7 @@ const findbar = {
         e.preventDefault();
         e.stopPropagation();
         this.expanded = false;
-      }
-      else if (this.findbar && !this.findbar.hidden) {
+      } else if (this.findbar && !this.findbar.hidden) {
         e.preventDefault();
         e.stopPropagation();
         this.hide();
