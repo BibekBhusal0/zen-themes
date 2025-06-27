@@ -2,6 +2,11 @@
 const EXPANDED = "extension.findbar-ai.expanded";
 const ENABLED = "extension.findbar-ai.enabled";
 
+// WindowManager
+import windowManagerAPI from "./windowManager.js";
+windowManagerAPI();
+console.log("findbar: main file loaded");
+
 const getPref = (key, defaultValue) => {
   try {
     const pref = UC_API.Prefs.get(key);
@@ -109,7 +114,13 @@ const findbar = {
   },
 
   addKeymaps: function(e) {
-    if (e.key && e.key.toLowerCase() === "f" && e.ctrlKey && !e.altKey && e.shiftKey) {
+    if (
+      e.key &&
+      e.key.toLowerCase() === "f" &&
+      e.ctrlKey &&
+      e.shiftKey &&
+      !e.altKey
+    ) {
       e.preventDefault();
       e.stopPropagation();
       this.expanded = true;
@@ -120,7 +131,7 @@ const findbar = {
         e.preventDefault();
         e.stopPropagation();
         this.expanded = false;
-      } 
+      }
     }
   },
 
@@ -134,10 +145,7 @@ const findbar = {
     UC_API.Prefs.addListener(EXPANDED, this._handleExpandChange);
   },
   removeListeners() {
-    gBrowser.tabContainer.removeEventListener(
-      "TabSelect",
-      this._updateFindbar,
-    );
+    gBrowser.tabContainer.removeEventListener("TabSelect", this._updateFindbar);
     document.removeEventListener("keydown", this._addKeymaps);
     UC_API.Prefs.removeListener(EXPANDED, this._handleExpandChange);
 
