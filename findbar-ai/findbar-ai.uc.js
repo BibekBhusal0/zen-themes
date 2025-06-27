@@ -19,6 +19,9 @@ UC_API.Prefs.set(EXPANDED, false);
 const findbar = {
   findbar: null,
   expandButton: null,
+  _updateFindbar: null,
+  _addKeymaps: null,
+  _handleExpandChange: null,
 
   get expanded() {
     return getPref(EXPANDED, false);
@@ -127,17 +130,25 @@ const findbar = {
   },
 
   addListeners() {
-    gBrowser.tabContainer.addEventListener(
-      "TabSelect",
-      this.updateFindbar.bind(this),
-    );
-    document.addEventListener("keydown", this.addKeymaps.bind(this));
-    UC_API.Prefs.addListener(EXPANDED, this.handleExpandChange.bind(this));
+    this._updateFindbar = this.updateFindbar.bind(this);
+    this._addKeymaps = this.addKeymaps.bind(this);
+    this._handleExpandChange = this.handleExpandChange.bind(this);
+
+    gBrowser.tabContainer.addEventListener("TabSelect", this._updateFindbar);
+    document.addEventListener("keydown", this._addKeymaps);
+    UC_API.Prefs.addListener(EXPANDED, this._handleExpandChange);
   },
   removeListeners() {
-    gBrowser.tabContainer.removeEventListener("TabSelect", this.updateFindbar);
-    document.removeEventListener("keydown", this.addKeymaps);
-    UC_API.Prefs.removeListener(EXPANDED, this.handleExpandChange);
+    gBrowser.tabContainer.removeEventListener(
+      "TabSelect",
+      this._updateFindbar,
+    );
+    document.removeEventListener("keydown", this._addKeymaps);
+    UC_API.Prefs.removeListener(EXPANDED, this._handleExpandChange);
+
+    this._updateFindbar = null;
+    this._addKeymaps = null;
+    this._handleExpandChange = null;
   },
 };
 
