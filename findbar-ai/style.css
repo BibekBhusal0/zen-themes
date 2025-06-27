@@ -14,11 +14,11 @@
 
 @keyframes glass-disappear {
   0% {
-    backdrop-filter: blur(var(--natsumi-mat-mc-blur-radius));
+    backdrop-filter: blur(10px);
   }
 
   99% {
-    backdrop-filter: blur(var(--natsumi-mat-mc-blur-radius));
+    backdrop-filter: blur(10px);
   }
 
   100% {
@@ -26,7 +26,7 @@
   }
 }
 
-@media not -moz-pref("natsumi.findbar.disabled") {
+@media -moz-pref("extension.findbar-ai.enabled") {
   findbar {
     position: absolute;
     top: 20px;
