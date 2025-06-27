@@ -109,11 +109,10 @@ const findbar = {
   },
 
   addKeymaps: function(e) {
-    if (e.key && e.key.toLowerCase() === "f" && e.ctrlKey && !e.altKey) {
+    if (e.key && e.key.toLowerCase() === "f" && e.ctrlKey && !e.altKey && e.shiftKey) {
       e.preventDefault();
       e.stopPropagation();
-      if (!e.shiftKey) this.show();
-      else this.expanded = true;
+      this.expanded = true;
     }
 
     if (e.key?.toLowerCase() === "escape") {
@@ -121,11 +120,7 @@ const findbar = {
         e.preventDefault();
         e.stopPropagation();
         this.expanded = false;
-      } else if (this.findbar && !this.findbar.hidden) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.hide();
-      }
+      } 
     }
   },
 
