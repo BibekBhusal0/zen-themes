@@ -1,20 +1,13 @@
 // prefs keys
 const EXPANDED = "extension.findbar-ai.expanded";
+const DISABLED = "extension.findbar-ai.disabled";
 
 // set expanded to false initially
 UC_API.Prefs.set(EXPANDED, false);
 
 const findbar = {
-  enabled: true,
   findbar: null,
   expandButton: null,
-
-  updateFindbar() {
-    gBrowser.getFindBar().then((findbar) => {
-      this.findbar = findbar;
-      this.addExpandButton();
-    });
-  },
 
   get expanded() {
     return UC_API.Prefs.get(EXPANDED).value || false;
@@ -29,6 +22,27 @@ const findbar = {
     if (!this.findbar) return false;
     if (expanded.value) this.show();
     return true;
+  },
+
+  get enabled() {
+    return !( UC_API.Prefs.get(DISABLED).value || false );
+  },
+  set enabled(value) {
+    if (typeof value === "boolean") UC_API.Prefs.set(DISABLED, !value);
+  },
+  toggleEnabled() {
+    this.enabled = !this.enabled;
+  },
+  handleEnabledChange(enabled) {
+    if (!enabled) this.init();
+    else this.destroy();
+  },
+
+  updateFindbar() {
+    gBrowser.getFindBar().then((findbar) => {
+      this.findbar = findbar;
+      this.addExpandButton();
+    });
   },
 
   show() {
@@ -50,6 +64,7 @@ const findbar = {
   },
 
   init() {
+    if (!this.enabled) return;
     this.updateFindbar();
     this.addListeners();
   },
@@ -116,4 +131,5 @@ const findbar = {
 };
 
 findbar.init();
+UC_API.Prefs.addListener(DISABLED, findbar.handleEnabledChange.bind(findbar));
 window.findbar = findbar;
