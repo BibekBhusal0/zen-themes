@@ -7,9 +7,13 @@ UC_API.Prefs.set(EXPANDED, false);
 const findbar = {
   enabled: true,
   findbar: null,
+  expandButton: null,
 
-  async updateFindbar() {
-    this.findbar = await gBrowser.getFindBar();
+  updateFindbar() {
+    gBrowser.getFindBar().then((findbar) => {
+      this.findbar = findbar;
+      this.addExpandButton();
+    });
   },
 
   get expanded() {
@@ -30,12 +34,13 @@ const findbar = {
   show() {
     if (!this.findbar) return false;
     this.findbar.hidden = false;
-    this.findbar._findField.focus()
+    this.findbar._findField.focus();
     return true;
   },
   hide() {
     if (!this.findbar) return false;
     this.findbar.hidden = true;
+    this.findbar.hide();
     return true;
   },
   toggleVisibility() {
@@ -51,6 +56,27 @@ const findbar = {
   destroy() {
     this.findbar = null;
     this.removeListeners();
+    this.removeExpandButton();
+  },
+
+  addExpandButton() {
+    if (!this.findbar) return false;
+    const button_id = "findbar-expand";
+    if (this.findbar.getElement(button_id)) return true;
+    const button = document.createElement("div");
+    button.innerText = "Expand";
+    button.setAttribute("anonid", button_id);
+    button.id = button_id;
+    this.findbar.appendChild(button);
+    this.expandButton = button;
+    return true;
+  },
+
+  removeExpandButton() {
+    if (!this.expandButton) return false;
+    this.expandButton.remove();
+    this.expandButton = null;
+    return true;
   },
 
   addKeymaps: function(e) {
