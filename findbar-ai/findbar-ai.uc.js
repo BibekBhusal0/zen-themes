@@ -1,6 +1,17 @@
 // prefs keys
 const EXPANDED = "extension.findbar-ai.expanded";
-const DISABLED = "extension.findbar-ai.disabled";
+const ENABLED = "extension.findbar-ai.enabled";
+
+const getPref = (key, defaultValue) => {
+  try {
+    const pref = UC_API.Prefs.get(key);
+    if (!pref) return defaultValue;
+    if (!pref.exists()) return defaultValue;
+    return pref.value;
+  } catch {
+    return defaultValue;
+  }
+};
 
 // set expanded to false initially
 UC_API.Prefs.set(EXPANDED, false);
@@ -10,7 +21,7 @@ const findbar = {
   expandButton: null,
 
   get expanded() {
-    return UC_API.Prefs.get(EXPANDED).value || false;
+    return getPref(EXPANDED, false);
   },
   set expanded(value) {
     if (typeof value === "boolean") UC_API.Prefs.set(EXPANDED, value);
@@ -25,16 +36,16 @@ const findbar = {
   },
 
   get enabled() {
-    return !( UC_API.Prefs.get(DISABLED).value || false );
+    return getPref(ENABLED, true);
   },
   set enabled(value) {
-    if (typeof value === "boolean") UC_API.Prefs.set(DISABLED, !value);
+    if (typeof value === "boolean") UC_API.Prefs.set(ENABLED, value);
   },
   toggleEnabled() {
     this.enabled = !this.enabled;
   },
   handleEnabledChange(enabled) {
-    if (!enabled) this.init();
+    if (enabled.value) this.init();
     else this.destroy();
   },
 
@@ -54,7 +65,7 @@ const findbar = {
   hide() {
     if (!this.findbar) return false;
     this.findbar.hidden = true;
-    this.findbar.hide();
+    this.findbar.close();
     return true;
   },
   toggleVisibility() {
@@ -126,10 +137,10 @@ const findbar = {
   removeListeners() {
     gBrowser.tabContainer.removeEventListener("TabSelect", this.updateFindbar);
     document.removeEventListener("keydown", this.addKeymaps);
-    UC_API.Prefs.removeListeners(EXPANDED, this.handleExpandChange);
+    UC_API.Prefs.removeListener(EXPANDED, this.handleExpandChange);
   },
 };
 
 findbar.init();
-UC_API.Prefs.addListener(DISABLED, findbar.handleEnabledChange.bind(findbar));
+UC_API.Prefs.addListener(ENABLED, findbar.handleEnabledChange.bind(findbar));
 window.findbar = findbar;
