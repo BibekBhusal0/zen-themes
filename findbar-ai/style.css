@@ -35,6 +35,7 @@
     min-height: 70px;
     height: auto !important;
     flex-wrap: wrap;
+    flex-direction: column;
     border-radius: 15px;
     border: none !important;
     opacity: 1;
@@ -53,7 +54,10 @@
 
     .findbar-closebutton {
       outline: none !important;
-      order: 1;
+      position: absolute !important;
+      top: 10px !important;
+      right: 5px !important;
+      padding: 3px !important;
     }
 
     .findbar-container {
@@ -69,7 +73,7 @@
       row-gap: 10px;
 
       &> :first-child {
-        width: 100% !important;
+        width: calc(100% - 40px) !important;
         margin-top: 5px !important;
         padding-bottom: 10px !important;
         border-bottom: 1px solid light-dark(rgba(20, 20, 20, 0.2), rgba(235, 235, 235, 0.3)) !important;
@@ -171,6 +175,48 @@
 
       .checkbox-label {
         font-size: 12px !important;
+      }
+    }
+
+    #findbar-expand {
+      position: relative;
+      text-align: center;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin: 5px 10px;
+      transition: all 0.3s ease;
+      background-color: #e9ecef;
+      color: #212529;
+      border: 1px solid #ced4da;
+
+      &::before {
+        content: "Collapse";
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      @media -moz-pref("extension.findbar-ai.expanded") {
+        &::before {
+          content: "Collapse";
+        }
+      }
+
+      @media not -moz-pref("extension.findbar-ai.expanded") {
+        &::before {
+          content: "Expand";
+        }
+      }
+
+      &:hover {
+        opacity: 0.9;
+      }
+
+      &:active {
+        transform: scale(0.98);
       }
     }
   }

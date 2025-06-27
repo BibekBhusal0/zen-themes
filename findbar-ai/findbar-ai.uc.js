@@ -64,8 +64,8 @@ const findbar = {
     const button_id = "findbar-expand";
     if (this.findbar.getElement(button_id)) return true;
     const button = document.createElement("div");
-    button.innerText = "Expand";
     button.setAttribute("anonid", button_id);
+    button.addEventListener("click", () => this.toggleExpanded());
     button.id = button_id;
     this.findbar.appendChild(button);
     this.expandButton = button;
