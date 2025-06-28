@@ -314,7 +314,7 @@ const hotkeys = [
   {
     id: "ClearTabs",
     modifiers: "alt",
-    key: "C",
+    key: "X",
     command: () => {
       clearTabs();
       showToast("Tabs Closed", "success");
