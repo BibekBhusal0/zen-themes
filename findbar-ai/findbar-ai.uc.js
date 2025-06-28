@@ -58,6 +58,7 @@ const findbar = {
   },
 
   updateFindbar() {
+    this.removeExpandButton()
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
       this.addExpandButton();
