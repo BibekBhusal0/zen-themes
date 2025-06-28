@@ -9,7 +9,6 @@ const getPref = (key, defaultValue) => {
   }
 };
 
-// Helper to create an HTML element from a string
 const createHTMLElement = (htmlString) => {
   return new DOMParser().parseFromString(htmlString, "text/html").body
     .firstChild;
@@ -35,6 +34,52 @@ const debugError = (...args) => {
   if (getPref(DEBUG_MODE, false)) {
     console.error("FindbarAI Error:", ...args);
   }
+};
+
+const windowManager = {
+  getWindowManager() {
+    try {
+      if (!gBrowser || !gBrowser.selectedBrowser) return undefined;
+      const context = gBrowser.selectedBrowser.browsingContext;
+      if (!context || !context.currentWindowContext) return undefined;
+      return context.currentWindowContext.getActor("FindbarAIWindowManager");
+    } catch {
+      return undefined;
+    }
+  },
+
+  async getHTMLContent() {
+    const wm = this.getWindowManager();
+    if (!wm) return {};
+    try {
+      return await wm.getPageHTMLContent();
+    } catch (error) {
+      debugError("Failed to get page HTML content:", error);
+      return {};
+    }
+  },
+
+  async getSelectedText() {
+    const wm = this.getWindowManager();
+    if (!wm) return {};
+    try {
+      return await wm.getSelectedText();
+    } catch (error) {
+      debugError("Failed to get selected text:", error);
+      return {};
+    }
+  },
+
+  async getPageTextContent() {
+    const wm = this.getWindowManager();
+    if (!wm) return {};
+    try {
+      return await wm.getPageTextContent();
+    } catch (error) {
+      debugError("Failed to get page text content:", error);
+      return {};
+    }
+  },
 };
 
 // Available Gemini models
@@ -349,7 +394,7 @@ const findbar = {
     if (this.findbar) setTimeout(() => this.findbar._findField.focus(), 10);
   },
   focusPrompt() {
-    const promptInput = this.chatContainer.querySelector("#ai-prompt");
+    const promptInput = this.chatContainer?.querySelector("#ai-prompt");
     if (promptInput) setTimeout(() => promptInput.focus(), 10);
   },
 
@@ -413,6 +458,14 @@ const findbar = {
       e.stopPropagation();
       this.expanded = true;
       this.focusPrompt();
+      windowManager.getSelectedText().then((selection) => {
+        if (!selection || !selection.hasSelection || !this.chatContainer)
+          return;
+        const promptInput = this.chatContainer.querySelector("#ai-prompt");
+        if (promptInput) {
+          promptInput.value = selection.selectedText;
+        }
+      });
     }
 
     if (e.key?.toLowerCase() === "escape") {

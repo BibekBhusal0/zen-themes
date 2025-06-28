@@ -47,7 +47,7 @@ export class FindbarAIWindowManagerParent extends JSWindowActorParent {
       return result;
     } catch (e) {
       debugError("Failed to get page content:", e);
-      return null;
+      return {};
     }
   }
 
@@ -57,7 +57,7 @@ export class FindbarAIWindowManagerParent extends JSWindowActorParent {
       return result;
     } catch (e) {
       debugError("Failed to get selected text:", e);
-      return null;
+      return {};
     }
   }
 
@@ -67,7 +67,7 @@ export class FindbarAIWindowManagerParent extends JSWindowActorParent {
       return result;
     } catch (e) {
       debugError("Failed to get page text content:", e);
-      return null;
+      return {};
     }
   }
 }

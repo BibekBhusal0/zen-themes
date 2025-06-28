@@ -22,15 +22,15 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
     super();
   }
 
-  handleEvent(event) {
-    debugLog(`findbar: child handling event: ${event.type}`);
-    if (event.type === "DOMContentLoaded") {
-      this.sendAsyncMessage("FindbarAI:ContentLoaded", {
-        url: this.document.location.href,
-        title: this.document.title,
-      });
-    }
-  }
+  // handleEvent(event) {
+  //   debugLog(`findbar: child handling event: ${event.type}`);
+  //   if (event.type === "DOMContentLoaded") {
+  //     this.sendAsyncMessage("FindbarAI:ContentLoaded", {
+  //       url: this.document.location.href,
+  //       title: this.document.title,
+  //     });
+  //   }
+  // }
 
   async receiveMessage(message) {
     debugLog(`findbar: child received message: ${message.name}`);
