@@ -52,6 +52,8 @@ const gemini = {
   },
 
   setSystemPrompt(promptText) {
+    // __AUTO_GENERATED_PRINT_VAR_START__
+    console.log("setSystemPrompt promptText:", promptText); // __AUTO_GENERATED_PRINT_VAR_END__
     if (promptText) {
       this.systemInstruction = { parts: [{ text: promptText }] };
     } else {
@@ -185,6 +187,7 @@ const findbar = {
     this.removeExpandButton();
     this.removeAIInterface();
     this.expanded = false;
+    gemini.setSystemPrompt(null)
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
       this.addExpandButton();
@@ -207,6 +210,22 @@ const findbar = {
     if (!this.findbar) return;
     if (this.findbar.hidden) this.show();
     else this.hide();
+  },
+
+ async getSystemPrompt() {
+    let systemPrompt = `You are a AI assistant intrigated inside Zen Browser. Your task is to help user in finding info inside the website.
+these are the instructions you should strictly follow:
+- When user asks you question give answer based on content of webpage.
+- If webpage content is not available you tell user that you can't read info of web page.
+- Don't task about anything ascept for content on the current page.
+- Make sure your response is 100% accurate based on current web page.
+
+Here is the info about current page:
+`;
+
+    const pageContent = await windowManagerAPI.getPageTextContent();
+    systemPrompt += JSON.stringify(pageContent);
+    return systemPrompt;
   },
 
   createAPIKeyInterface() {
@@ -295,6 +314,7 @@ const findbar = {
       sendBtn.textContent = "Sending...";
       sendBtn.disabled = true;
 
+      if (!gemini.systemInstruction) gemini.setSystemPrompt( await this.getSystemPrompt());
       try {
         const response = await gemini.sendMessage(prompt);
         this.addChatMessage(response, "ai");
