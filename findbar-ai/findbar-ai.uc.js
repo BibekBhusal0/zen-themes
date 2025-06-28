@@ -1,22 +1,10 @@
+import { getPref } from "../utils/getPref.js";
+import windowManagerAPI from "./windowManager.js";
+windowManagerAPI();
+
 // prefs keys
 const EXPANDED = "extension.findbar-ai.expanded";
 const ENABLED = "extension.findbar-ai.enabled";
-
-// WindowManager
-import windowManagerAPI from "./windowManager.js";
-windowManagerAPI();
-console.log("findbar: main file loaded");
-
-const getPref = (key, defaultValue) => {
-  try {
-    const pref = UC_API.Prefs.get(key);
-    if (!pref) return defaultValue;
-    if (!pref.exists()) return defaultValue;
-    return pref.value;
-  } catch {
-    return defaultValue;
-  }
-};
 
 // set expanded to false initially
 UC_API.Prefs.set(EXPANDED, false);

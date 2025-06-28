@@ -1,8 +1,12 @@
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import { getPref } from "../../utils/getPref";
 
-console.log("findbar: Window Manager child loaded");
+const debugLog = (...args) => {
+  if (getPref("extensions.findbar-ai.debug-mode", false)) {
+    console.log(...args);
+  }
+};
+
+debugLog("findbar: Window Manager child loaded");
 
 export class FindbarAIWindowManagerChild extends JSWindowActorChild {
   constructor() {
@@ -10,7 +14,7 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
   }
 
   handleEvent(event) {
-    console.log(`findbar: child handling event: ${event.type}`);
+    debugLog(`findbar: child handling event: ${event.type}`);
     if (event.type === "DOMContentLoaded") {
       this.sendAsyncMessage("FindbarAI:ContentLoaded", {
         url: this.document.location.href,
@@ -20,7 +24,7 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
   }
 
   async receiveMessage(message) {
-    console.log(`findbar: child received message: ${message.name}`);
+    debugLog(`findbar: child received message: ${message.name}`);
     switch (message.name) {
       case "FindbarAI:GetPageContent":
         return {
@@ -37,7 +41,7 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
         };
 
       default:
-        console.log(`findbar: child unhandled message: ${message.name}`);
+        debugLog(`findbar: child unhandled message: ${message.name}`);
     }
   }
 }

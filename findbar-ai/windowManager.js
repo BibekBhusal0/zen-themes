@@ -2,6 +2,8 @@
 // ===========================================================
 // Module to read HTML content (and maybe modify if I implement it)
 // ===========================================================
+import { getPref } from "../utils/getPref.js";
+
 const _actors = new Set();
 let _lazy = {};
 ChromeUtils.defineESModuleGetters(_lazy, {
@@ -9,6 +11,19 @@ ChromeUtils.defineESModuleGetters(_lazy, {
 });
 
 const windowManagerName = "FindbarAIWindowManager";
+
+// Debug logging helper
+const debugLog = (...args) => {
+  if (getPref("extensions.findbar-ai.debug-mode", false)) {
+    console.log(...args);
+  }
+};
+
+const debugError = (...args) => {
+  if (getPref("extensions.findbar-ai.debug-mode", false)) {
+    console.error(...args);
+  }
+};
 
 const windowManagerAPI = () => {
   if (_actors.has(windowManagerName)) {
@@ -30,14 +45,13 @@ const windowManagerAPI = () => {
     },
     matches: ["https://*", "http://*"],
   };
-  // allFrames: true,
 
   try {
     _lazy.ActorManagerParent.addJSWindowActors(decl);
     _actors.add(windowManagerName);
-    console.log("FindbarAI WindowManager registered successfully");
+    debugLog("FindbarAI WindowManager registered successfully");
   } catch (e) {
-    console.warn(`Failed to register JSWindowActor: ${e}`);
+    debugError(`Failed to register JSWindowActor: ${e}`);
   }
 };
 
