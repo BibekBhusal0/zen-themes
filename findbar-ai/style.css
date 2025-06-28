@@ -58,6 +58,10 @@
       top: 10px !important;
       right: 5px !important;
       padding: 3px !important;
+
+      @media -moz-pref("extension.findbar-ai.expanded") {
+        display: none !important;
+      }
     }
 
     .findbar-container {
@@ -65,7 +69,7 @@
       margin-bottom: 5px !important;
 
       @media -moz-pref("extension.findbar-ai.expanded") {
-        margin-bottom: 50px !important;
+        display: none !important;
       }
 
       flex-wrap: wrap;
@@ -178,7 +182,177 @@
       }
     }
 
+    .findbar-ai-setup,
+    .findbar-ai-chat {
+      width: 100%;
+      padding: 5px 15px 15px 15px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .findbar-ai-setup {
+      .ai-setup-content {
+        text-align: center;
+        color: var(--lwt-text-color, ButtonText);
+        h3 {
+          margin: 0 0 5px 0;
+          font-size: 20px;
+          font-weight: bold;
+        }
+        p {
+          margin: 0 0 10px 0;
+          font-size: 15px;
+        }
+      }
+      .api-key-input-group {
+        display: flex;
+        gap: 5px;
+        input {
+          flex-grow: 1;
+          border-radius: 4px;
+          border: 1px solid #ced4da;
+          padding: 6px 8px;
+          background-color: var(--lwt-input-bg, #fff);
+          color: var(--lwt-input-color, #000);
+        }
+        button {
+          padding: 6px 12px;
+          border-radius: 4px;
+          border: 1px solid light-dark(#ced4da, #6c757d);
+          background-color: light-dark(#f8f9fa, #495057);
+          color: light-dark(#212529, #e9ecef);
+          cursor: pointer;
+          &:hover {
+            background-color: light-dark(#e9ecef, #6c757d);
+          }
+        }
+      }
+      .api-key-links {
+        margin-top: 10px;
+        font-size: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        button {
+          background: none;
+          border: none;
+          text-decoration: underline;
+          cursor: pointer;
+          color: -moz-nativehyperlinktext;
+          padding: 0;
+          font-size: 12px;
+        }
+      }
+    }
+
+    .findbar-ai-chat {
+      .ai-chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        .model-selector {
+          flex-grow: 1;
+          max-width: 200px;
+          border-radius: 4px;
+          padding: 4px;
+          border: 1px solid #ced4da;
+        }
+        .clear-chat-btn {
+          padding: 4px 10px;
+          border-radius: 4px;
+          border: 1px solid light-dark(#ced4da, #6c757d);
+          background-color: light-dark(#f8f9fa, #495057);
+          color: light-dark(#212529, #e9ecef);
+          cursor: pointer;
+          &:hover {
+            background-color: light-dark(#e9ecef, #6c757d);
+          }
+        }
+      }
+      .ai-chat-messages {
+        max-height: 300px;
+        min-height: 100px;
+        overflow-y: auto;
+        background-color: light-dark(
+          rgba(20, 20, 20, 0.05),
+          rgba(235, 235, 235, 0.1)
+        );
+        border-radius: 8px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .chat-message {
+        max-width: 85%;
+        padding: 8px 12px;
+        border-radius: 12px;
+        word-wrap: break-word;
+        .message-content {
+          white-space: pre-wrap;
+        }
+      }
+      .chat-message-user {
+        align-self: flex-end;
+        background-color: #007bff;
+        color: white;
+        border-bottom-right-radius: 2px;
+      }
+      .chat-message-ai {
+        align-self: flex-start;
+        background-color: #e9ecef;
+        color: #212529;
+        border-bottom-left-radius: 2px;
+      }
+      .chat-message-error {
+        align-self: flex-start;
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+      .ai-chat-input-group {
+        display: flex;
+        gap: 5px;
+        align-items: flex-end;
+        textarea {
+          flex-grow: 1;
+          border-radius: 8px;
+          border: 1px solid #ced4da;
+          padding: 8px;
+          resize: vertical;
+          min-height: 40px;
+          max-height: 150px;
+          background-color: var(--lwt-input-bg, #fff);
+          color: var(--lwt-input-color, #000);
+        }
+        .send-btn {
+          height: 40px;
+          padding: 0 15px;
+          border-radius: 8px;
+          border: 1px solid #007bff;
+          background-color: #007bff;
+          color: white;
+          cursor: pointer;
+          font-weight: bold;
+          &:hover {
+            background-color: #0056b3;
+          }
+          &:disabled {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+
     #findbar-expand {
+      /* width: calc(100% - 20px); */
       position: relative;
       text-align: center;
       cursor: pointer;
@@ -191,7 +365,7 @@
       border: 1px solid #ced4da;
 
       &::before {
-        content: "Collapse";
+        content: "Expand";
         display: block;
         width: 100%;
         text-align: center;
@@ -202,12 +376,6 @@
       @media -moz-pref("extension.findbar-ai.expanded") {
         &::before {
           content: "Collapse";
-        }
-      }
-
-      @media not -moz-pref("extension.findbar-ai.expanded") {
-        &::before {
-          content: "Expand";
         }
       }
 
