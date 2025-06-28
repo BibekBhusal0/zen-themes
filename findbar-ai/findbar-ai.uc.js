@@ -1,4 +1,14 @@
-import { getPref } from "../utils/getPref.js";
+const getPref = (key, defaultValue) => {
+  try {
+    const pref = UC_API.Prefs.get(key);
+    if (!pref) return defaultValue;
+    if (!pref.exists()) return defaultValue;
+    return pref.value;
+  } catch {
+    return defaultValue;
+  }
+};
+
 import windowManagerAPI from "./windowManager.js";
 windowManagerAPI();
 
@@ -46,7 +56,7 @@ const findbar = {
   },
 
   updateFindbar() {
-    this.removeExpandButton()
+    this.removeExpandButton();
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
       this.addExpandButton();

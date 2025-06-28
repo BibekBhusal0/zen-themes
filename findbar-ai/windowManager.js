@@ -2,7 +2,16 @@
 // ===========================================================
 // Module to read HTML content (and maybe modify if I implement it)
 // ===========================================================
-import { getPref } from "../utils/getPref.js";
+const getPref = (key, defaultValue) => {
+  try {
+    const pref = UC_API.Prefs.get(key);
+    if (!pref) return defaultValue;
+    if (!pref.exists()) return defaultValue;
+    return pref.value;
+  } catch {
+    return defaultValue;
+  }
+};
 
 const _actors = new Set();
 let _lazy = {};
