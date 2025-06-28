@@ -41,10 +41,9 @@ export class FindbarAIWindowManagerParent extends JSWindowActorParent {
     }
   }
 
-  // Helper method to get page content
-  async getPageContent() {
+  async getPageHTMLContent() {
     try {
-      const result = await this.sendQuery("FindbarAI:GetPageContent");
+      const result = await this.sendQuery("FindbarAI:GetPageHTMLContent");
       return result;
     } catch (e) {
       debugError("Failed to get page content:", e);
@@ -52,13 +51,22 @@ export class FindbarAIWindowManagerParent extends JSWindowActorParent {
     }
   }
 
-  // Helper method to get selected text
   async getSelectedText() {
     try {
       const result = await this.sendQuery("FindbarAI:GetSelectedText");
       return result;
     } catch (e) {
       debugError("Failed to get selected text:", e);
+      return null;
+    }
+  }
+
+  async getPageTextContent() {
+    try {
+      const result = await this.sendQuery("FindbarAI:GetPageTextContent");
+      return result;
+    } catch (e) {
+      debugError("Failed to get page text content:", e);
       return null;
     }
   }
