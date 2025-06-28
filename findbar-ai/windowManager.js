@@ -34,7 +34,7 @@ const debugError = (...args) => {
   }
 };
 
-const windowManagerAPI = () => {
+const windowManager = () => {
   if (_actors.has(windowManagerName)) {
     return;
   }
@@ -64,4 +64,51 @@ const windowManagerAPI = () => {
   }
 };
 
-export default windowManagerAPI;
+
+export const windowManagerAPI = {
+  getWindowManager() {
+    try {
+      if (!gBrowser || !gBrowser.selectedBrowser) return undefined;
+      const context = gBrowser.selectedBrowser.browsingContext;
+      if (!context || !context.currentWindowContext) return undefined;
+      return context.currentWindowContext.getActor(windowManagerName);
+    } catch {
+      return undefined;
+    }
+  },
+
+  async getHTMLContent() {
+    const wm = this.getWindowManager();
+    if (!wm) return {};
+    try {
+      return await wm.getPageHTMLContent();
+    } catch (error) {
+      debugError("Failed to get page HTML content:", error);
+      return {};
+    }
+  },
+
+  async getSelectedText() {
+    const wm = this.getWindowManager();
+    if (!wm) return {};
+    try {
+      return await wm.getSelectedText();
+    } catch (error) {
+      debugError("Failed to get selected text:", error);
+      return {};
+    }
+  },
+
+  async getPageTextContent() {
+    const wm = this.getWindowManager();
+    if (!wm) return {};
+    try {
+      return await wm.getPageTextContent();
+    } catch (error) {
+      debugError("Failed to get page text content:", error);
+      return {};
+    }
+  },
+};
+
+export default windowManager;

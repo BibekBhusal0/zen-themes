@@ -1,21 +1,11 @@
-const getPref = (key, defaultValue) => {
-  try {
-    const pref = UC_API.Prefs.get(key);
-    if (!pref) return defaultValue;
-    if (!pref.exists()) return defaultValue;
-    return pref.value;
-  } catch {
-    return defaultValue;
-  }
-};
+import windowManager, { windowManagerAPI } from "./windowManager.js";
+import getPref from "../utils/getPref.mjs";
+windowManager();
 
 const createHTMLElement = (htmlString) => {
   return new DOMParser().parseFromString(htmlString, "text/html").body
     .firstChild;
 };
-
-import windowManager from "./windowManager.js";
-windowManager();
 
 // prefs keys
 const EXPANDED = "extension.findbar-ai.expanded";
@@ -23,64 +13,6 @@ const ENABLED = "extension.findbar-ai.enabled";
 const API_KEY = "extension.findbar-ai.gemini-api-key";
 const MODEL = "extension.findbar-ai.gemini-model";
 const DEBUG_MODE = "extension.findbar-ai.debug-mode";
-
-const debugLog = (...args) => {
-  if (getPref(DEBUG_MODE, false)) {
-    console.log("FindbarAI:", ...args);
-  }
-};
-
-const debugError = (...args) => {
-  if (getPref(DEBUG_MODE, false)) {
-    console.error("FindbarAI Error:", ...args);
-  }
-};
-
-const windowManagerAPI = {
-  getWindowManager() {
-    try {
-      if (!gBrowser || !gBrowser.selectedBrowser) return undefined;
-      const context = gBrowser.selectedBrowser.browsingContext;
-      if (!context || !context.currentWindowContext) return undefined;
-      return context.currentWindowContext.getActor("FindbarAIWindowManager");
-    } catch {
-      return undefined;
-    }
-  },
-
-  async getHTMLContent() {
-    const wm = this.getWindowManager();
-    if (!wm) return {};
-    try {
-      return await wm.getPageHTMLContent();
-    } catch (error) {
-      debugError("Failed to get page HTML content:", error);
-      return {};
-    }
-  },
-
-  async getSelectedText() {
-    const wm = this.getWindowManager();
-    if (!wm) return {};
-    try {
-      return await wm.getSelectedText();
-    } catch (error) {
-      debugError("Failed to get selected text:", error);
-      return {};
-    }
-  },
-
-  async getPageTextContent() {
-    const wm = this.getWindowManager();
-    if (!wm) return {};
-    try {
-      return await wm.getPageTextContent();
-    } catch (error) {
-      debugError("Failed to get page text content:", error);
-      return {};
-    }
-  },
-};
 
 // Available Gemini models
 const AVAILABLE_MODELS = [
@@ -110,9 +42,7 @@ const gemini = {
     return getPref(MODEL, "gemini-2.0-flash");
   },
   set model(value) {
-    if (AVAILABLE_MODELS.includes(value)) {
-      UC_API.Prefs.set(MODEL, value);
-    }
+    UC_API.Prefs.set(MODEL, value);
   },
 
   get apiUrl() {
