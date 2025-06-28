@@ -115,6 +115,7 @@ const findbar = {
   updateFindbar() {
     this.removeExpandButton();
     this.removeAIInterface();
+    this.expanded = false
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
       this.addExpandButton();
@@ -292,7 +293,7 @@ const findbar = {
       } finally {
         sendBtn.textContent = "Send";
         sendBtn.disabled = false;
-        promptInput.focus();
+        this.focusPrompt()
       }
     };
 
@@ -339,9 +340,16 @@ const findbar = {
     } else {
       this.chatContainer = this.createChatInterface();
       this.findbar.insertBefore(this.chatContainer, this.expandButton);
-      const promptInput = this.chatContainer.querySelector("#ai-prompt");
-      if (promptInput) setTimeout(() => promptInput.focus(), 0);
+      this.focusPrompt()
     }
+  },
+
+  focusInput () {
+    if (this.findbar) setTimeout(() => this.findbar._findField.focus(), 10);
+  },
+  focusPrompt (){
+    const promptInput = this.chatContainer.querySelector("#ai-prompt");
+    if (promptInput) setTimeout(() => promptInput.focus(), 10);
   },
 
   hideAIInterface() {
@@ -403,6 +411,7 @@ const findbar = {
       e.preventDefault();
       e.stopPropagation();
       this.expanded = true;
+      this.focusPrompt()
     }
 
     if (e.key?.toLowerCase() === "escape") {
@@ -410,6 +419,7 @@ const findbar = {
         e.preventDefault();
         e.stopPropagation();
         this.expanded = false;
+        this.focusInput()
       } 
       // else {
       //   this.hide();
