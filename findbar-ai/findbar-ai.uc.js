@@ -115,7 +115,7 @@ const findbar = {
   updateFindbar() {
     this.removeExpandButton();
     this.removeAIInterface();
-    this.expanded = false
+    this.expanded = false;
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
       this.addExpandButton();
@@ -250,11 +250,10 @@ const findbar = {
         <div class="ai-chat-header">
           <select id="model-selector" class="model-selector">
             ${AVAILABLE_MODELS.map(
-              (model) =>
-                `<option value="${model}" ${
-                  model === this.model ? "selected" : ""
-                }>${model}</option>`
-            ).join("")}
+      (model) =>
+        `<option value="${model}" ${model === this.model ? "selected" : ""
+        }>${model}</option>`,
+    ).join("")}
           </select>
           <button id="clear-chat" class="clear-chat-btn">Clear</button>
         </div>
@@ -293,7 +292,7 @@ const findbar = {
       } finally {
         sendBtn.textContent = "Send";
         sendBtn.disabled = false;
-        this.focusPrompt()
+        this.focusPrompt();
       }
     };
 
@@ -320,7 +319,9 @@ const findbar = {
       this.chatContainer.querySelector("#chat-messages");
     if (!messagesContainer) return;
 
-    const messageDiv = createHTMLElement(`<div class="chat-message chat-message-${type}"></div>`);
+    const messageDiv = createHTMLElement(
+      `<div class="chat-message chat-message-${type}"></div>`,
+    );
     const contentDiv = createHTMLElement(`<div class="message-content"></div>`);
     contentDiv.textContent = content;
 
@@ -340,14 +341,14 @@ const findbar = {
     } else {
       this.chatContainer = this.createChatInterface();
       this.findbar.insertBefore(this.chatContainer, this.expandButton);
-      this.focusPrompt()
+      this.focusPrompt();
     }
   },
 
-  focusInput () {
+  focusInput() {
     if (this.findbar) setTimeout(() => this.findbar._findField.focus(), 10);
   },
-  focusPrompt (){
+  focusPrompt() {
     const promptInput = this.chatContainer.querySelector("#ai-prompt");
     if (promptInput) setTimeout(() => promptInput.focus(), 10);
   },
@@ -385,7 +386,7 @@ const findbar = {
     const button_id = "findbar-expand";
     if (this.findbar.getElement(button_id)) return true;
     const button = createHTMLElement(
-      `<button id="${button_id}" anonid="${button_id}"></button>`
+      `<button id="${button_id}" anonid="${button_id}"></button>`,
     );
     button.addEventListener("click", () => this.toggleExpanded());
     this.findbar.appendChild(button);
@@ -400,7 +401,7 @@ const findbar = {
     return true;
   },
 
-  addKeymaps: function (e) {
+  addKeymaps: function(e) {
     if (
       e.key &&
       e.key.toLowerCase() === "f" &&
@@ -411,7 +412,7 @@ const findbar = {
       e.preventDefault();
       e.stopPropagation();
       this.expanded = true;
-      this.focusPrompt()
+      this.focusPrompt();
     }
 
     if (e.key?.toLowerCase() === "escape") {
@@ -419,8 +420,8 @@ const findbar = {
         e.preventDefault();
         e.stopPropagation();
         this.expanded = false;
-        this.focusInput()
-      } 
+        this.focusInput();
+      }
       // else {
       //   this.hide();
       // }
