@@ -28,6 +28,13 @@
 
 @media -moz-pref("extension.findbar-ai.enabled") {
   findbar {
+    --button-bg-color: light-dark(#f8f9fa, #495057);
+    --button-hover-bg-color: light-dark(#e9ecef, #6c757d);
+    --button-border-color: light-dark(#ced4da, #6c757d);
+    --button-text-color: light-dark(#212529, #e9ecef);
+    --button-padding: 6px 12px;
+    --button-border-radius: 4px;
+
     position: absolute;
     top: 20px;
     width: min(550px, 90%);
@@ -195,7 +202,6 @@
     .findbar-ai-setup {
       .ai-setup-content {
         text-align: center;
-        color: var(--lwt-text-color, ButtonText);
         h3 {
           margin: 0 0 5px 0;
           font-size: 20px;
@@ -211,21 +217,19 @@
         gap: 5px;
         input {
           flex-grow: 1;
-          border-radius: 4px;
-          border: 1px solid #ced4da;
+          border-radius: var(--button-border-radius);
+          border: 1px solid var(--button-border-color);
           padding: 6px 8px;
-          background-color: var(--lwt-input-bg, #fff);
-          color: var(--lwt-input-color, #000);
         }
         button {
-          padding: 6px 12px;
-          border-radius: 4px;
-          border: 1px solid light-dark(#ced4da, #6c757d);
-          background-color: light-dark(#f8f9fa, #495057);
-          color: light-dark(#212529, #e9ecef);
+          padding: var(--button-padding);
+          border-radius: var(--button-border-radius);
+          border: 1px solid var(--button-border-color);
+          background-color: var(--button-bg-color);
+          color: var(--button-text-color);
           cursor: pointer;
           &:hover {
-            background-color: light-dark(#e9ecef, #6c757d);
+            background-color: var(--button-hover-bg-color);
           }
         }
       }
@@ -257,25 +261,27 @@
         .model-selector {
           flex-grow: 1;
           max-width: 200px;
-          border-radius: 4px;
+          border-radius: var(--button-border-radius) !important;
           padding: 4px;
-          border: 1px solid #ced4da;
+          border: 1px solid var(--button-border-color) !important;
+          background-color: var(--button-bg-color) !important;
+          color: var(--button-text-color) !important;
+          cursor: pointer;
         }
         .clear-chat-btn {
           padding: 4px 10px;
-          border-radius: 4px;
-          border: 1px solid light-dark(#ced4da, #6c757d);
-          background-color: light-dark(#f8f9fa, #495057);
-          color: light-dark(#212529, #e9ecef);
+          border-radius: var(--button-border-radius);
+          border: 1px solid var(--button-border-color);
+          background-color: var(--button-bg-color);
+          color: var(--button-text-color);
           cursor: pointer;
           &:hover {
-            background-color: light-dark(#e9ecef, #6c757d);
+            background-color: var(--button-hover-bg-color);
           }
         }
       }
       .ai-chat-messages {
         max-height: 300px;
-        min-height: 100px;
         overflow-y: auto;
         background-color: light-dark(
           rgba(20, 20, 20, 0.05),
@@ -287,6 +293,9 @@
         flex-direction: column;
         gap: 10px;
         margin-bottom: 10px;
+        &:empty {
+          display: none;
+        }
       }
       .chat-message {
         max-width: 85%;
@@ -305,8 +314,8 @@
       }
       .chat-message-ai {
         align-self: flex-start;
-        background-color: #e9ecef;
-        color: #212529;
+        background-color: var(--button-hover-bg-color);
+        color: var(--button-text-color);
         border-bottom-left-radius: 2px;
       }
       .chat-message-error {
@@ -321,26 +330,23 @@
         align-items: flex-end;
         textarea {
           flex-grow: 1;
-          border-radius: 8px;
-          border: 1px solid #ced4da;
+          border-radius: var(--button-border-radius);
           padding: 8px;
-          resize: vertical;
           min-height: 40px;
           max-height: 150px;
-          background-color: var(--lwt-input-bg, #fff);
-          color: var(--lwt-input-color, #000);
+          resize: none !important;
         }
         .send-btn {
           height: 40px;
-          padding: 0 15px;
-          border-radius: 8px;
-          border: 1px solid #007bff;
-          background-color: #007bff;
-          color: white;
+          padding: var(--button-padding);
+          border-radius: var(--button-border-radius);
+          background-color: var(--button-bg-color);
+          color: var(--button-text-color);
+          border: 1px solid var(--button-border-color);
           cursor: pointer;
           font-weight: bold;
           &:hover {
-            background-color: #0056b3;
+            background-color: var(--button-hover-bg-color);
           }
           &:disabled {
             background-color: #6c757d;
@@ -352,17 +358,16 @@
     }
 
     #findbar-expand {
-      /* width: calc(100% - 20px); */
       position: relative;
       text-align: center;
       cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 4px;
       margin: 5px 10px;
       transition: all 0.3s ease;
-      background-color: #e9ecef;
-      color: #212529;
-      border: 1px solid #ced4da;
+      padding: var(--button-padding);
+      border-radius: var(--button-border-radius);
+      background-color: var(--button-bg-color);
+      color: var(--button-text-color);
+      border: 1px solid var(--button-border-color);
 
       &::before {
         content: "Expand";
@@ -380,7 +385,7 @@
       }
 
       &:hover {
-        opacity: 0.9;
+        background-color: var(--button-hover-bg-color);
       }
 
       &:active {

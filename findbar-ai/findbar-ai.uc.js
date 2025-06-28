@@ -9,6 +9,12 @@ const getPref = (key, defaultValue) => {
   }
 };
 
+// Helper to create an HTML element from a string
+const createHTMLElement = (htmlString) => {
+  return new DOMParser().parseFromString(htmlString, "text/html").body
+    .firstChild;
+};
+
 import windowManagerAPI from "./windowManager.js";
 windowManagerAPI();
 
@@ -17,6 +23,19 @@ const EXPANDED = "extension.findbar-ai.expanded";
 const ENABLED = "extension.findbar-ai.enabled";
 const API_KEY = "extension.findbar-ai.gemini-api-key";
 const MODEL = "extension.findbar-ai.gemini-model";
+const DEBUG_MODE = "extension.findbar-ai.debug-mode";
+
+const debugLog = (...args) => {
+  if (getPref(DEBUG_MODE, false)) {
+    console.log("FindbarAI:", ...args);
+  }
+};
+
+const debugError = (...args) => {
+  if (getPref(DEBUG_MODE, false)) {
+    console.error("FindbarAI Error:", ...args);
+  }
+};
 
 // Available Gemini models
 const AVAILABLE_MODELS = [
@@ -99,7 +118,6 @@ const findbar = {
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
       this.addExpandButton();
-      // if (this.expanded) this.showAIInterface();
     });
   },
 
@@ -152,6 +170,7 @@ const findbar = {
 
     if (!response.ok) {
       const errorData = await response.text();
+      debugError(`API Error: ${response.status} - ${errorData}`);
       throw new Error(`API Error: ${response.status} - ${errorData}`);
     }
 
@@ -178,8 +197,7 @@ const findbar = {
           </div>
         </div>
       </div>`;
-    const container = new DOMParser().parseFromString(html, "text/html").body
-      .firstChild;
+    const container = createHTMLElement(html);
 
     const input = container.querySelector("#gemini-api-key");
     const saveBtn = container.querySelector("#save-api-key");
@@ -245,8 +263,7 @@ const findbar = {
           <button id="send-prompt" class="send-btn">Send</button>
         </div>
       </div>`;
-    const container = new DOMParser().parseFromString(html, "text/html").body
-      .firstChild;
+    const container = createHTMLElement(html);
 
     const modelSelector = container.querySelector("#model-selector");
     const chatMessages = container.querySelector("#chat-messages");
@@ -302,11 +319,8 @@ const findbar = {
       this.chatContainer.querySelector("#chat-messages");
     if (!messagesContainer) return;
 
-    const messageDiv = document.createElement("div");
-    messageDiv.className = `chat-message chat-message-${type}`;
-
-    const contentDiv = document.createElement("div");
-    contentDiv.className = "message-content";
+    const messageDiv = createHTMLElement(`<div class="chat-message chat-message-${type}"></div>`);
+    const contentDiv = createHTMLElement(`<div class="message-content"></div>`);
     contentDiv.textContent = content;
 
     messageDiv.appendChild(contentDiv);
@@ -325,6 +339,8 @@ const findbar = {
     } else {
       this.chatContainer = this.createChatInterface();
       this.findbar.insertBefore(this.chatContainer, this.expandButton);
+      const promptInput = this.chatContainer.querySelector("#ai-prompt");
+      if (promptInput) setTimeout(() => promptInput.focus(), 0);
     }
   },
 
@@ -350,6 +366,7 @@ const findbar = {
   },
   destroy() {
     this.findbar = null;
+    this.expanded = false;
     this.removeListeners();
     this.removeExpandButton();
     this.removeAIInterface();
@@ -359,10 +376,10 @@ const findbar = {
     if (!this.findbar) return false;
     const button_id = "findbar-expand";
     if (this.findbar.getElement(button_id)) return true;
-    const button = document.createElement("div");
-    button.setAttribute("anonid", button_id);
+    const button = createHTMLElement(
+      `<button id="${button_id}" anonid="${button_id}"></button>`
+    );
     button.addEventListener("click", () => this.toggleExpanded());
-    button.id = button_id;
     this.findbar.appendChild(button);
     this.expandButton = button;
     return true;
@@ -375,7 +392,7 @@ const findbar = {
     return true;
   },
 
-  addKeymaps: function(e) {
+  addKeymaps: function (e) {
     if (
       e.key &&
       e.key.toLowerCase() === "f" &&
