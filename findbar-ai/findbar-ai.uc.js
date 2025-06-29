@@ -379,6 +379,15 @@ Here is the info about current page:
       this.findbar.insertBefore(this.apiKeyContainer, this.expandButton);
     } else {
       this.chatContainer = this.createChatInterface();
+
+      // Re-render the existing chat history
+      const history = gemini.getHistory();
+      for (const message of history) {
+        const type = message.role === "model" ? "ai" : "user";
+        const content = message.parts[0].text;
+        this.addChatMessage(content, type);
+      }
+
       this.findbar.insertBefore(this.chatContainer, this.expandButton);
       this.focusPrompt();
     }
