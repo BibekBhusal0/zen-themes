@@ -1,0 +1,33 @@
+{
+  "id": "findbar-ai-zen-browser",
+  "name": "Findbar AI",
+  "description": "Transforms the standard Zen Browser findbar into a modern, floating, AI-powered chat interface using Google's Gemini API. Inspired by Arc Browser.",
+  "homepage": "https://github.com/BibekBhusal0/zen-themes/tree/main/findbar-ai",
+  "preferences": "https://raw.githubusercontent.com/BibekBhusal0/zen-custom-js/main/findbar-ai/preferences.json",
+  "js": [
+    "https://raw.githubusercontent.com/BibekBhusal0/zen-custom-js/main/findbar-ai/findbar-ai.uc.js",
+    "https://raw.githubusercontent.com/BibekBhusal0/zen-custom-js/main/findbar-ai/windowManager.js",
+    "https://raw.githubusercontent.com/BibekBhusal0/zen-custom-js/main/findbar-ai/actors/FindbarAIWindowManagerParent.sys.mjs",
+    "https://raw.githubusercontent.com/BibekBhusal0/zen-custom-js/main/findbar-ai/actors/FindbarAIWindowManagerChild.sys.mjs",
+    "https://raw.githubusercontent.com/BibekBhusal0/zen-custom-js/main/utils/getPref.mjs"
+  ],
+  "readme": "https://raw.githubusercontent.com/BibekBhusal0/zen-custom-js/main/findbar-ai/README.md",
+  "author": "Bibek Bhusal",
+  "version": "Beta",
+  "tags": [
+    "ai",
+    "findbar",
+    "ARC",
+    "gemini",
+    "Artificial Intelligence",
+    "LLM",
+    "sine",
+    "zen browser",
+    "chat"
+  ],
+  "createdAt": "2024-05-22",
+  "updatedAt": "2024-05-22",
+  "fork": [
+    "zen"
+  ]
+}
