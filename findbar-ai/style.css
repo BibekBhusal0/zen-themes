@@ -328,10 +328,6 @@
       word-wrap: break-word;
     }
 
-    .findbar-ai-chat .chat-message .message-content {
-      white-space: pre-wrap;
-    }
-
     .findbar-ai-chat .chat-message-user {
       align-self: flex-end;
       background-color: #007bff;

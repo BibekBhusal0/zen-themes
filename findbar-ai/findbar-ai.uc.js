@@ -1,10 +1,13 @@
 import windowManager, { windowManagerAPI } from "./windowManager.js";
+import { markedStyles } from "chrome://userscripts/content/engine/marked.js";
 import getPref from "../utils/getPref.mjs";
 windowManager();
 
 const createHTMLElement = (htmlString) => {
-  return new DOMParser().parseFromString(htmlString, "text/html").body
-    .firstChild;
+  let element = new DOMParser().parseFromString(htmlString, "text/html");
+  if (element.body.children.length) element = element.body.firstChild;
+  else element = element.head.firstChild;
+  return element;
 };
 
 // prefs keys
@@ -13,9 +16,29 @@ const API_KEY = "extension.findbar-ai.gemini-api-key";
 const MODEL = "extension.findbar-ai.gemini-model";
 const DEBUG_MODE = "extension.findbar-ai.debug-mode";
 
+var markdownStylesInjected = false;
+const injectMarkdownStyles = () => {
+  if (!markedStyles) return false;
+  try {
+    const styleTag = createHTMLElement(`<style>${markedStyles}<style>`);
+    document.head.appendChild(styleTag);
+
+    markdownStylesInjected = true;
+    return true;
+  } catch (e) {
+    console.warn(e);
+    return false;
+  }
+};
+
 function parseMD(markdown) {
-  const content = marked ? marked.parse(markdown) : markdown;
-  let htmlContent = createHTMLElement(`<div>${content}</div>`);
+  const markedOptions = { breaks: true, gfm: true };
+  injectMarkdownStyles();
+  const content = marked ? marked.parse(markdown, markedOptions) : markdown;
+  let htmlContent =
+    createHTMLElement(`<div class="markdown-body">${content}</div>
+  `);
+
   return htmlContent;
 }
 
