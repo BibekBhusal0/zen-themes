@@ -13,6 +13,12 @@ const API_KEY = "extension.findbar-ai.gemini-api-key";
 const MODEL = "extension.findbar-ai.gemini-model";
 const DEBUG_MODE = "extension.findbar-ai.debug-mode";
 
+function parseMD(markdown) {
+  const content = marked ? marked.parse(markdown) : markdown;
+  let htmlContent = createHTMLElement(`<div>${content}</div>`);
+  return htmlContent;
+}
+
 // Available Gemini models
 const AVAILABLE_MODELS = [
   "gemini-2.5-flash",
@@ -382,7 +388,7 @@ Here is the info about current page:
       `<div class="chat-message chat-message-${type}"></div>`,
     );
     const contentDiv = createHTMLElement(`<div class="message-content"></div>`);
-    contentDiv.textContent = content;
+    contentDiv.appendChild(parseMD(content));
 
     messageDiv.appendChild(contentDiv);
     messagesContainer.appendChild(messageDiv);
