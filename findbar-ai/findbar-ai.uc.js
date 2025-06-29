@@ -156,11 +156,11 @@ const findbar = {
       this.findbar.classList.add("ai-expanded");
       this.show();
       this.showAIInterface();
-      this.focusPrompt()
+      this.focusPrompt();
     } else {
       this.findbar.classList.remove("ai-expanded");
       this.hideAIInterface();
-      this.focusInput()
+      this.focusInput();
     }
   },
   toggleExpanded() {
@@ -185,7 +185,7 @@ const findbar = {
     this.removeExpandButton();
     this.removeAIInterface();
     this.expanded = false;
-    gemini.setSystemPrompt(null)
+    gemini.setSystemPrompt(null);
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
       this.addExpandButton();
@@ -320,7 +320,8 @@ Here is the info about current page:
       sendBtn.textContent = "Sending...";
       sendBtn.disabled = true;
 
-      if (!gemini.systemInstruction) gemini.setSystemPrompt( await this.getSystemPrompt());
+      if (!gemini.systemInstruction)
+        gemini.setSystemPrompt(await this.getSystemPrompt());
       try {
         const response = await gemini.sendMessage(prompt);
         this.addChatMessage(response, "ai");
@@ -390,6 +391,20 @@ Here is the info about current page:
     const promptInput = this.chatContainer?.querySelector("#ai-prompt");
     if (promptInput) setTimeout(() => promptInput.focus(), 10);
   },
+  setPromptText(text) {
+    const promptInput = this?.chatContainer?.querySelector("#ai-prompt");
+    if (promptInput && text) {
+      promptInput.value = text;
+    }
+  },
+  async setPromptTextFromSelection() {
+    let text = "";
+    const selection = await windowManagerAPI.getSelectedText();
+    if (!selection || !selection.hasSelection)
+      text = this?.findbar?._findField?.value;
+    else text = selection.selectedText;
+    this.setPromptText(text);
+  },
 
   hideAIInterface() {
     this.removeAIInterface();
@@ -451,14 +466,7 @@ Here is the info about current page:
       e.stopPropagation();
       this.expanded = true;
       this.focusPrompt();
-      windowManagerAPI.getSelectedText().then((selection) => {
-        if (!selection || !selection.hasSelection || !this.chatContainer)
-          return;
-        const promptInput = this.chatContainer.querySelector("#ai-prompt");
-        if (promptInput) {
-          promptInput.value = selection.selectedText;
-        }
-      });
+      this.setPromptTextFromSelection();
     }
 
     if (e.key?.toLowerCase() === "escape") {
