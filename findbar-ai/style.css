@@ -91,117 +91,117 @@
       flex-wrap: wrap;
       height: auto !important;
       row-gap: 10px;
+
+      &> :first-child {
+        width: calc(100% - 40px) !important;
+        margin-top: 5px !important;
+        padding-bottom: 10px !important;
+        border-bottom: 1px solid light-dark(rgba(20, 20, 20, 0.2), rgba(235, 235, 235, 0.3)) !important;
+
+        &::before {
+          content: "";
+          width: 16px !important;
+          min-width: 16px !important;
+          background-image: url(chrome://global/skin/icons/search-glass.svg) !important;
+          background-repeat: no-repeat;
+          margin-top: 4px;
+          margin-right: 15px;
+          margin-left: 5px;
+        }
+      }
+
+      .findbar-textbox {
+        background: none !important;
+        padding: 0 !important;
+        font-size: 16px !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        border: none !important;
+      }
+
+      toolbarbutton {
+        width: 24px !important;
+        justify-content: space-between !important;
+        padding: 4px !important;
+        margin-left: 4px !important;
+        margin-right: 0 !important;
+      }
+
+      checkbox,
+      label,
+      description {
+        margin-left: 4px !important;
+        margin-right: 6px !important;
+      }
+
+      .findbar-label {
+        display: flex;
+        flex-basis: 100% !important;
+
+        &:is([hidden="true"]) {
+          display: none;
+        }
+      }
+
+      .found-matches {
+        font-size: 14px !important;
+        margin-top: 10px !important;
+
+        &:not([hidden])::before {
+          background-image: url("chrome://browser/skin/zen-icons/search-page.svg") !important;
+          background-repeat: no-repeat !important;
+          padding-left: 25px !important;
+        }
+      }
+
+      .findbar-find-status {
+        display: none;
+        margin-left: 29px !important;
+
+        &:is([status="notfound"]) {
+          margin-left: 4px !important;
+          margin-top: 10px !important;
+          font-size: 14px !important;
+          font-weight: normal !important;
+          flex-basis: 100% !important;
+          display: flex;
+          align-items: center;
+          background-repeat: no-repeat !important;
+
+          &::before {
+            content: "";
+            min-width: 17px !important;
+            min-height: 17px !important;
+            background-image: url(chrome://global/skin/icons/close.svg) !important;
+            margin-right: 8px !important;
+            background-repeat: no-repeat !important;
+          }
+        }
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .findbar-find-status:is([status="notfound"])::before {
+          filter: invert();
+        }
+      }
+
+      .findbar-find-status:is([data-l10n-id]) {
+        display: flex;
+      }
+
+      .checkbox-label {
+        font-size: 12px !important;
+      }
     }
 
     &.ai-expanded .findbar-container {
       display: none !important;
     }
 
-    .findbar-container> :first-child {
-      width: calc(100% - 40px) !important;
-      margin-top: 5px !important;
-      padding-bottom: 10px !important;
-      border-bottom: 1px solid light-dark(rgba(20, 20, 20, 0.2), rgba(235, 235, 235, 0.3)) !important;
-    }
-
-    .findbar-container> :first-child::before {
-      content: "";
-      width: 16px !important;
-      min-width: 16px !important;
-      background-image: url(chrome://global/skin/icons/search-glass.svg) !important;
-      background-repeat: no-repeat;
-      margin-top: 4px;
-      margin-right: 15px;
-      margin-left: 5px;
-    }
-
     @media (prefers-color-scheme: dark) {
       .findbar-container> :first-child::before {
         filter: invert();
       }
-    }
-
-    .findbar-container .findbar-textbox {
-      background: none !important;
-      padding: 0 !important;
-      font-size: 16px !important;
-      box-shadow: none !important;
-      width: 100% !important;
-      border: none !important;
-    }
-
-    .findbar-container toolbarbutton {
-      width: 24px !important;
-      justify-content: space-between !important;
-      padding: 4px !important;
-      margin-left: 4px !important;
-      margin-right: 0 !important;
-    }
-
-    .findbar-container checkbox,
-    .findbar-container label,
-    .findbar-container description {
-      margin-left: 4px !important;
-      margin-right: 6px !important;
-    }
-
-    .findbar-container .findbar-label {
-      display: flex;
-      flex-basis: 100% !important;
-    }
-
-    .findbar-container .findbar-label:is([hidden="true"]) {
-      display: none;
-    }
-
-    .findbar-container .found-matches {
-      font-size: 14px !important;
-      margin-top: 10px !important;
-    }
-
-    .findbar-container .found-matches:not([hidden])::before {
-      background-image: url("chrome://browser/skin/zen-icons/search-page.svg") !important;
-      background-repeat: no-repeat !important;
-      padding-left: 25px !important;
-    }
-
-    .findbar-container .findbar-find-status {
-      display: none;
-      margin-left: 29px !important;
-    }
-
-    .findbar-container .findbar-find-status:is([status="notfound"]) {
-      margin-left: 4px !important;
-      margin-top: 10px !important;
-      font-size: 14px !important;
-      font-weight: normal !important;
-      flex-basis: 100% !important;
-      display: flex;
-      align-items: center;
-      background-repeat: no-repeat !important;
-    }
-
-    .findbar-container .findbar-find-status:is([status="notfound"])::before {
-      content: "";
-      min-width: 17px !important;
-      min-height: 17px !important;
-      background-image: url(chrome://global/skin/icons/close.svg) !important;
-      margin-right: 8px !important;
-      background-repeat: no-repeat !important;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      .findbar-container .findbar-find-status:is([status="notfound"])::before {
-        filter: invert();
-      }
-    }
-
-    .findbar-container .findbar-find-status:is([data-l10n-id]) {
-      display: flex;
-    }
-
-    .findbar-container .checkbox-label {
-      font-size: 12px !important;
     }
 
     .findbar-ai-setup,
@@ -214,186 +214,190 @@
       gap: 10px;
     }
 
-    .findbar-ai-setup .ai-setup-content {
-      text-align: center;
+    .findbar-ai-setup {
+      .ai-setup-content {
+        text-align: center;
+
+        h3 {
+          margin: 0 0 5px 0;
+          font-size: 20px;
+          font-weight: bold;
+        }
+
+        p {
+          margin: 0 0 10px 0;
+          font-size: 15px;
+        }
+      }
+
+      .api-key-input-group {
+        display: flex;
+        gap: 5px;
+
+        input {
+          flex-grow: 1;
+          border-radius: var(--button-border-radius);
+          border: 1px solid var(--button-border-color);
+          padding: 6px 8px;
+        }
+
+        button {
+          padding: var(--button-padding);
+          border-radius: var(--button-border-radius);
+          border: 1px solid var(--button-border-color);
+          background-color: var(--button-bg-color);
+          color: var(--button-text-color);
+          cursor: pointer;
+
+          &:hover {
+            background-color: var(--button-hover-bg-color);
+          }
+        }
+      }
+
+      .api-key-links {
+        margin-top: 10px;
+        font-size: 12px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+
+        button {
+          background: none;
+          border: none;
+          text-decoration: underline;
+          cursor: pointer;
+          color: -moz-nativehyperlinktext;
+          padding: 0;
+          font-size: 12px;
+        }
+      }
     }
 
-    .findbar-ai-setup .ai-setup-content h3 {
-      margin: 0 0 5px 0;
-      font-size: 20px;
-      font-weight: bold;
-    }
+    .findbar-ai-chat {
+      .ai-chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
 
-    .findbar-ai-setup .ai-setup-content p {
-      margin: 0 0 10px 0;
-      font-size: 15px;
-    }
+      .model-selector {
+        flex-grow: 1;
+        max-width: 200px;
+        border-radius: var(--button-border-radius) !important;
+        padding: 4px;
+        border: 1px solid var(--button-border-color) !important;
+        background-color: var(--button-bg-color) !important;
+        color: var(--button-text-color) !important;
+        cursor: pointer;
+      }
 
-    .findbar-ai-setup .api-key-input-group {
-      display: flex;
-      gap: 5px;
-    }
+      .clear-chat-btn {
+        padding: 4px 10px;
+        border-radius: var(--button-border-radius);
+        border: 1px solid var(--button-border-color);
+        background-color: var(--button-bg-color);
+        color: var(--button-text-color);
+        cursor: pointer;
 
-    .findbar-ai-setup .api-key-input-group input {
-      flex-grow: 1;
-      border-radius: var(--button-border-radius);
-      border: 1px solid var(--button-border-color);
-      padding: 6px 8px;
-    }
+        &:hover {
+          background-color: var(--button-hover-bg-color);
+        }
+      }
 
-    .findbar-ai-setup .api-key-input-group button {
-      padding: var(--button-padding);
-      border-radius: var(--button-border-radius);
-      border: 1px solid var(--button-border-color);
-      background-color: var(--button-bg-color);
-      color: var(--button-text-color);
-      cursor: pointer;
-    }
+      .ai-chat-messages {
+        max-height: 300px;
+        overflow-y: auto;
+        background-color: light-dark(rgba(20, 20, 20, 0.05),
+            rgba(235, 235, 235, 0.1));
+        border-radius: 8px;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 10px;
 
-    .findbar-ai-setup .api-key-input-group button:hover {
-      background-color: var(--button-hover-bg-color);
-    }
+        &:empty {
+          display: none;
+        }
+      }
 
-    .findbar-ai-setup .api-key-links {
-      margin-top: 10px;
-      font-size: 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 5px;
-    }
+      .chat-message {
+        max-width: 85%;
+        padding: 8px 12px;
+        border-radius: 12px;
+        word-wrap: break-word;
+      }
 
-    .findbar-ai-setup .api-key-links button {
-      background: none;
-      border: none;
-      text-decoration: underline;
-      cursor: pointer;
-      color: -moz-nativehyperlinktext;
-      padding: 0;
-      font-size: 12px;
-    }
+      .chat-message-user {
+        align-self: flex-end;
+        background-color: #007bff;
+        color: white;
+        border-bottom-right-radius: 2px;
+      }
 
-    .findbar-ai-chat .ai-chat-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
+      .chat-message-ai {
+        align-self: flex-start;
+        background-color: var(--button-hover-bg-color);
+        color: var(--button-text-color);
+        border-bottom-left-radius: 2px;
+      }
 
-    .findbar-ai-chat .model-selector {
-      flex-grow: 1;
-      max-width: 200px;
-      border-radius: var(--button-border-radius) !important;
-      padding: 4px;
-      border: 1px solid var(--button-border-color) !important;
-      background-color: var(--button-bg-color) !important;
-      color: var(--button-text-color) !important;
-      cursor: pointer;
-    }
+      .chat-message-error {
+        align-self: flex-start;
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
 
-    .findbar-ai-chat .clear-chat-btn {
-      padding: 4px 10px;
-      border-radius: var(--button-border-radius);
-      border: 1px solid var(--button-border-color);
-      background-color: var(--button-bg-color);
-      color: var(--button-text-color);
-      cursor: pointer;
-    }
+      .ai-chat-input-group {
+        display: flex;
+        gap: 5px;
+        align-items: flex-end;
 
-    .findbar-ai-chat .clear-chat-btn:hover {
-      background-color: var(--button-hover-bg-color);
-    }
+        textarea {
+          flex-grow: 1;
+          border-radius: var(--button-border-radius);
+          padding: 8px;
+          min-height: 40px;
+          max-height: 150px;
+          resize: none !important;
+        }
 
-    .findbar-ai-chat .ai-chat-messages {
-      max-height: 300px;
-      overflow-y: auto;
-      background-color: light-dark(rgba(20, 20, 20, 0.05),
-          rgba(235, 235, 235, 0.1));
-      border-radius: 8px;
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
+        .send-btn {
+          height: 40px;
+          padding: var(--button-padding);
+          border-radius: var(--button-border-radius);
+          background-color: var(--button-bg-color);
+          color: var(--button-text-color);
+          border: 1px solid var(--button-border-color);
+          cursor: pointer;
+          font-weight: bold;
 
-    .findbar-ai-chat .ai-chat-messages:empty {
-      display: none;
-    }
+          &:hover {
+            background-color: var(--button-hover-bg-color);
+          }
 
-    .findbar-ai-chat .chat-message {
-      max-width: 85%;
-      padding: 8px 12px;
-      border-radius: 12px;
-      word-wrap: break-word;
-    }
+          &:disabled {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            cursor: not-allowed;
+          }
+        }
+      }
 
-    .findbar-ai-chat .chat-message-user {
-      align-self: flex-end;
-      background-color: #007bff;
-      color: white;
-      border-bottom-right-radius: 2px;
-    }
+      .chat-message-loading {
+        align-self: flex-start;
+        background-color: var(--button-hover-bg-color);
+        color: var(--button-text-color);
+        border-bottom-left-radius: 2px;
 
-    .findbar-ai-chat .chat-message-ai {
-      align-self: flex-start;
-      background-color: var(--button-hover-bg-color);
-      color: var(--button-text-color);
-      border-bottom-left-radius: 2px;
-    }
-
-    .findbar-ai-chat .chat-message-error {
-      align-self: flex-start;
-      background-color: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-
-    .findbar-ai-chat .ai-chat-input-group {
-      display: flex;
-      gap: 5px;
-      align-items: flex-end;
-    }
-
-    .findbar-ai-chat .ai-chat-input-group textarea {
-      flex-grow: 1;
-      border-radius: var(--button-border-radius);
-      padding: 8px;
-      min-height: 40px;
-      max-height: 150px;
-      resize: none !important;
-    }
-
-    .findbar-ai-chat .ai-chat-input-group .send-btn {
-      height: 40px;
-      padding: var(--button-padding);
-      border-radius: var(--button-border-radius);
-      background-color: var(--button-bg-color);
-      color: var(--button-text-color);
-      border: 1px solid var(--button-border-color);
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .findbar-ai-chat .ai-chat-input-group .send-btn:hover {
-      background-color: var(--button-hover-bg-color);
-    }
-
-    .findbar-ai-chat .ai-chat-input-group .send-btn:disabled {
-      background-color: #6c757d;
-      border-color: #6c757d;
-      cursor: not-allowed;
-    }
-
-    .findbar-ai-chat .chat-message-loading {
-      align-self: flex-start;
-      background-color: var(--button-hover-bg-color);
-      color: var(--button-text-color);
-      border-bottom-left-radius: 2px;
-    }
-
-    .findbar-ai-chat .chat-message-loading .message-content {
-      animation: pulse 1.5s ease-in-out infinite;
+        .message-content {
+          animation: pulse 1.5s ease-in-out infinite;
+        }
+      }
     }
 
     #findbar-expand {
@@ -407,27 +411,27 @@
       background-color: var(--button-bg-color);
       color: var(--button-text-color);
       border: 1px solid var(--button-border-color);
-    }
 
-    #findbar-expand::before {
-      content: "Expand";
-      display: block;
-      width: 100%;
-      text-align: center;
-      font-size: 16px;
-      font-weight: bold;
+      &::before {
+        content: "Expand";
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      &:hover {
+        background-color: var(--button-hover-bg-color);
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
     }
 
     &.ai-expanded #findbar-expand::before {
       content: "Collapse";
-    }
-
-    #findbar-expand:hover {
-      background-color: var(--button-hover-bg-color);
-    }
-
-    #findbar-expand:active {
-      transform: scale(0.98);
     }
   }
 }
