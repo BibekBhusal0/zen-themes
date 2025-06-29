@@ -86,8 +86,8 @@ You can customize the Findbar AI via `about:config`.
 - [x] Add Readme
 - [x] Loading indicator
 - [x] Improve system prompts
-- [ ] Markdown formatting
-- [ ] Minimal styles (like Arc Browser)
+- [x] Markdown formatting
+- [x] Minimal styles (like Arc Browser)
 - [ ] Highlight text in page that corresponds to AI's answer
 - [ ] AI interacting with page content (beyond reading)
 - [ ] Tool calls (opening links, changing workspaces)
