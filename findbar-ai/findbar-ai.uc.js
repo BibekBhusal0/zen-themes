@@ -174,25 +174,22 @@ const findbar = {
   apiKeyContainer: null,
   _updateFindbar: null,
   _addKeymaps: null,
+  _handleInputKeyPress: null,
   _isExpanded: false,
 
   get expanded() {
     return this._isExpanded;
   },
   set expanded(value) {
-    if (this._isExpanded === value) return;
     this._isExpanded = value;
 
     if (!this.findbar) return;
 
     if (this._isExpanded) {
-      const inpText = this?.findbar?._findField?.value?.trim();
-      if (this.minimal && !inpText) return;
       this.findbar.classList.add("ai-expanded");
       this.show();
       this.showAIInterface();
-      if (this.minimal) this.sendMessage(inpText);
-      else this.focusPrompt();
+      this.focusPrompt();
     } else {
       this.findbar.classList.remove("ai-expanded");
       this.hideAIInterface();
@@ -233,6 +230,10 @@ const findbar = {
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
       this.addExpandButton();
+      this.findbar._findField.addEventListener(
+        "keypress",
+        this._handleInputKeyPress,
+      );
     });
   },
 
@@ -523,7 +524,13 @@ Here is the info about current page:
     const button = createHTMLElement(
       `<button id="${button_id}" anonid="${button_id}"></button>`,
     );
-    button.addEventListener("click", () => this.toggleExpanded());
+    button.addEventListener("click", () => {
+      this.toggleExpanded();
+      if (this.minimal) {
+        const inpText = this?.findbar?._findField?.value?.trim();
+        this.sendMessage(inpText);
+      }
+    });
     this.findbar.appendChild(button);
     this.expandButton = button;
     return true;
@@ -534,6 +541,14 @@ Here is the info about current page:
     this.expandButton.remove();
     this.expandButton = null;
     return true;
+  },
+
+  handleInputKeyPress: function(e) {
+    if (e?.key === "Enter" && e?.altKey) {
+      const inpText = this?.findbar?._findField?.value?.trim();
+      this.expanded = true;
+      this.sendMessage(inpText);
+    }
   },
 
   addKeymaps: function(e) {
@@ -567,14 +582,22 @@ Here is the info about current page:
   addListeners() {
     this._updateFindbar = this.updateFindbar.bind(this);
     this._addKeymaps = this.addKeymaps.bind(this);
+    this._handleInputKeyPress = this.handleInputKeyPress.bind(this);
 
     gBrowser.tabContainer.addEventListener("TabSelect", this._updateFindbar);
     document.addEventListener("keydown", this._addKeymaps);
   },
   removeListeners() {
+    if (this.findbar) {
+      this.findbar._findField.removeEventListener(
+        "keypress",
+        this._handleInputKeyPress,
+      );
+    }
     gBrowser.tabContainer.removeEventListener("TabSelect", this._updateFindbar);
     document.removeEventListener("keydown", this._addKeymaps);
 
+    this._handleInputKeyPress = null;
     this._updateFindbar = null;
     this._addKeymaps = null;
   },
