@@ -13,8 +13,9 @@ const createHTMLElement = (htmlString) => {
 
 // prefs keys
 const ENABLED = "extension.findbar-ai.enabled";
-const DEBUG_MODE = "extension.findbar-ai.debug-mode";
 const MINIMAL = "extension.findbar-ai.minimal";
+const GOD_MODE = "extension.findbar-ai.god-mode";
+
 
 //set minimal true by default
 UC_API.Prefs.setIfUnset(MINIMAL, true);
@@ -25,7 +26,6 @@ const injectMarkdownStyles = () => {
   try {
     const styleTag = createHTMLElement(`<style>${markedStyles}<style>`);
     document.head.appendChild(styleTag);
-
     markdownStylesInjected = true;
     return true;
   } catch (e) {
@@ -53,6 +53,7 @@ const findbar = {
   _updateFindbar: null,
   _addKeymaps: null,
   _handleInputKeyPress: null,
+  _handleGodModeChange: null,
   _isExpanded: false,
 
   get expanded() {
@@ -60,7 +61,6 @@ const findbar = {
   },
   set expanded(value) {
     this._isExpanded = value;
-
     if (!this.findbar) return;
 
     if (this._isExpanded) {
@@ -157,11 +157,7 @@ const findbar = {
     getApiKeyLink.addEventListener("click", () => {
       openTrustedLinkIn("https://aistudio.google.com/app/apikey", "tab");
     });
-
-    if (gemini.apiKey) {
-      input.value = gemini.apiKey;
-    }
-
+    if (gemini.apiKey) input.value = gemini.apiKey;
     saveBtn.addEventListener("click", () => {
       const key = input.value.trim();
       if (key) {
@@ -169,23 +165,23 @@ const findbar = {
         this.showAIInterface();
       }
     });
-
     input.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") {
-        saveBtn.click();
-      }
+      if (e.key === "Enter") saveBtn.click();
     });
-
     return container;
   },
 
   async sendMessage(prompt) {
     const container = this.chatContainer;
-    if (!container) return;
-    if (!prompt) return;
+    if (!container || !prompt) return;
 
     const promptInput = container.querySelector("#ai-prompt");
     const sendBtn = container.querySelector("#send-prompt");
+
+    const pageContext = {
+      url: gBrowser.currentURI.spec,
+      title: gBrowser.selectedBrowser.contentTitle,
+    };
 
     this.addChatMessage(prompt, "user");
     if (promptInput) promptInput.value = "";
@@ -202,11 +198,9 @@ const findbar = {
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
 
-    if (!gemini.systemInstruction)
-      gemini.setSystemPrompt(await gemini.getSystemPrompt());
     try {
-      const response = await gemini.sendMessage(prompt);
-      this.addChatMessage(response, "ai");
+      const response = await gemini.sendMessage(prompt, pageContext);
+      if (response) this.addChatMessage(response, "ai");
     } catch (e) {
       this.addChatMessage(`Error: ${e.message}`, "error");
     } finally {
@@ -220,16 +214,16 @@ const findbar = {
   },
 
   createChatInterface() {
+    const modelOptions = gemini.AVAILABLE_MODELS.map((model) => {
+      const displayName =
+        model.charAt(0).toUpperCase() + model.slice(1).replace(/-/g, " ");
+      return `<option value="${model}" ${model === gemini.model ? "selected" : ""}>${displayName}</option>`;
+    }).join("");
+
     const html = `
       <div class="findbar-ai-chat">
         <div class="ai-chat-header">
-          <select id="model-selector" class="model-selector">
-            ${gemini.AVAILABLE_MODELS.map(
-      (model) =>
-        `<option value="${model}" ${model === gemini.model ? "selected" : ""
-        }>${model}</option>`,
-    ).join("")}
-          </select>
+          <select id="model-selector" class="model-selector">${modelOptions}</select>
           <button id="clear-chat" class="clear-chat-btn">Clear</button>
         </div>
         <div class="ai-chat-messages" id="chat-messages"></div>
@@ -241,7 +235,6 @@ const findbar = {
     const container = createHTMLElement(html);
 
     const modelSelector = container.querySelector("#model-selector");
-    const chatMessages = container.querySelector("#chat-messages");
     const promptInput = container.querySelector("#ai-prompt");
     const sendBtn = container.querySelector("#send-prompt");
     const clearBtn = container.querySelector("#clear-chat");
@@ -249,23 +242,18 @@ const findbar = {
     modelSelector.addEventListener("change", (e) => {
       gemini.model = e.target.value;
     });
-
     const handleSend = () => this.sendMessage(promptInput.value.trim());
-
     sendBtn.addEventListener("click", handleSend);
-
     promptInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         handleSend();
       }
     });
-
     clearBtn.addEventListener("click", () => {
-      chatMessages.innerHTML = "";
+      container.querySelector("#chat-messages").innerHTML = "";
       gemini.clearHistory();
     });
-
     return container;
   },
 
@@ -281,18 +269,15 @@ const findbar = {
   },
 
   addChatMessage(content, type) {
-    if (!this.chatContainer) return;
-
+    if (!this.chatContainer || !content) return;
     const messagesContainer =
       this.chatContainer.querySelector("#chat-messages");
     if (!messagesContainer) return;
-
     const messageDiv = createHTMLElement(
       `<div class="chat-message chat-message-${type}"></div>`,
     );
     const contentDiv = createHTMLElement(`<div class="message-content"></div>`);
     contentDiv.appendChild(parseMD(content));
-
     messageDiv.appendChild(contentDiv);
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -300,7 +285,6 @@ const findbar = {
 
   showAIInterface() {
     if (!this.findbar) return;
-
     this.removeAIInterface();
 
     if (!gemini.apiKey) {
@@ -308,14 +292,21 @@ const findbar = {
       this.findbar.insertBefore(this.apiKeyContainer, this.expandButton);
     } else {
       this.chatContainer = this.createChatInterface();
-
       const history = gemini.getHistory();
       for (const message of history) {
+        if (
+          message.role === "tool" ||
+          (message.parts && message.parts.some((p) => p.functionCall))
+        )
+          continue;
+        if (!message.parts[0].text) continue;
         const type = message.role === "model" ? "ai" : "user";
-        const content = message.parts[0].text;
+        const content = message.parts[0].text.replace(
+          /\[Current Page Context:.*?\]\s*/,
+          "",
+        );
         this.addChatMessage(content, type);
       }
-
       this.findbar.insertBefore(this.chatContainer, this.expandButton);
       this.focusPrompt();
     }
@@ -330,9 +321,7 @@ const findbar = {
   },
   setPromptText(text) {
     const promptInput = this?.chatContainer?.querySelector("#ai-prompt");
-    if (promptInput && text) {
-      promptInput.value = text;
-    }
+    if (promptInput && text) promptInput.value = text;
   },
   async setPromptTextFromSelection() {
     let text = "";
@@ -346,7 +335,6 @@ const findbar = {
   hideAIInterface() {
     this.removeAIInterface();
   },
-
   removeAIInterface() {
     if (this.apiKeyContainer) {
       this.apiKeyContainer.remove();
@@ -419,7 +407,6 @@ const findbar = {
       this.focusPrompt();
       this.setPromptTextFromSelection();
     }
-
     if (e.key?.toLowerCase() === "escape") {
       if (this.expanded) {
         e.preventDefault();
@@ -434,23 +421,26 @@ const findbar = {
     this._updateFindbar = this.updateFindbar.bind(this);
     this._addKeymaps = this.addKeymaps.bind(this);
     this._handleInputKeyPress = this.handleInputKeyPress.bind(this);
+    this._handleGodModeChange = gemini.updateSystemPrompt.bind(gemini);
 
     gBrowser.tabContainer.addEventListener("TabSelect", this._updateFindbar);
     document.addEventListener("keydown", this._addKeymaps);
+    UC_API.Prefs.addListener(GOD_MODE, this._handleGodModeChange);
   },
   removeListeners() {
-    if (this.findbar) {
+    if (this.findbar)
       this.findbar._findField.removeEventListener(
         "keypress",
         this._handleInputKeyPress,
       );
-    }
     gBrowser.tabContainer.removeEventListener("TabSelect", this._updateFindbar);
     document.removeEventListener("keydown", this._addKeymaps);
+    UC_API.Prefs.removeListener(GOD_MODE, this._handleGodModeChange);
 
     this._handleInputKeyPress = null;
     this._updateFindbar = null;
     this._addKeymaps = null;
+    this._handleGodModeChange = null;
   },
 };
 
