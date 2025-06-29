@@ -15,6 +15,10 @@ const ENABLED = "extension.findbar-ai.enabled";
 const API_KEY = "extension.findbar-ai.gemini-api-key";
 const MODEL = "extension.findbar-ai.gemini-model";
 const DEBUG_MODE = "extension.findbar-ai.debug-mode";
+const MINIMAL = "extension.findbar-ai.minimal";
+
+//set minimal true by default
+UC_API.Prefs.setIfUnset(MINIMAL, true);
 
 var markdownStylesInjected = false;
 const injectMarkdownStyles = () => {
@@ -182,10 +186,13 @@ const findbar = {
     if (!this.findbar) return;
 
     if (this._isExpanded) {
+      const inpText = this?.findbar?._findField?.value?.trim();
+      if (this.minimal && !inpText) return;
       this.findbar.classList.add("ai-expanded");
       this.show();
       this.showAIInterface();
-      this.focusPrompt();
+      if (this.minimal) this.sendMessage(inpText);
+      else this.focusPrompt();
     } else {
       this.findbar.classList.remove("ai-expanded");
       this.hideAIInterface();
@@ -210,11 +217,19 @@ const findbar = {
     else this.destroy();
   },
 
+  get minimal() {
+    return getPref(MINIMAL, true);
+  },
+  set minimal(value) {
+    if (typeof value === "boolean") UC_API.Prefs.set(MINIMAL, value);
+  },
+
   updateFindbar() {
     this.removeExpandButton();
     this.removeAIInterface();
     this.expanded = false;
     gemini.setSystemPrompt(null);
+    gemini.clearHistory();
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
       this.addExpandButton();
@@ -309,6 +324,46 @@ Here is the info about current page:
     return container;
   },
 
+  async sendMessage(prompt) {
+    const container = this.chatContainer;
+    if (!container) return;
+    if (!prompt) return;
+
+    const promptInput = container.querySelector("#ai-prompt");
+    const sendBtn = container.querySelector("#send-prompt");
+
+    this.addChatMessage(prompt, "user");
+    if (promptInput) promptInput.value = "";
+    if (sendBtn) {
+      sendBtn.textContent = "Sending...";
+      sendBtn.disabled = true;
+    }
+
+    const loadingIndicator = this.createLoadingIndicator();
+    const messagesContainer =
+      this.chatContainer.querySelector("#chat-messages");
+    if (messagesContainer) {
+      messagesContainer.appendChild(loadingIndicator);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    if (!gemini.systemInstruction)
+      gemini.setSystemPrompt(await this.getSystemPrompt());
+    try {
+      const response = await gemini.sendMessage(prompt);
+      this.addChatMessage(response, "ai");
+    } catch (e) {
+      this.addChatMessage(`Error: ${e.message}`, "error");
+    } finally {
+      loadingIndicator.remove();
+      if (sendBtn) {
+        sendBtn.textContent = "Send";
+        sendBtn.disabled = false;
+      }
+      this.focusPrompt();
+    }
+  },
+
   createChatInterface() {
     const html = `
       <div class="findbar-ai-chat">
@@ -340,44 +395,14 @@ Here is the info about current page:
       gemini.model = e.target.value;
     });
 
-    const sendMessage = async () => {
-      const prompt = promptInput.value.trim();
-      if (!prompt) return;
+    const handleSend = () => this.sendMessage(promptInput.value.trim());
 
-      this.addChatMessage(prompt, "user");
-      promptInput.value = "";
-      sendBtn.textContent = "Sending...";
-      sendBtn.disabled = true;
-
-      const loadingIndicator = this.createLoadingIndicator();
-      const messagesContainer =
-        this.chatContainer.querySelector("#chat-messages");
-      if (messagesContainer) {
-        messagesContainer.appendChild(loadingIndicator);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-      }
-
-      if (!gemini.systemInstruction)
-        gemini.setSystemPrompt(await this.getSystemPrompt());
-      try {
-        const response = await gemini.sendMessage(prompt);
-        this.addChatMessage(response, "ai");
-      } catch (e) {
-        this.addChatMessage(`Error: ${e.message}`, "error");
-      } finally {
-        loadingIndicator.remove();
-        sendBtn.textContent = "Send";
-        sendBtn.disabled = false;
-        this.focusPrompt();
-      }
-    };
-
-    sendBtn.addEventListener("click", sendMessage);
+    sendBtn.addEventListener("click", handleSend);
 
     promptInput.addEventListener("keypress", (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        sendMessage();
+        handleSend();
       }
     });
 
