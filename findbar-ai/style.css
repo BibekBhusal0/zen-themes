@@ -108,23 +108,23 @@
           margin-right: 15px;
           margin-left: 5px;
         }
-      }
 
-      .findbar-textbox {
-        background: none !important;
-        padding: 0 !important;
-        font-size: 16px !important;
-        box-shadow: none !important;
-        width: 100% !important;
-        border: none !important;
-      }
+        .findbar-textbox {
+          background: none !important;
+          padding: 0 !important;
+          font-size: 16px !important;
+          box-shadow: none !important;
+          width: 100% !important;
+          border: none !important;
+        }
 
-      toolbarbutton {
-        width: 24px !important;
-        justify-content: space-between !important;
-        padding: 4px !important;
-        margin-left: 4px !important;
-        margin-right: 0 !important;
+        toolbarbutton {
+          width: 24px !important;
+          justify-content: space-between !important;
+          padding: 4px !important;
+          margin-left: 4px !important;
+          margin-right: 0 !important;
+        }
       }
 
       checkbox,
@@ -432,6 +432,72 @@
 
     &.ai-expanded #findbar-expand::before {
       content: "Collapse";
+    }
+
+    @media -moz-pref("extension.findbar-ai.minimal") {
+      max-width: 400px !important;
+      flex-direction: row !important;
+      min-height: 50px !important;
+      align-items: center !important;
+
+      .findbar-closebutton {
+        top: 13px !important;
+      }
+
+      #findbar-expand {
+        margin: 0 !important;
+        position: absolute !important;
+        top: 50%;
+        right: 50px !important;
+        transform: translateY(-50%);
+
+        &::before {
+          content: "Ask" !important;
+        }
+      }
+
+      &.ai-expanded {
+        padding-top: 12px !important;
+
+        .findbar-closebutton {
+          display: block !important;
+          top: 7px !important;
+        }
+
+        #findbar-expand {
+          display: none !important;
+        }
+      }
+
+      .findbar-container {
+        margin-bottom: 0 !important;
+        height: 27px !important;
+
+        &> :first-child {
+          border-bottom: 0 !important;
+          width: calc(100% - 100px) !important;
+
+          toolbarbutton {
+            display: none !important;
+          }
+        }
+
+        hbox[anonid="findbar-textbox-wrapper"] {
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+
+        checkbox,
+        label,
+        description {
+          display: none !important;
+        }
+      }
+
+      .model-selector,
+      .clear-chat-btn {
+        display: none !important;
+      }
     }
   }
 }
