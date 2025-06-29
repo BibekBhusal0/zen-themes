@@ -13,6 +13,13 @@ const getPref = (key, defaultValue) => {
   }
 };
 
+const getUrlAndTitle = () => {
+  return {
+    url: gBrowser.currentURI.spec,
+    title: gBrowser.selectedBrowser.contentTitle,
+  };
+};
+
 const _actors = new Set();
 let _lazy = {};
 ChromeUtils.defineESModuleGetters(_lazy, {
@@ -64,7 +71,6 @@ const windowManager = () => {
   }
 };
 
-
 export const windowManagerAPI = {
   getWindowManager() {
     try {
@@ -90,23 +96,23 @@ export const windowManagerAPI = {
 
   async getSelectedText() {
     const wm = this.getWindowManager();
-    if (!wm) return {};
+    if (!wm) return getUrlAndTitle();
     try {
       return await wm.getSelectedText();
     } catch (error) {
       debugError("Failed to get selected text:", error);
-      return {};
+      return getUrlAndTitle();
     }
   },
 
   async getPageTextContent() {
     const wm = this.getWindowManager();
-    if (!wm) return {};
+    if (!wm) return getUrlAndTitle();
     try {
       return await wm.getPageTextContent();
     } catch (error) {
       debugError("Failed to get page text content:", error);
-      return {};
+      return getUrlAndTitle();
     }
   },
 };
