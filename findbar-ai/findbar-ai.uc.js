@@ -8,7 +8,6 @@ const createHTMLElement = (htmlString) => {
 };
 
 // prefs keys
-const EXPANDED = "extension.findbar-ai.expanded";
 const ENABLED = "extension.findbar-ai.enabled";
 const API_KEY = "extension.findbar-ai.gemini-api-key";
 const MODEL = "extension.findbar-ai.gemini-model";
@@ -52,8 +51,6 @@ const gemini = {
   },
 
   setSystemPrompt(promptText) {
-    // __AUTO_GENERATED_PRINT_VAR_START__
-    console.log("setSystemPrompt promptText:", promptText); // __AUTO_GENERATED_PRINT_VAR_END__
     if (promptText) {
       this.systemInstruction = { parts: [{ text: promptText }] };
     } else {
@@ -137,9 +134,6 @@ const gemini = {
   },
 };
 
-// set expanded to false initially
-UC_API.Prefs.set(EXPANDED, false);
-
 const findbar = {
   findbar: null,
   expandButton: null,
@@ -147,26 +141,30 @@ const findbar = {
   apiKeyContainer: null,
   _updateFindbar: null,
   _addKeymaps: null,
-  _handleExpandChange: null,
+  _isExpanded: false,
 
   get expanded() {
-    return getPref(EXPANDED, false);
+    return this._isExpanded;
   },
   set expanded(value) {
-    if (typeof value === "boolean") UC_API.Prefs.set(EXPANDED, value);
+    if (this._isExpanded === value) return;
+    this._isExpanded = value;
+
+    if (!this.findbar) return;
+
+    if (this._isExpanded) {
+      this.findbar.classList.add("ai-expanded");
+      this.show();
+      this.showAIInterface();
+      this.focusPrompt()
+    } else {
+      this.findbar.classList.remove("ai-expanded");
+      this.hideAIInterface();
+      this.focusInput()
+    }
   },
   toggleExpanded() {
     this.expanded = !this.expanded;
-  },
-  handleExpandChange(expanded) {
-    if (!this.findbar) return false;
-    if (expanded.value) {
-      this.show();
-      this.showAIInterface();
-    } else {
-      this.hideAIInterface();
-    }
-    return true;
   },
 
   get enabled() {
@@ -471,20 +469,16 @@ Here is the info about current page:
   addListeners() {
     this._updateFindbar = this.updateFindbar.bind(this);
     this._addKeymaps = this.addKeymaps.bind(this);
-    this._handleExpandChange = this.handleExpandChange.bind(this);
 
     gBrowser.tabContainer.addEventListener("TabSelect", this._updateFindbar);
     document.addEventListener("keydown", this._addKeymaps);
-    UC_API.Prefs.addListener(EXPANDED, this._handleExpandChange);
   },
   removeListeners() {
     gBrowser.tabContainer.removeEventListener("TabSelect", this._updateFindbar);
     document.removeEventListener("keydown", this._addKeymaps);
-    UC_API.Prefs.removeListener(EXPANDED, this._handleExpandChange);
 
     this._updateFindbar = null;
     this._addKeymaps = null;
-    this._handleExpandChange = null;
   },
 };
 

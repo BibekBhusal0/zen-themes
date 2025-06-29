@@ -64,7 +64,6 @@ You can customize the Findbar AI via `about:config`.
 | Preference                            | Type    | Default              | Description                                                     |
 | ------------------------------------- | ------- | -------------------- | --------------------------------------------------------------- |
 | `extension.findbar-ai.enabled`        | Boolean | `true`               | Toggles the entire feature on or off.                           |
-| `extension.findbar-ai.expanded`       | Boolean | `false`              | Controls the expanded (AI chat) state of the findbar.           |
 | `extension.findbar-ai.gemini-api-key` | String  | _(empty)_            | **Required**. Your Google Gemini API key.                       |
 | `extension.findbar-ai.gemini-model`   | String  | `"gemini-2.0-flash"` | The specific Gemini model to use for chat.                      |
 | `extension.findbar-ai.debug-mode`     | Boolean | `false`              | Set to `true` to enable verbose logging in the Browser Console. |
