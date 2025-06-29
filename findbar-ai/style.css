@@ -26,6 +26,20 @@
   }
 }
 
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.5;
+  }
+}
+
 @media -moz-pref("extension.findbar-ai.enabled") {
   findbar {
     --button-bg-color: light-dark(#f8f9fa, #495057);
@@ -83,15 +97,14 @@
       display: none !important;
     }
 
-    .findbar-container > :first-child {
+    .findbar-container> :first-child {
       width: calc(100% - 40px) !important;
       margin-top: 5px !important;
       padding-bottom: 10px !important;
-      border-bottom: 1px solid
-        light-dark(rgba(20, 20, 20, 0.2), rgba(235, 235, 235, 0.3)) !important;
+      border-bottom: 1px solid light-dark(rgba(20, 20, 20, 0.2), rgba(235, 235, 235, 0.3)) !important;
     }
 
-    .findbar-container > :first-child::before {
+    .findbar-container> :first-child::before {
       content: "";
       width: 16px !important;
       min-width: 16px !important;
@@ -103,7 +116,7 @@
     }
 
     @media (prefers-color-scheme: dark) {
-      .findbar-container > :first-child::before {
+      .findbar-container> :first-child::before {
         filter: invert();
       }
     }
@@ -178,8 +191,7 @@
     }
 
     @media (prefers-color-scheme: dark) {
-      .findbar-container
-        .findbar-find-status:is([status="notfound"])::before {
+      .findbar-container .findbar-find-status:is([status="notfound"])::before {
         filter: invert();
       }
     }
@@ -295,10 +307,8 @@
     .findbar-ai-chat .ai-chat-messages {
       max-height: 300px;
       overflow-y: auto;
-      background-color: light-dark(
-        rgba(20, 20, 20, 0.05),
-        rgba(235, 235, 235, 0.1)
-      );
+      background-color: light-dark(rgba(20, 20, 20, 0.05),
+          rgba(235, 235, 235, 0.1));
       border-radius: 8px;
       padding: 10px;
       display: flex;
@@ -379,6 +389,17 @@
       cursor: not-allowed;
     }
 
+    .findbar-ai-chat .chat-message-loading {
+      align-self: flex-start;
+      background-color: var(--button-hover-bg-color);
+      color: var(--button-text-color);
+      border-bottom-left-radius: 2px;
+    }
+
+    .findbar-ai-chat .chat-message-loading .message-content {
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
     #findbar-expand {
       position: relative;
       text-align: center;
@@ -402,7 +423,7 @@
     }
 
     &.ai-expanded #findbar-expand::before {
-      content: "Collapse" ;
+      content: "Collapse";
     }
 
     #findbar-expand:hover {

@@ -84,7 +84,7 @@ You can customize the Findbar AI via `about:config`.
 - [x] Integrating Gemini API
 - [x] Reading current page HTML
 - [x] Add Readme
-- [ ] Loading state
+- [x] Loading indicator
 - [x] Improve system prompts
 - [ ] Markdown formatting
 - [ ] Minimal styles (like Arc Browser)

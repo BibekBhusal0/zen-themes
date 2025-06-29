@@ -320,6 +320,14 @@ Here is the info about current page:
       sendBtn.textContent = "Sending...";
       sendBtn.disabled = true;
 
+      const loadingIndicator = this.createLoadingIndicator();
+      const messagesContainer =
+        this.chatContainer.querySelector("#chat-messages");
+      if (messagesContainer) {
+        messagesContainer.appendChild(loadingIndicator);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
       if (!gemini.systemInstruction)
         gemini.setSystemPrompt(await this.getSystemPrompt());
       try {
@@ -328,6 +336,7 @@ Here is the info about current page:
       } catch (e) {
         this.addChatMessage(`Error: ${e.message}`, "error");
       } finally {
+        loadingIndicator.remove();
         sendBtn.textContent = "Send";
         sendBtn.disabled = false;
         this.focusPrompt();
@@ -349,6 +358,17 @@ Here is the info about current page:
     });
 
     return container;
+  },
+
+  createLoadingIndicator() {
+    const messageDiv = createHTMLElement(
+      `<div class="chat-message chat-message-loading"></div>`,
+    );
+    const contentDiv = createHTMLElement(
+      `<div class="message-content">Loading...</div>`,
+    );
+    messageDiv.appendChild(contentDiv);
+    return messageDiv;
   },
 
   addChatMessage(content, type) {
@@ -380,7 +400,6 @@ Here is the info about current page:
     } else {
       this.chatContainer = this.createChatInterface();
 
-      // Re-render the existing chat history
       const history = gemini.getHistory();
       for (const message of history) {
         const type = message.role === "model" ? "ai" : "user";
