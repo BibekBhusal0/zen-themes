@@ -15,9 +15,11 @@ const createHTMLElement = (htmlString) => {
 const ENABLED = "extension.findbar-ai.enabled";
 const MINIMAL = "extension.findbar-ai.minimal";
 const GOD_MODE = "extension.findbar-ai.god-mode";
+const CITATIONS_ENABLED = "extension.findbar-ai.citations-enabled";
 
-//set minimal true by default
+//default configurations
 UC_API.Prefs.setIfUnset(MINIMAL, true);
+UC_API.Prefs.setIfUnset(CITATIONS_ENABLED, false); // experimental
 
 var markdownStylesInjected = false;
 const injectMarkdownStyles = () => {
@@ -35,11 +37,15 @@ const injectMarkdownStyles = () => {
 
 function parseMD(markdown) {
   const markedOptions = { breaks: true, gfm: true };
-  injectMarkdownStyles();
-  const content = marked ? marked.parse(markdown, markedOptions) : markdown;
-  let htmlContent =
-    createHTMLElement(`<div class="markdown-body">${content}</div>
-  `);
+  if (!markdownStylesInjected) {
+    injectMarkdownStyles();
+  }
+  const content = window.marked
+    ? window.marked.parse(markdown, markedOptions)
+    : markdown;
+  let htmlContent = createHTMLElement(
+    `<div class="markdown-body">${content}</div>`,
+  );
 
   return htmlContent;
 }
@@ -53,6 +59,7 @@ const findbar = {
   _addKeymaps: null,
   _handleInputKeyPress: null,
   _handleGodModeChange: null,
+  _handleCitationChange: null,
   _isExpanded: false,
 
   get expanded() {
@@ -188,7 +195,7 @@ const findbar = {
       title: gBrowser.selectedBrowser.contentTitle,
     };
 
-    this.addChatMessage(prompt, "user");
+    this.addChatMessage({ answer: prompt }, "user");
     if (promptInput) promptInput.value = "";
     if (sendBtn) {
       sendBtn.textContent = "Sending...";
@@ -205,9 +212,11 @@ const findbar = {
 
     try {
       const response = await gemini.sendMessage(prompt, pageContext);
-      if (response) this.addChatMessage(response, "ai");
+      if (response && response.answer) {
+        this.addChatMessage(response, "ai");
+      }
     } catch (e) {
-      this.addChatMessage(`Error: ${e.message}`, "error");
+      this.addChatMessage({ answer: `Error: ${e.message}` }, "error");
     } finally {
       loadingIndicator.remove();
       if (sendBtn) {
@@ -222,7 +231,8 @@ const findbar = {
     const modelOptions = gemini.AVAILABLE_MODELS.map((model) => {
       const displayName =
         model.charAt(0).toUpperCase() + model.slice(1).replace(/-/g, " ");
-      return `<option value="${model}" ${model === gemini.model ? "selected" : ""}>${displayName}</option>`;
+      return `<option value="${model}" ${model === gemini.model ? "selected" : ""
+        }>${displayName}</option>`;
     }).join("");
 
     const html = `
@@ -240,6 +250,7 @@ const findbar = {
     const container = createHTMLElement(html);
 
     const modelSelector = container.querySelector("#model-selector");
+    const chatMessages = container.querySelector("#chat-messages");
     const promptInput = container.querySelector("#ai-prompt");
     const sendBtn = container.querySelector("#send-prompt");
     const clearBtn = container.querySelector("#clear-chat");
@@ -255,11 +266,31 @@ const findbar = {
         handleSend();
       }
     });
+
     clearBtn.addEventListener("click", () => {
       container.querySelector("#chat-messages").innerHTML = "";
       gemini.setSystemPrompt(null);
       gemini.clearHistory();
     });
+
+    chatMessages.addEventListener("click", async (e) => {
+      if (e.target.classList.contains("citation-link")) {
+        const button = e.target;
+        const citationId = button.dataset.citationId;
+        const messageEl = button.closest(".chat-message[data-citations]");
+
+        if (messageEl) {
+          const citations = JSON.parse(messageEl.dataset.citations);
+          const citation = citations.find((c) => c.id == citationId);
+          if (citation && citation.source_quote) {
+            await windowManagerAPI.highlightAndScrollToText(
+              citation.source_quote,
+            );
+          }
+        }
+      }
+    });
+
     return container;
   },
 
@@ -274,16 +305,27 @@ const findbar = {
     return messageDiv;
   },
 
-  addChatMessage(content, type) {
-    if (!this.chatContainer || !content) return;
+  addChatMessage(response, type) {
+    const { answer, citations } = response;
+    if (!this.chatContainer || !answer) return;
     const messagesContainer =
       this.chatContainer.querySelector("#chat-messages");
     if (!messagesContainer) return;
+
     const messageDiv = createHTMLElement(
       `<div class="chat-message chat-message-${type}"></div>`,
     );
+    if (citations && citations.length > 0) {
+      messageDiv.dataset.citations = JSON.stringify(citations);
+    }
+
     const contentDiv = createHTMLElement(`<div class="message-content"></div>`);
-    contentDiv.appendChild(parseMD(content));
+    const processedContent = answer.replace(
+      /\[(\d+)\]/g,
+      `<button class="citation-link" data-citation-id="$1">[$1]</button>`,
+    );
+    contentDiv.appendChild(parseMD(processedContent));
+
     messageDiv.appendChild(contentDiv);
     messagesContainer.appendChild(messageDiv);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -305,13 +347,29 @@ const findbar = {
           (message.parts && message.parts.some((p) => p.functionCall))
         )
           continue;
-        if (!message.parts[0].text) continue;
-        const type = message.role === "model" ? "ai" : "user";
-        const content = message.parts[0].text.replace(
-          /\[Current Page Context:.*?\]\s*/,
-          "",
-        );
-        this.addChatMessage(content, type);
+
+        const isModel = message.role === "model";
+        const textContent = message.parts[0].text;
+        if (!textContent) continue;
+
+        let responsePayload = {};
+
+        if (isModel && gemini.citationsEnabled) {
+          try {
+            responsePayload = JSON.parse(textContent);
+          } catch (e) {
+            responsePayload = { answer: textContent };
+          }
+        } else {
+          responsePayload.answer = textContent.replace(
+            /\[Current Page Context:.*?\]\s*/,
+            "",
+          );
+        }
+
+        if (responsePayload.answer) {
+          this.addChatMessage(responsePayload, isModel ? "ai" : "user");
+        }
       }
       this.findbar.insertBefore(this.chatContainer, this.expandButton);
       this.focusPrompt();
@@ -428,10 +486,12 @@ const findbar = {
     this._addKeymaps = this.addKeymaps.bind(this);
     this._handleInputKeyPress = this.handleInputKeyPress.bind(this);
     this._handleGodModeChange = gemini.updateSystemPrompt.bind(gemini);
+    this._handleCitationChange = gemini.updateSystemPrompt.bind(gemini);
 
     gBrowser.tabContainer.addEventListener("TabSelect", this._updateFindbar);
     document.addEventListener("keydown", this._addKeymaps);
     UC_API.Prefs.addListener(GOD_MODE, this._handleGodModeChange);
+    UC_API.Prefs.addListener(CITATIONS_ENABLED, this._handleCitationChange);
   },
   removeListeners() {
     if (this.findbar)
@@ -442,11 +502,13 @@ const findbar = {
     gBrowser.tabContainer.removeEventListener("TabSelect", this._updateFindbar);
     document.removeEventListener("keydown", this._addKeymaps);
     UC_API.Prefs.removeListener(GOD_MODE, this._handleGodModeChange);
+    UC_API.Prefs.removeListener(CITATIONS_ENABLED, this._handleCitationChange);
 
     this._handleInputKeyPress = null;
     this._updateFindbar = null;
     this._addKeymaps = null;
     this._handleGodModeChange = null;
+    this._handleCitationChange = null;
   },
 };
 

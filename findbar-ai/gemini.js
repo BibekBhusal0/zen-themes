@@ -6,6 +6,7 @@ const API_KEY = "extension.findbar-ai.gemini-api-key";
 const MODEL = "extension.findbar-ai.gemini-model";
 const GOD_MODE = "extension.findbar-ai.god-mode";
 const DEBUG_MODE = "extension.findbar-ai.debug-mode";
+const CITATIONS_ENABLED = "extension.findbar-ai.citations-enabled";
 
 // Debug logging helper
 const debugLog = (...args) => {
@@ -253,6 +254,9 @@ const gemini = {
   get godMode() {
     return getPref(GOD_MODE, false);
   },
+  get citationsEnabled() {
+    return getPref(CITATIONS_ENABLED, true);
+  },
 
   get apiUrl() {
     const model = this.model;
@@ -304,7 +308,7 @@ Therse are just examples for you on how you can use tools calls each example giv
 
 #### Searching the Web: 
 -   **User Prompt:** "search for firefox themes"
--   **Your Tool Call:** \`{"functionCall": {"name": "search", "args": {"searchTerm": "firefox themes", "engineName": ${defaultEngine}}}}\`
+-   **Your Tool Call:** \`{"functionCall": {"name": "search", "args": {"searchTerm": "firefox themes", "engineName": "${defaultEngine}"}}}\`
 
 ### Make sure you are calling tools with correct parameters.
 #### Opening a Single Link:
@@ -334,17 +338,34 @@ Therse are just examples for you on how you can use tools calls each example giv
 
 *(Available search engines: ${engineNames}. Default is '${defaultEngine}'.)*
 `;
+    }
+
+    if (this.citationsEnabled) {
+      systemPrompt += `
+
+## Citation Instructions
+- **Output Format**: Your entire response **MUST** be a single, valid JSON object with two keys: \`"answer"\` and \`"citations"\`.
+- **Answer**: The \`"answer"\` key holds the conversational text.
+- **Citations**: The \`"citations"\` key holds an array of citation objects.
+- **When to Cite**: For any statement of fact that is directly supported by the provided page content, you **SHOULD** provide a citation. It is not mandatory for every sentence.
+- **How to Cite**: In your \`"answer"\`, append a marker like \`[1]\`, \`[2]\`. Each marker must correspond to a citation object in the array.
+- **Citation Object**: Each object in the \`citations\` array must have:
+    - \`"id"\`: The number corresponding to the marker.
+    - \`"source_quote"\`: The **exact, verbatim text** from the page content that serves as the source. This quote should be unique enough to be found on the page.
+`;
     } else {
       systemPrompt += `
 - Strictly base all your answers on the webpage content provided below.
 - If the user's question cannot be answered from the content, state that the information is not available on the page.
+`;
+    }
+
+    systemPrompt += `
 
 Here is the initial info about the current page:
 `;
-      const pageContext = await windowManagerAPI.getPageTextContent();
-      systemPrompt += JSON.stringify(pageContext);
-    }
-
+    const pageContext = await windowManagerAPI.getPageTextContent();
+    systemPrompt += JSON.stringify(pageContext);
     return systemPrompt;
   },
 
@@ -366,9 +387,9 @@ Here is the initial info about the current page:
       await this.updateSystemPrompt();
     }
 
-    const fullPrompt = this.godMode
-      ? `[Current Page Context: ${JSON.stringify(pageContext || {})}] ${prompt}`
-      : prompt;
+    const fullPrompt = `[Current Page Context: ${JSON.stringify(
+      pageContext || {},
+    )}] ${prompt}`;
 
     this.history.push({ role: "user", parts: [{ text: fullPrompt }] });
 
@@ -376,6 +397,10 @@ Here is the initial info about the current page:
       contents: this.history,
       systemInstruction: this.systemInstruction,
     };
+
+    if (this.citationsEnabled) {
+      requestBody.generationConfig = { responseMimeType: "application/json" };
+    }
 
     if (this.godMode) {
       requestBody.tools = toolDeclarations;
@@ -400,7 +425,7 @@ Here is the initial info about the current page:
 
     if (!modelResponse) {
       this.history.pop();
-      return "The model did not return a valid response.";
+      return { answer: "The model did not return a valid response." };
     }
 
     this.history.push(modelResponse);
@@ -418,7 +443,7 @@ Here is the initial info about the current page:
         if (availableTools[name]) {
           debugLog(`Executing tool: "${name}" with args:`, args);
           const toolResult = await availableTools[name](args);
-          debugLog(`Tool ${name} result:`, toolResult);
+          debugLog(`Tool "${name}" executed. Result:`, toolResult);
           functionResponses.push({
             functionResponse: { name, response: toolResult },
           });
@@ -444,6 +469,9 @@ Here is the initial info about the current page:
         body: JSON.stringify({
           contents: this.history,
           systemInstruction: this.systemInstruction,
+          generationConfig: this.citationsEnabled
+            ? { responseMimeType: "application/json" }
+            : {},
         }),
       });
 
@@ -460,13 +488,40 @@ Here is the initial info about the current page:
       this.history.push(modelResponse);
     }
 
-    const responseText =
-      modelResponse.parts.find((part) => part.text)?.text || "";
-    if (!responseText && functionCalls.length === 0) {
-      this.history.pop();
-    }
+    if (this.citationsEnabled) {
+      try {
+        const responseText =
+          modelResponse.parts.find((part) => part.text)?.text || "{}";
+        const parsedResponse = JSON.parse(responseText);
 
-    return responseText || "I used my tools to complete your request.";
+        if (!parsedResponse.answer) {
+          if (functionCalls.length > 0)
+            return { answer: "I used my tools to complete your request." };
+          this.history.pop();
+        }
+        return parsedResponse;
+      } catch (e) {
+        debugError(
+          "Failed to parse JSON response from AI:",
+          e,
+          modelResponse.parts[0].text,
+        );
+        return {
+          answer:
+            modelResponse.parts[0].text ||
+            "Sorry, I received an invalid response from the server.",
+        }; // Fallback
+      }
+    } else {
+      const responseText =
+        modelResponse.parts.find((part) => part.text)?.text || "";
+      if (!responseText && functionCalls.length === 0) {
+        this.history.pop();
+      }
+      return {
+        answer: responseText || "I used my tools to complete your request.",
+      };
+    }
   },
 
   getHistory() {

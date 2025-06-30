@@ -30,13 +30,13 @@ const windowManagerName = "FindbarAIWindowManager";
 
 // Debug logging helper
 const debugLog = (...args) => {
-  if (getPref("extensions.findbar-ai.debug-mode", false)) {
+  if (getPref("extension.findbar-ai.debug-mode", false)) {
     console.log(...args);
   }
 };
 
 const debugError = (...args) => {
-  if (getPref("extensions.findbar-ai.debug-mode", false)) {
+  if (getPref("extension.findbar-ai.debug-mode", false)) {
     console.error(...args);
   }
 };
@@ -113,6 +113,17 @@ export const windowManagerAPI = {
     } catch (error) {
       debugError("Failed to get page text content:", error);
       return getUrlAndTitle();
+    }
+  },
+
+  async highlightAndScrollToText(text) {
+    const wm = this.getWindowManager();
+    if (!wm) return { error: "Window manager not available." };
+    try {
+      return await wm.highlightAndScrollToText(text);
+    } catch (error) {
+      debugError("Failed to highlight text:", error);
+      return { error: "Failed to highlight text." };
     }
   },
 };

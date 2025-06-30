@@ -1,22 +1,13 @@
-const getPref = (key, defaultValue) => {
-  try {
-    const pref = UC_API.Prefs.get(key);
-    if (!pref) return defaultValue;
-    if (!pref.exists()) return defaultValue;
-    return pref.value;
-  } catch {
-    return defaultValue;
-  }
-};
+import getPref from "chrome://userscripts/content/custom/utils/getPref.mjs";
 
 const debugLog = (...args) => {
-  if (getPref("extensions.findbar-ai.debug-mode", false)) {
+  if (getPref("extension.findbar-ai.debug-mode", false)) {
     console.log(...args);
   }
 };
 
 const debugError = (...args) => {
-  if (getPref("extensions.findbar-ai.debug-mode", false)) {
+  if (getPref("extension.findbar-ai.debug-mode", false)) {
     console.error(...args);
   }
 };
@@ -67,6 +58,18 @@ export class FindbarAIWindowManagerParent extends JSWindowActorParent {
       return result;
     } catch (e) {
       debugError("Failed to get page text content:", e);
+      return {};
+    }
+  }
+
+  async highlightAndScrollToText(text) {
+    try {
+      const result = await this.sendQuery("FindbarAI:HighlightAndScroll", {
+        text,
+      });
+      return result;
+    } catch (e) {
+      debugError("Failed to send highlight command to child:", e);
       return {};
     }
   }
