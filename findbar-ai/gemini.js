@@ -302,10 +302,9 @@ You have access to browser functions. The user knows you have these abilities.
 - If the user asks you to open a link by its text (e.g., "click the 'About Us' link"), you must first use \`getHTMLContent()\` to find the link's full URL, then use \`openLink()\` to open it.
 
 ## Tool Call Examples:
-Therse are just examples for you on how you can use tools calls each example give you some concept, the concept is not specific to single tool.
+Therse are just examples for you on how you can use tools calls, each example give you some concept, the concept is not specific to single tool.
 
-### Use default value when user don't provides full information.
-
+### Use default value when user don't provides full information, If user don't provide default value you may ask and even give options if possible
 #### Searching the Web: 
 -   **User Prompt:** "search for firefox themes"
 -   **Your Tool Call:** \`{"functionCall": {"name": "search", "args": {"searchTerm": "firefox themes", "engineName": "${defaultEngine}"}}}\`
@@ -319,12 +318,12 @@ Therse are just examples for you on how you can use tools calls each example giv
 -   **User Prompt:** "show me youtube and twitch side by side"
 -   **Your Tool Call:** \`{"functionCall": {"name": "newSplit", "args": {"link1": "https://youtube.com", "link2": "https://twitch.tv"}}}\`
 
-### Use tools to get more context.
+### Use tools to get more context: If user ask anything whose answer is unknown to you and it can be obtained via tool call use it.
 #### Reading the Current Page for Context
 -   **User Prompt:** "summarize this page for me"
 -   **Your Tool Call:** \`{"functionCall": {"name": "getPageTextContent", "args": {}}}\`
 
-### Taking multiple steps, you might need for previous tool to compete and give you output before calling next tool
+### Taking multiple steps; you might need for previous tool to compete and give you output before calling next tool
 #### Finding and Clicking a Link on the Current Page
 -   **User Prompt:** "click on the contact link"
 -   **Your First Tool Call:** \`{"functionCall": {"name": "getHTMLContent", "args": {}}}\`
@@ -345,27 +344,36 @@ Therse are just examples for you on how you can use tools calls each example giv
 
 ## Citation Instructions
 - **Output Format**: Your entire response **MUST** be a single, valid JSON object with two keys: \`"answer"\` and \`"citations"\`.
-- **Answer**: The \`"answer"\` key holds the conversational text. Use Markdown.
-- **Citations**: The \`"citations"\` key holds an array of citation objects.
-- **When to Cite**: For any statement of fact that is directly supported by the provided page content, you **SHOULD** provide a citation. It is not mandatory for every sentence. You can and should create multiple citations if your answer uses information from different parts of the source text.
+- **When to Cite**: For any statement of fact that is directly supported by the provided page content, you **SHOULD** provide a citation. You can create multiple citations if your answer uses information from different parts of the source text.
 - **How to Cite**: In your \`"answer"\`, append a marker like \`[1]\`, \`[2]\`. Each marker must correspond to a citation object in the array.
-- **Citation Object**: Each object in the \`citations\` array must have:
-    - \`"id"\`: The number corresponding to the marker.
-    - \`"source_quote"\`: The **exact, verbatim, and short (usually a single sentence)** text from the page content that serves as the source. Do not use very long quotes.
+- **Citation Object**: Each object in the \`citations\` array may have:
+    - \`"id"\`: The number corresponding to the marker in the answer.
+    - \`"source_quote"\`: The **exact, verbatim, and short (usually a single sentence)** text from the page content that serves as the source.
+    - \`"prefix_context"\`: (Optional) A small snippet of text immediately preceding the source_quote.
+    - \`"suffix_context"\`: (Optional) A small snippet of text immediately following the source_quote.
+- Do **not** cite your explanation of your own abilities, or in simple greetings.
+- Only cite sources that are from current page.
+- Make sure there are no duplicates in citation array.
+- If you call a tool, you **must not** provide citations in the same turn.
 `;
     } else {
       systemPrompt += `
-- Strictly base all your answers on the webpage content provided below.
-- If the user's question cannot be answered from the content, state that the information is not available on the page.
 `;
     }
 
-    systemPrompt += `
+    if (!this.godMode) {
+      systemPrompt += `
+- Strictly base all your answers on the webpage content provided below.
+- If the user's question cannot be answered from the content, state that the information is not available on the page.
 
 Here is the initial info about the current page:
 `;
-    const pageContext = await windowManagerAPI.getPageTextContent();
-    systemPrompt += JSON.stringify(pageContext);
+      const pageContext = await windowManagerAPI.getPageTextContent();
+      systemPrompt += JSON.stringify(pageContext);
+    }
+    // __AUTO_GENERATED_PRINT_VAR_START__
+    console.log("getSystemPrompt#if systemPrompt:", systemPrompt); // __AUTO_GENERATED_PRINT_VAR_END__
+
     return systemPrompt;
   },
 

@@ -16,17 +16,21 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
   // }
 
   debugLog(...args) {
-    this.browsingContext.top.window.console.log(
-      "[findbar-ai] windowManager.js (Child):",
-      ...args,
-    );
+    if (this.browsingContext.top) {
+      this.browsingContext.top.window.console.log(
+        "[findbar-ai] windowManager.js (Child):",
+        ...args,
+      );
+    }
   }
 
   debugError(...args) {
-    this.browsingContext.top.window.console.error(
-      "[findbar-ai] windowManager.js (Child Error):",
-      ...args,
-    );
+    if (this.browsingContext.top) {
+      this.browsingContext.top.window.console.error(
+        "[findbar-ai] windowManager.js (Child Error):",
+        ...args,
+      );
+    }
   }
 
   async receiveMessage(message) {
@@ -99,36 +103,69 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
       this._highlightTimer = null;
     }
 
-    if (this._currentHighlight) {
-      if (this._currentHighlight.parentNode) {
-        try {
-          const parent = this._currentHighlight.parentNode;
-          parent.replaceChild(
-            this.document.createTextNode(this._currentHighlight.textContent),
-            this._currentHighlight,
-          );
-          parent.normalize();
-        } catch (e) {
-          this.debugError("Error removing highlight:", e);
-        }
-      } else {
-        const fallbackMark = this.document.querySelector(
-          "mark.findbar-ai-highlight",
-        );
-        if (fallbackMark && fallbackMark.parentNode) {
-          try {
-            fallbackMark.parentNode.replaceChild(
-              this.document.createTextNode(fallbackMark.textContent),
-              fallbackMark,
-            );
-            fallbackMark.parentNode.normalize();
-          } catch (e) {
-            this.debugError("Fallback removal error:", e);
-          }
-        }
-      }
+    if (this._currentHighlight && this._currentHighlight.parentNode) {
+      const parent = this._currentHighlight.parentNode;
+      parent.replaceChild(
+        this.document.createTextNode(this._currentHighlight.textContent),
+        this._currentHighlight,
+      );
+      parent.normalize();
       this._currentHighlight = null;
     }
+  }
+
+  findRangeFromText(searchText) {
+    const bodyText = this.document.body.innerText;
+
+    const escapedText = searchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const searchRegex = new RegExp(escapedText.replace(/\s+/g, "\\s+"));
+
+    const match = bodyText.match(searchRegex);
+    if (!match) {
+      this.debugError("Regex search failed to find a match for:", searchText);
+      return null;
+    }
+
+    const startIndex = match.index;
+    const endIndex = startIndex + match[0].length;
+
+    this.debugLog(`Regex match found. Start: ${startIndex}, End: ${endIndex}`);
+
+    const range = this.document.createRange();
+    const walker = this.document.createTreeWalker(
+      this.document.body,
+      NodeFilter.SHOW_TEXT,
+      null,
+      false,
+    );
+
+    let charCount = 0;
+    let startNode, startOffset, endNode, endOffset;
+
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      const nodeLength = node.textContent.length;
+
+      if (!startNode && startIndex < charCount + nodeLength) {
+        startNode = node;
+        startOffset = startIndex - charCount;
+      }
+      if (!endNode && endIndex <= charCount + nodeLength) {
+        endNode = node;
+        endOffset = endIndex - charCount;
+        break;
+      }
+      charCount += nodeLength;
+    }
+
+    if (startNode && endNode) {
+      range.setStart(startNode, startOffset);
+      range.setEnd(endNode, endOffset);
+      return range;
+    }
+
+    this.debugError("Failed to map character indices to DOM nodes.");
+    return null;
   }
 
   highlightAndScroll(text) {
@@ -136,39 +173,16 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
     this.injectHighlightStyle();
     this.clearHighlight();
 
-    // Reset the find operation to start from the top of the page
-    this.browsingContext.top.window.getSelection().removeAllRanges();
+    const range = this.findRangeFromText(text);
 
-    if (
-      this.browsingContext.top.window.find(
-        text,
-        false,
-        false,
-        true,
-        false,
-        false,
-        true,
-      )
-    ) {
-      this.debugLog("Text found on page.");
-      const selection = this.contentWindow.getSelection();
-      if (!selection.rangeCount) {
-        this.debugError("Text found but could not get selection range.");
-        return {
-          success: false,
-          error: "Text found but could not get selection range.",
-        };
-      }
-
-      const range = selection.getRangeAt(0);
+    if (range) {
       const mark = this.document.createElement("mark");
       mark.className = "findbar-ai-highlight";
-
       try {
         range.surroundContents(mark);
         this._currentHighlight = mark;
         mark.scrollIntoView({ behavior: "smooth", block: "center" });
-
+        this.debugLog("Highlight successful.");
         this._highlightTimer = this.browsingContext.top.window.setTimeout(
           () => this.clearHighlight(),
           3000,

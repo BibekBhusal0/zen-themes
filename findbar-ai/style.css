@@ -398,6 +398,29 @@
           animation: pulse 1.5s ease-in-out infinite;
         }
       }
+
+      .citation-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(128, 128, 128, 0.2);
+        color: inherit;
+        border: 1px solid rgba(128, 128, 128, 0.3);
+        border-radius: 50%;
+        width: 1.5em;
+        height: 1.5em;
+        font-size: 0.75em;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 0 2px;
+        vertical-align: middle;
+        transition: background-color 0.2s;
+        padding: 0;
+
+        :hover {
+          background-color: rgba(128, 128, 128, 0.4);
+        }
+      }
     }
 
     #findbar-expand {

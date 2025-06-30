@@ -2,17 +2,17 @@ import getPref from "chrome://userscripts/content/custom/utils/getPref.mjs";
 
 const debugLog = (...args) => {
   if (getPref("extension.findbar-ai.debug-mode", false)) {
-    console.log("[findbar-ai] windowManager.js (parent):", ...args);
+    console.log("[findbar-ai] Window Manager (Parent):", ...args);
   }
 };
 
 const debugError = (...args) => {
   if (getPref("extension.findbar-ai.debug-mode", false)) {
-    console.error("[findbar-ai] windowManager.js (parent Error):", ...args);
+    console.error("[findbar-ai] Window Manager (Parent Error):", ...args);
   }
 };
 
-debugLog("Window Manager parent loaded");
+debugLog("Parent actor loaded");
 
 export class FindbarAIWindowManagerParent extends JSWindowActorParent {
   constructor() {
@@ -20,15 +20,14 @@ export class FindbarAIWindowManagerParent extends JSWindowActorParent {
   }
 
   async receiveMessage(message) {
-    debugLog("parent received message");
-    debugLog(`Message name: ${message.name}`);
+    debugLog(`Parent received message: ${message.name}`);
     switch (message.name) {
       case "FindbarAI:ContentLoaded":
         debugLog(`Page loaded: ${message.data.title} - ${message.data.url}`);
         break;
 
       default:
-        debugLog(`unhandled message: ${message.name}`);
+        debugLog(`Parent unhandled message: ${message.name}`);
     }
   }
 

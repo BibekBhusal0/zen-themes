@@ -31,13 +31,13 @@ const windowManagerName = "FindbarAIWindowManager";
 // Debug logging helper
 const debugLog = (...args) => {
   if (getPref("extension.findbar-ai.debug-mode", false)) {
-    console.log(...args);
+    console.log("[findbar-ai] windowmanager.js:", ...args);
   }
 };
 
 const debugError = (...args) => {
   if (getPref("extension.findbar-ai.debug-mode", false)) {
-    console.error(...args);
+    console.error("[findbar-ai] windowmanager.js:", ...args);
   }
 };
 
@@ -117,8 +117,6 @@ export const windowManagerAPI = {
   },
 
   async highlightAndScrollToText(text) {
-    // __AUTO_GENERATED_PRINT_VAR_START__
-    console.log("highlightAndScrollToText text:", text); // __AUTO_GENERATED_PRINT_VAR_END__
     const wm = this.getWindowManager();
     if (!wm) return { error: "Window manager not available." };
     try {
