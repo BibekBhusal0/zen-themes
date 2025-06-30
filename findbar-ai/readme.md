@@ -7,8 +7,9 @@ Inspired by Arc Browser, this script transforms the standard findbar in **Zen Br
 - **Modern, Floating UI**: Replaces the default findbar with a sleek, centered, and collapsible interface.
 - **AI-Powered Chat**: Integrates Google's Gemini AI to provide a conversational experience.
 - **Page Content Awareness**: The AI can read the text content of the current webpage to answer your questions accurately.
-- **Buildin Keyboard Shortcuts**: Use the `Ctrl+Shift+F` keymap to open findbar.
-- **Customizable**: Many customization options.
+- **Buildin Keyboard Shortcuts**: Use the `Ctrl+Shift+F`, `alt+Enter` keymap to open findbar.
+- **Customizable**: Many customization options from `about:config`.
+- **AI Interacting with Browser**: AI can make tool calls to control the browser.
 
 ## 🚨 Caution 🚨
 
@@ -51,7 +52,7 @@ Inspired by Arc Browser, this script transforms the standard findbar in **Zen Br
 2.  **Save the Key**: Paste the key into the input field and click "Save". The chat interface will now appear.
 3.  **Start Chatting**:
     - Press `Ctrl+F` to open the standard findbar.
-    - Click the "Expand" button to switch to the AI chat view.
+    - Click the "Expand" button to switch to the AI chat view or enter your query and click on ask if you are in Minimal Mode.
     - Type your questions about the current page and press "Send".
     - Use `Ctrl+Shift+F` to open the AI chat directly, using any text you have selected on the page as the initial prompt.
 
@@ -67,6 +68,7 @@ You can customize the Findbar AI via `about:config`.
 | `extension.findbar-ai.gemini-api-key` | String  | _(empty)_            | **Required**. Your Google Gemini API key.                       |
 | `extension.findbar-ai.gemini-model`   | String  | `"gemini-2.0-flash"` | The specific Gemini model to use for chat.                      |
 | `extension.findbar-ai.debug-mode`     | Boolean | `false`              | Set to `true` to enable verbose logging in the Browser Console. |
+| `extension.findbar-ai.god-mode`       | Boolean | `false`              | When `true` AI can make tool calls.                             |
 
 ### Keymaps
 
@@ -74,6 +76,21 @@ You can customize the Findbar AI via `about:config`.
 | -------------- | ----------------------------------------------------------------------------------------------------------- |
 | `Ctrl+Shift+F` | Opens the findbar directly into the expanded AI mode.                                                       |
 | `Escape`       | If the AI interface is expanded, it collapses to the standard findbar. If not expanded, closes the findbar. |
+| `Alt + Enter`  | If findbar is not expanded, this expandes findbar while sending query from findbar to AI                    |
+
+## Tool-calls
+
+AI can also make tool calls to enable this go to `about:config` and set `extension.findbar-ai.god-mode`
+
+Currently available tool calls are:
+
+- **Search** : Searches specific term in search engines from browsers, and it can be open in `current tab`, `new tab`, `new window`, `incognito`, `glance`, `vsplit`, `hsplit`.
+- **Open Link** : Opens link, and it can be open in `current tab`, `new tab`, `new window`, `incognito`, `glance`, `vsplit`, `hsplit`.
+- **New Split** : Opens 2 tab it can be open it can be opened in `horizontal` or `vertical` split.
+- **Get Page Text Content**: Returns text content.
+- **Get HTML Content**: Returns entire HTML content of page.
+
+More tools will be comming soon.
 
 ## Development Roadmap
 
@@ -90,7 +107,7 @@ You can customize the Findbar AI via `about:config`.
 - [x] Minimal styles (like Arc Browser)
 - [ ] Highlight text in page that corresponds to AI's answer
 - [ ] AI interacting with page content (beyond reading)
-- [ ] Tool calls (opening links, changing workspaces)
+- [x] Tool calls (opening links, changing workspaces)
 - [ ] Browser management tools
 - [ ] Add support for other AI models (Claude, OpenAI)
 - [ ] Drag-and-drop to resize and move the findbar (optional)
@@ -98,6 +115,7 @@ You can customize the Findbar AI via `about:config`.
 - [ ] Context Menu integration (optional)
 - [ ] Different themes (glass, light, dark, etc.)
 - [ ] Smooth animations for all interactions
+- [ ] Custom system prompts
 
 ## Credits
 
