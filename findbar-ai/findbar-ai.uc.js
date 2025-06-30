@@ -283,6 +283,10 @@ const findbar = {
           const citations = JSON.parse(messageEl.dataset.citations);
           const citation = citations.find((c) => c.id == citationId);
           if (citation && citation.source_quote) {
+            console.log(
+              `[findbar-ai] Citation [${citationId}] clicked. Requesting highlight for:`,
+              citation.source_quote,
+            );
             await windowManagerAPI.highlightAndScrollToText(
               citation.source_quote,
             );

@@ -1,26 +1,8 @@
-const getPref = (key, defaultValue) => {
-  try {
-    const pref = UC_API.Prefs.get(key);
-    if (!pref) return defaultValue;
-    if (!pref.exists()) return defaultValue;
-    return pref.value;
-  } catch {
-    return defaultValue;
-  }
-};
-
-const debugLog = (...args) => {
-  if (getPref("extension.findbar-ai.debug-mode", false)) {
-    console.log(...args);
-  }
-};
-
-debugLog("findbar: Window Manager child loaded");
-
 export class FindbarAIWindowManagerChild extends JSWindowActorChild {
   constructor() {
     super();
     this._currentHighlight = null;
+    this._highlightTimer = null;
   }
 
   // handleEvent(event) {
@@ -33,8 +15,22 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
   //   }
   // }
 
+  debugLog(...args) {
+    this.browsingContext.top.window.console.log(
+      "[findbar-ai] windowManager.js (Child):",
+      ...args,
+    );
+  }
+
+  debugError(...args) {
+    this.browsingContext.top.window.console.error(
+      "[findbar-ai] windowManager.js (Child Error):",
+      ...args,
+    );
+  }
+
   async receiveMessage(message) {
-    debugLog(`findbar: child received message: ${message.name}`);
+    this.debugLog(`Received message: ${message.name}`);
     switch (message.name) {
       case "FindbarAI:GetPageHTMLContent":
         return {
@@ -61,7 +57,7 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
         return this.highlightAndScroll(message.data.text);
 
       default:
-        debugLog(`findbar: child unhandled message: ${message.name}`);
+        this.debugLog(`Unhandled message: ${message.name}`);
     }
   }
 
@@ -76,11 +72,12 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
       .trim();
     return textContent;
   }
-  
+
   injectHighlightStyle() {
     const styleId = "findbar-ai-highlight-style";
     if (this.document.getElementById(styleId)) return;
 
+    this.debugLog("Injecting highlight style into the page.");
     const style = this.document.createElement("style");
     style.id = styleId;
     style.textContent = `
@@ -94,7 +91,14 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
   }
 
   clearHighlight() {
+    if (this._highlightTimer) {
+      this._highlightTimer.cancel();
+      this._highlightTimer = null;
+      this.debugLog("Cancelled pending highlight removal timer.");
+    }
+
     if (this._currentHighlight && this._currentHighlight.parentNode) {
+      this.debugLog("Clearing previous highlight.");
       const parent = this._currentHighlight.parentNode;
       parent.replaceChild(
         document.createTextNode(this._currentHighlight.textContent),
@@ -102,34 +106,64 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
       );
       parent.normalize();
       this._currentHighlight = null;
+    } else {
+      this.debugLog("No previous highlight to clear.");
     }
   }
 
   highlightAndScroll(text) {
+    this.debugLog("Highlight and scroll triggered with text:", `"${text}"`);
     this.injectHighlightStyle();
     this.clearHighlight();
 
-    if (window.find(text, false, false, true, false, false, true)) {
+    // Reset the find operation to start from the top of the page
+    this.browsingContext.top.window.getSelection().removeAllRanges();
+
+    if (
+      this.browsingContext.top.window.find(
+        text,
+        false,
+        false,
+        true,
+        false,
+        false,
+        true,
+      )
+    ) {
+      this.debugLog("Text found on page.");
       const selection = this.contentWindow.getSelection();
-      if (!selection.rangeCount) return { success: false, error: "Text found but could not get selection range." };
+      if (!selection.rangeCount) {
+        this.debugError("Text found but could not get selection range.");
+        return {
+          success: false,
+          error: "Text found but could not get selection range.",
+        };
+      }
 
       const range = selection.getRangeAt(0);
       const mark = this.document.createElement("mark");
       mark.className = "findbar-ai-highlight";
-      
+
       try {
         range.surroundContents(mark);
         this._currentHighlight = mark;
         mark.scrollIntoView({ behavior: "smooth", block: "center" });
 
-        setTimeout(() => this.clearHighlight(), 3000);
+        this.debugLog(
+          "Highlight successful. Setting timer to clear in 3 seconds.",
+        );
+        this.browsingContext.top.window.setTimeout(() => {
+          this.debugLog("3 seconds complete removing highlights");
+          this.clearHighlight();
+        }, 3000);
 
         return { success: true };
       } catch (e) {
-        debugError("Failed to wrap selection with <mark>:", e);
+        this.debugError("Failed to wrap selection with <mark>:", e);
         return { success: false, error: "Could not highlight text." };
       }
     } else {
+      this.debugError("Text not found on page.");
       return { success: false, error: "Text not found on page." };
     }
   }

@@ -345,13 +345,13 @@ Therse are just examples for you on how you can use tools calls each example giv
 
 ## Citation Instructions
 - **Output Format**: Your entire response **MUST** be a single, valid JSON object with two keys: \`"answer"\` and \`"citations"\`.
-- **Answer**: The \`"answer"\` key holds the conversational text.
+- **Answer**: The \`"answer"\` key holds the conversational text. Use Markdown.
 - **Citations**: The \`"citations"\` key holds an array of citation objects.
-- **When to Cite**: For any statement of fact that is directly supported by the provided page content, you **SHOULD** provide a citation. It is not mandatory for every sentence.
+- **When to Cite**: For any statement of fact that is directly supported by the provided page content, you **SHOULD** provide a citation. It is not mandatory for every sentence. You can and should create multiple citations if your answer uses information from different parts of the source text.
 - **How to Cite**: In your \`"answer"\`, append a marker like \`[1]\`, \`[2]\`. Each marker must correspond to a citation object in the array.
 - **Citation Object**: Each object in the \`citations\` array must have:
     - \`"id"\`: The number corresponding to the marker.
-    - \`"source_quote"\`: The **exact, verbatim text** from the page content that serves as the source. This quote should be unique enough to be found on the page.
+    - \`"source_quote"\`: The **exact, verbatim, and short (usually a single sentence)** text from the page content that serves as the source. Do not use very long quotes.
 `;
     } else {
       systemPrompt += `
@@ -387,10 +387,7 @@ Here is the initial info about the current page:
       await this.updateSystemPrompt();
     }
 
-    const fullPrompt = `[Current Page Context: ${JSON.stringify(
-      pageContext || {},
-    )}] ${prompt}`;
-
+    const fullPrompt = `[Current Page Context: ${JSON.stringify(pageContext || {})}] ${prompt}`;
     this.history.push({ role: "user", parts: [{ text: fullPrompt }] });
 
     const requestBody = {
@@ -493,6 +490,7 @@ Here is the initial info about the current page:
         const responseText =
           modelResponse.parts.find((part) => part.text)?.text || "{}";
         const parsedResponse = JSON.parse(responseText);
+        debugLog("Parsed AI Response:", parsedResponse);
 
         if (!parsedResponse.answer) {
           if (functionCalls.length > 0)
@@ -501,16 +499,18 @@ Here is the initial info about the current page:
         }
         return parsedResponse;
       } catch (e) {
+        const rawText = modelResponse.parts[0]?.text || "[Empty Response]";
         debugError(
           "Failed to parse JSON response from AI:",
           e,
-          modelResponse.parts[0].text,
+          "Raw Text:",
+          rawText,
         );
         return {
           answer:
             modelResponse.parts[0].text ||
             "Sorry, I received an invalid response from the server.",
-        }; // Fallback
+        };
       }
     } else {
       const responseText =

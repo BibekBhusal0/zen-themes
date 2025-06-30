@@ -2,17 +2,17 @@ import getPref from "chrome://userscripts/content/custom/utils/getPref.mjs";
 
 const debugLog = (...args) => {
   if (getPref("extension.findbar-ai.debug-mode", false)) {
-    console.log(...args);
+    console.log("[findbar-ai] windowManager.js (parent):", ...args);
   }
 };
 
 const debugError = (...args) => {
   if (getPref("extension.findbar-ai.debug-mode", false)) {
-    console.error(...args);
+    console.error("[findbar-ai] windowManager.js (parent Error):", ...args);
   }
 };
 
-debugLog("findbar: Window Manager parent loaded");
+debugLog("Window Manager parent loaded");
 
 export class FindbarAIWindowManagerParent extends JSWindowActorParent {
   constructor() {
@@ -20,7 +20,7 @@ export class FindbarAIWindowManagerParent extends JSWindowActorParent {
   }
 
   async receiveMessage(message) {
-    debugLog("findbar: parent received message");
+    debugLog("parent received message");
     debugLog(`Message name: ${message.name}`);
     switch (message.name) {
       case "FindbarAI:ContentLoaded":
@@ -28,7 +28,7 @@ export class FindbarAIWindowManagerParent extends JSWindowActorParent {
         break;
 
       default:
-        debugLog(`findbar: parent unhandled message: ${message.name}`);
+        debugLog(`unhandled message: ${message.name}`);
     }
   }
 
@@ -63,10 +63,20 @@ export class FindbarAIWindowManagerParent extends JSWindowActorParent {
   }
 
   async highlightAndScrollToText(text) {
+    // __AUTO_GENERATED_PRINT_VAR_START__
+    console.log(
+      "FindbarAIWindowManagerParent#highlightAndScrollToText text:",
+      text,
+    ); // __AUTO_GENERATED_PRINT_VAR_END__
     try {
       const result = await this.sendQuery("FindbarAI:HighlightAndScroll", {
         text,
       });
+      // __AUTO_GENERATED_PRINT_VAR_START__
+      console.log(
+        "FindbarAIWindowManagerParent#highlightAndScrollToText result:",
+        result,
+      ); // __AUTO_GENERATED_PRINT_VAR_END__
       return result;
     } catch (e) {
       debugError("Failed to send highlight command to child:", e);

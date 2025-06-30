@@ -117,6 +117,8 @@ export const windowManagerAPI = {
   },
 
   async highlightAndScrollToText(text) {
+    // __AUTO_GENERATED_PRINT_VAR_START__
+    console.log("highlightAndScrollToText text:", text); // __AUTO_GENERATED_PRINT_VAR_END__
     const wm = this.getWindowManager();
     if (!wm) return { error: "Window manager not available." };
     try {
