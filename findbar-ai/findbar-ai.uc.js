@@ -100,9 +100,11 @@ const findbar = {
   updateFindbar() {
     this.removeExpandButton();
     this.removeAIInterface();
-    this.expanded = false;
-    gemini.setSystemPrompt(null);
-    gemini.clearHistory();
+    this.hide();
+    if (!gemini.godMode) {
+      gemini.setSystemPrompt(null);
+      gemini.clearHistory();
+    }
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
       this.addExpandButton();
@@ -250,6 +252,7 @@ const findbar = {
     });
     clearBtn.addEventListener("click", () => {
       container.querySelector("#chat-messages").innerHTML = "";
+      gemini.setSystemPrompt(null);
       gemini.clearHistory();
     });
     return container;
