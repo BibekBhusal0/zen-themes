@@ -16,7 +16,6 @@ const ENABLED = "extension.findbar-ai.enabled";
 const MINIMAL = "extension.findbar-ai.minimal";
 const GOD_MODE = "extension.findbar-ai.god-mode";
 
-
 //set minimal true by default
 UC_API.Prefs.setIfUnset(MINIMAL, true);
 

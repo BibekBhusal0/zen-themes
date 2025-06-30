@@ -108,7 +108,7 @@ async function search(args) {
 }
 
 async function newSplit(args) {
-  const { link1, link2, type = "horizontal" } = args;
+  const { link1, link2, type = "vertical" } = args;
   if (!window.gZenViewSplitter)
     return { error: "Split view function is not available." };
   if (!link1 || !link2) return { error: "newSplit requires two links." };
@@ -158,7 +158,7 @@ const toolDeclarations = [
             where: {
               type: "STRING",
               description:
-                "Optional. Where to open the search results. Defaults to 'new tab'.",
+                "Optional. Where to open the search results. Options: 'current tab', 'new tab', 'new window', 'incognito', 'glance', 'vsplit', 'hsplit'. Defaults to 'new tab'. Note that 'glance', 'vsplit' and 'hsplit' are special to zen browser. 'glance' opens in small popup and 'vsplit' and 'hsplit' opens in vertical and horizontal split respectively. When user says open in split and don't spicify 'vsplit' or 'hsplit' default to 'vsplit'.",
             },
           },
           required: ["searchTerm"],
@@ -175,7 +175,7 @@ const toolDeclarations = [
             where: {
               type: "STRING",
               description:
-                "Where to open the link. Options: 'current tab', 'new tab', 'new window', 'incognito', 'glance', 'vsplit', 'hsplit'. Defaults to 'new tab'.",
+                "Optional. Where to open the link. Options: 'current tab', 'new tab', 'new window', 'incognito', 'glance', 'vsplit', 'hsplit'. Defaults to 'new tab'. Note that 'glance', 'vsplit' and 'hsplit' are special to zen browser. 'glance' opens in small popup and 'vsplit' and 'hsplit' opens in vertical and horizontal split respectively. When user says open in split and don't spicify 'vsplit' or 'hsplit' default to 'vsplit'.",
             },
           },
           required: ["link"],
@@ -199,7 +199,7 @@ const toolDeclarations = [
             type: {
               type: "STRING",
               description:
-                "The split type: 'horizontal' or 'vertical'. Defaults to 'horizontal'.",
+                "Optional, The split type: 'horizontal' or 'vertical'. Defaults to 'vertical'.",
             },
           },
           required: ["link1", "link2"],
@@ -269,9 +269,7 @@ const gemini = {
   async getSystemPrompt() {
     let systemPrompt = `You are a helpful AI assistant integrated into Zen Browser, a minimal and modern fork of Firefox. Your primary purpose is to answer user questions based on the content of the current webpage.
 
-**Your Instructions:**
-- Strictly base all your answers on the webpage content provided below.
-- If the user's question cannot be answered from the content, state that the information is not available on the page.
+## Your Instructions:
 - Be concise, accurate, and helpful.`;
 
     if (this.godMode) {
@@ -282,24 +280,71 @@ const gemini = {
       systemPrompt += `
 - When asked about your own abilities, describe the functions you can perform based on the tools listed below.
 
-**GOD MODE ENABLED - TOOL USAGE:**
+## GOD MODE ENABLED - TOOL USAGE:
 You have access to browser functions. The user knows you have these abilities.
-- **CRITICAL**: When you decide to call a tool, your response MUST ONLY contain the \`functionCall\` part. Do NOT include any other text, as it will be hidden from the user and cause errors. Any text you want the user to see must be in the *next* turn after you receive the tool's output.
+- **CRITICAL**: When you decide to call a tool, give short summary of what tool are you calling and why?
 - Use tools when the user explicitly asks, or when it is the only logical way to fulfill their request (e.g., "search for...").
 
-**Available Tools:**
+## Available Tools:
 - \`search(searchTerm, engineName, where)\`: Performs a web search. Available engines: ${engineNames}. The default is '${defaultEngine}'.
 - \`openLink(link, where)\`: Opens a URL. Use this to open a single link or to create a split view with the *current* tab.
 - \`newSplit(link1, link2, type)\`: Use this specifically for creating a split view with *two new tabs*.
-- \`getPageTextContent()\` / \`getHTMLContent()\`: Use these to get updated page information if context is missing. Prefer \`getPageTextContent\`.`;
-    }
+- \`getPageTextContent()\` / \`getHTMLContent()\`: Use these to get updated page information if context is missing. Prefer \`getPageTextContent\`.
 
-    systemPrompt += `
+## More instructions for Running tools
+- While running tool like \`openLink\` and \`newSplit\` make sure URL is valid.
+- User will provide URL and title of current of webpage. If you need more context, use the \`getPageTextContent\` or \`getHTMLContent\` tools.
+- When the user asks you to "read the current page", use the \`getPageTextContent()\` or \`getHTMLContent\` tool.
+- If the user asks you to open a link by its text (e.g., "click the 'About Us' link"), you must first use \`getHTMLContent()\` to find the link's full URL, then use \`openLink()\` to open it.
+
+## Tool Call Examples:
+Therse are just examples for you on how you can use tools calls each example give you some concept, the concept is not specific to single tool.
+
+### Use default value when user don't provides full information.
+
+#### Searching the Web: 
+-   **User Prompt:** "search for firefox themes"
+-   **Your Tool Call:** \`{"functionCall": {"name": "search", "args": {"searchTerm": "firefox themes", "engineName": ${defaultEngine}}}}\`
+
+### Make sure you are calling tools with correct parameters.
+#### Opening a Single Link:
+-   **User Prompt:** "open github"
+-   **Your Tool Call:** \`{"functionCall": {"name": "openLink", "args": {"link": "https://github.com", "where": "new tab"}}}\`
+
+#### Creating a Split View with Two New Pages:
+-   **User Prompt:** "show me youtube and twitch side by side"
+-   **Your Tool Call:** \`{"functionCall": {"name": "newSplit", "args": {"link1": "https://youtube.com", "link2": "https://twitch.tv"}}}\`
+
+### Use tools to get more context.
+#### Reading the Current Page for Context
+-   **User Prompt:** "summarize this page for me"
+-   **Your Tool Call:** \`{"functionCall": {"name": "getPageTextContent", "args": {}}}\`
+
+### Taking multiple steps, you might need for previous tool to compete and give you output before calling next tool
+#### Finding and Clicking a Link on the Current Page
+-   **User Prompt:** "click on the contact link"
+-   **Your First Tool Call:** \`{"functionCall": {"name": "getHTMLContent", "args": {}}}\`
+-   **Your Second Tool Call (after receiving HTML and finding the link):** \`{"functionCall": {"name": "openLink", "args": {"link": "https://example.com/contact-us"}}}\`
+
+### Calling multiple tools at once.
+#### Making 2 searches in split 
+-   **User Prompt:** "Search for Japan in google and search for America in Youtube. Open them in vertical split."
+-   **Your First Tool Call:** \`{"functionCall": {"name": "search", "args": {"searchTerm": "Japan", "engineName": "Google", "where": "new tab"}}}\`
+-   **Your Second Tool Call:** \`{"functionCall": {"name": "search", "args": {"searchTerm": "America", "engineName": "Youtube", "where": "vsplit"}}}\`
+
+*(Available search engines: ${engineNames}. Default is '${defaultEngine}'.)*
+`;
+    } else {
+      systemPrompt += `
+- Strictly base all your answers on the webpage content provided below.
+- If the user's question cannot be answered from the content, state that the information is not available on the page.
 
 Here is the initial info about the current page:
 `;
-    const pageContext = await windowManagerAPI.getPageTextContent();
-    systemPrompt += JSON.stringify(pageContext);
+      const pageContext = await windowManagerAPI.getPageTextContent();
+      systemPrompt += JSON.stringify(pageContext);
+    }
+
     return systemPrompt;
   },
 
