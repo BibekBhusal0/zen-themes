@@ -62,6 +62,7 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
   }
 
   extractTextContent() {
+    this.debugLog("extractTextContent called");
     const clonedDocument = this.document.cloneNode(true);
     const elementsToRemove = clonedDocument.querySelectorAll(
       "script, style, noscript, iframe, svg, canvas, input, textarea, select",
@@ -74,6 +75,7 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
   }
 
   injectHighlightStyle() {
+    this.debugLog("injectHighlightStyle called");
     const styleId = "findbar-ai-highlight-style";
     if (this.document.getElementById(styleId)) return;
 
@@ -91,23 +93,41 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
   }
 
   clearHighlight() {
+    this.debugLog("clearHighlight called");
     if (this._highlightTimer) {
-      this._highlightTimer.cancel();
+      this.browsingContext.top.window.clearTimeout(this._highlightTimer);
       this._highlightTimer = null;
-      this.debugLog("Cancelled pending highlight removal timer.");
     }
 
-    if (this._currentHighlight && this._currentHighlight.parentNode) {
-      this.debugLog("Clearing previous highlight.");
-      const parent = this._currentHighlight.parentNode;
-      parent.replaceChild(
-        document.createTextNode(this._currentHighlight.textContent),
-        this._currentHighlight,
-      );
-      parent.normalize();
+    if (this._currentHighlight) {
+      if (this._currentHighlight.parentNode) {
+        try {
+          const parent = this._currentHighlight.parentNode;
+          parent.replaceChild(
+            this.document.createTextNode(this._currentHighlight.textContent),
+            this._currentHighlight,
+          );
+          parent.normalize();
+        } catch (e) {
+          this.debugError("Error removing highlight:", e);
+        }
+      } else {
+        const fallbackMark = this.document.querySelector(
+          "mark.findbar-ai-highlight",
+        );
+        if (fallbackMark && fallbackMark.parentNode) {
+          try {
+            fallbackMark.parentNode.replaceChild(
+              this.document.createTextNode(fallbackMark.textContent),
+              fallbackMark,
+            );
+            fallbackMark.parentNode.normalize();
+          } catch (e) {
+            this.debugError("Fallback removal error:", e);
+          }
+        }
+      }
       this._currentHighlight = null;
-    } else {
-      this.debugLog("No previous highlight to clear.");
     }
   }
 
@@ -149,13 +169,10 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
         this._currentHighlight = mark;
         mark.scrollIntoView({ behavior: "smooth", block: "center" });
 
-        this.debugLog(
-          "Highlight successful. Setting timer to clear in 3 seconds.",
+        this._highlightTimer = this.browsingContext.top.window.setTimeout(
+          () => this.clearHighlight(),
+          3000,
         );
-        this.browsingContext.top.window.setTimeout(() => {
-          this.debugLog("3 seconds complete removing highlights");
-          this.clearHighlight();
-        }, 3000);
 
         return { success: true };
       } catch (e) {
