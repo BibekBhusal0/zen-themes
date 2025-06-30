@@ -71,7 +71,6 @@ const findbar = {
     } else {
       this.findbar.classList.remove("ai-expanded");
       this.hideAIInterface();
-      this.focusInput();
     }
   },
   toggleExpanded() {
