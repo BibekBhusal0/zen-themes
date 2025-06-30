@@ -67,6 +67,11 @@ const findbar = {
       this.show();
       this.showAIInterface();
       this.focusPrompt();
+      const messagesContainer =
+        this?.chatContainer?.querySelector("#chat-messages");
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
     } else {
       this.findbar.classList.remove("ai-expanded");
       this.hideAIInterface();
