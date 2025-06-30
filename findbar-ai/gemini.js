@@ -36,7 +36,8 @@ async function getSearchURL(engineName, searchTerm) {
 }
 
 // --- Tool Implementations ---
-async function openLink(link, where = "new tab") {
+async function openLink(args) {
+  const { link, where = "new tab" } = args;
   if (!link) return { error: "openLink requires a link." };
   const whereNormalized = where?.toLowerCase()?.trim();
   try {
@@ -92,20 +93,22 @@ async function openLink(link, where = "new tab") {
   }
 }
 
-async function search(searchTerm, engineName, where) {
+async function search(args) {
+  const { searchTerm, engineName, where } = args;
   const defaultEngine = Services.search.defaultEngine.name;
   const searchEngine = engineName || defaultEngine;
   if (!searchTerm) return { error: "Search tool requires a searchTerm." };
 
   const url = await getSearchURL(searchEngine, searchTerm);
   if (url) {
-    return await openLink(url, where);
+    return await openLink({ link: url, where });
   } else {
     return { error: `Could not find search engine named '${searchEngine}'.` };
   }
 }
 
-async function newSplit(link1, link2, type = "horizontal") {
+async function newSplit(args) {
+  const { link1, link2, type = "horizontal" } = args;
   if (!window.gZenViewSplitter)
     return { error: "Split view function is not available." };
   if (!link1 || !link2) return { error: "newSplit requires two links." };
@@ -318,7 +321,10 @@ Here is the initial info about the current page:
       await this.updateSystemPrompt();
     }
 
-    const fullPrompt = `[Current Page Context: ${JSON.stringify(pageContext)}] ${prompt}`;
+    const fullPrompt = this.godMode
+      ? `[Current Page Context: ${JSON.stringify(pageContext || {})}] ${prompt}`
+      : prompt;
+
     this.history.push({ role: "user", parts: [{ text: fullPrompt }] });
 
     const requestBody = {
@@ -365,18 +371,18 @@ Here is the initial info about the current page:
       for (const call of functionCalls) {
         const { name, args } = call.functionCall;
         if (availableTools[name]) {
-          debugLog(`Executing tool: ${name} with args:`, args);
+          debugLog(`Executing tool: "${name}" with args:`, args);
           const toolResult = await availableTools[name](args);
           debugLog(`Tool ${name} result:`, toolResult);
           functionResponses.push({
             functionResponse: { name, response: toolResult },
           });
         } else {
-          debugError(`Tool ${name} not found!`);
+          debugError(`Tool "${name}" not found!`);
           functionResponses.push({
             functionResponse: {
               name,
-              response: { error: `Tool ${name} is not available.` },
+              response: { error: `Tool "${name}" is not available.` },
             },
           });
         }
