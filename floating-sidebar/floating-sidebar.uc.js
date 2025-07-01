@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name            Sidebar Pin Unpin icon
-// @description     Toggle pin unpin easily with a button
+// @name            Floating sidebar
+// @description     Make firefox sidebar floating and toggle pin unpin easily with a button
 // @author          BibekBhusal
 // ==/UserScript==
 
