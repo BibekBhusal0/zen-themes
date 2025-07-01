@@ -102,6 +102,21 @@
     ]
   },
   {
+    "property": "extension.findbar-ai.citations-enabled",
+    "label": "Citations",
+    "type": "checkbox",
+    "default": false,
+    "description": "(EXPERIMENTAL) Ai will give link in page where text is from",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
     "property": "extension.findbar-ai.god-mode",
     "label": "God Mode",
     "type": "checkbox",
@@ -117,11 +132,11 @@
     ]
   },
   {
-    "property": "extension.findbar-ai.citations-enabled",
-    "label": "Citations",
+    "property": "extension.findbar-ai.god-mode",
+    "label": "",
     "type": "checkbox",
     "default": false,
-    "description": "(EXPERIMENTAL) Ai will give link in page where text is from",
+    "description": "AI can make tool calls like opening links, searching, reading page",
     "conditions": [
       {
         "if": {
@@ -130,6 +145,23 @@
         }
       }
     ]
+  },
+  {
+    "type": "text",
+    "label": "Using God Mode and Citation both is not recommended",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.god-mode"
+        }
+      },
+      {
+        "if": {
+          "property": "extension.findbar-ai.citations-enabled"
+        }
+      }
+    ],
+    "operator": "AND"
   },
   {
     "type": "separator",
