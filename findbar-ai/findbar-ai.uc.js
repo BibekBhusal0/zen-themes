@@ -131,6 +131,7 @@ const findbar = {
         "keypress",
         this._handleInputKeyPress,
       );
+      this.findbar._findField.placeholder = "Press Alt + Enter to ask AI";
     });
   },
 
