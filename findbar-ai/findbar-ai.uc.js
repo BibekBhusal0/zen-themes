@@ -17,6 +17,13 @@ const MINIMAL = "extension.findbar-ai.minimal";
 const GOD_MODE = "extension.findbar-ai.god-mode";
 const CITATIONS_ENABLED = "extension.findbar-ai.citations-enabled";
 
+// TODO: impliment this
+const CONFORMATION = "extension.findbar-ai.confirmation-before-tool-call";
+const SHOW_TOOL_CALL = "extension.findbar-ai.show-tool-call";
+const CONTEXT_MENU_ENABLED = "extension.findbar-ai.context-menu-enabled";
+const DND_ENABLED = "extension.findbar-ai.dnd-enabled";
+const POSITION = "extension.findbar-ai.position";
+
 //default configurations
 UC_API.Prefs.setIfUnset(MINIMAL, true);
 UC_API.Prefs.setIfUnset(CITATIONS_ENABLED, false); // experimental
@@ -112,6 +119,7 @@ const findbar = {
     this.removeExpandButton();
     this.removeAIInterface();
     this.hide();
+    this.expanded = false;
     if (!gemini.godMode) {
       gemini.setSystemPrompt(null);
       gemini.clearData();
@@ -458,6 +466,17 @@ const findbar = {
       this.sendMessage(inpText);
     }
   },
+
+  //TODO: add context menu intrigation
+  addContextMenuItem: function() { },
+  removeContextMenuItem: function() { },
+
+  //TODO: add drag and drop
+  doResize: function() { },
+  stopResize: function() { },
+  doDrag: function() { },
+  stopDrag: function() { },
+  stopDrag: function() { },
 
   addKeymaps: function(e) {
     if (

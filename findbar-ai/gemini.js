@@ -129,6 +129,13 @@ async function newSplit(args) {
   }
 }
 
+// TODO: 
+// --- Tool for browser control ---
+function compactMode(){}
+function getBookmakrs(){}
+function addBookmakrs(){}
+function removeBookmarks(){}
+
 const availableTools = {
   search,
   newSplit,
