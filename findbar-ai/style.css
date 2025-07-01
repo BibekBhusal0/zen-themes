@@ -178,9 +178,9 @@
 
         &::before {
           content: "";
-          width: 16px !important;
-          min-width: 16px !important;
-          background-image: url(chrome://global/skin/icons/search-glass.svg) !important;
+          width: 18px !important;
+          min-width: 18px !important;
+          background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23fff" d="M10.5 2c.58 0 1.15.058 1.699.17a1 1 0 1 1-.398 1.96a6.5 6.5 0 1 0 5.069 7.671a1 1 0 1 1 1.96.398a8.5 8.5 0 0 1-1.457 3.303l-.197.26l3.652 3.652a1 1 0 0 1-1.32 1.498l-.094-.084l-3.652-3.652A8.5 8.5 0 1 1 10.5 2M19 1a1 1 0 0 1 .898.56l.048.117l.13.378a3 3 0 0 0 1.684 1.8l.185.07l.378.129a1 1 0 0 1 .118 1.844l-.118.048l-.378.13a3 3 0 0 0-1.8 1.684l-.07.185l-.129.378a1 1 0 0 1-1.844.117l-.048-.117l-.13-.378a3 3 0 0 0-1.684-1.8l-.185-.07l-.378-.129a1 1 0 0 1-.118-1.844l.118-.048l.378-.13a3 3 0 0 0 1.8-1.684l.07-.185l.129-.378A1 1 0 0 1 19 1m0 3.196a5 5 0 0 1-.804.804q.448.355.804.804q.355-.448.804-.804A5 5 0 0 1 19 4.196" /></svg>')  !important;
           background-repeat: no-repeat;
           margin-top: 9px;
           margin-right: 15px;
@@ -334,8 +334,7 @@
     @media (prefers-color-scheme: dark) {
 
       .findbar-find-status:is([status="notfound"])::before,
-      .found-matches:not([hidden])::before,
-      .findbar-container> :first-child::before {
+      .found-matches:not([hidden])::before {
         filter: invert();
       }
     }
