@@ -2,6 +2,12 @@
 
 Inspired by Arc Browser, this script transforms the standard findbar in **Zen Browser** into a modern, floating, AI-powered chat interface. It leverages Google's Gemini API to allow you to interact with and ask questions about the content of the current webpage.
 
+## Demo
+
+https://github.com/user-attachments/assets/258d2643-6135-4b2b-accc-c1d59f3f76fc
+
+https://github.com/user-attachments/assets/73413ee0-15b6-4ef3-bc16-faa0302c622f
+
 ## Features
 
 - **Modern, Floating UI**: Replaces the default findbar with a sleek, centered, and collapsible interface.
