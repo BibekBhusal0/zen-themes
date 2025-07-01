@@ -656,23 +656,14 @@
       background: var(--findbar-ai-accent-muted);
       color: var(--findbar-ai-accent);
       border: 1px solid var(--findbar-ai-border);
-      border-radius: 50%;
-      width: 1.6em;
-      height: 1.6em;
-      font-size: 0.75em;
-      font-weight: 700;
+      width: 1.7em !important;
+      height: 1.7em !important;
+      font-size: 0.75em!important;
+      font-weight: 700!important;
       cursor: pointer;
       margin: 0 3px;
       vertical-align: middle;
-      transition: all 0.2s ease;
-      padding: 0;
-
-      &:hover {
-        background: var(--findbar-ai-accent);
-        color: light-dark(#1a1a1a, #ffffff);
-        transform: scale(1.1);
-        box-shadow: 0 2px 8px var(--findbar-ai-accent-muted);
-      }
+      padding: 0 !important;
     }
 
     #findbar-expand {
