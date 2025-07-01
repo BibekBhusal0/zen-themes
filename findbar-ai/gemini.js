@@ -643,9 +643,9 @@ Here is the initial info about the current page:
   getHistory() {
     return [...this.history];
   },
-  clearHistory() {
+  clearData() {
     this.history = [];
-    return this;
+    this.setSystemPrompt(null);
   },
   getLastMessage() {
     return this.history.length > 0

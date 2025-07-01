@@ -58,8 +58,7 @@ const findbar = {
   _updateFindbar: null,
   _addKeymaps: null,
   _handleInputKeyPress: null,
-  _handleGodModeChange: null,
-  _handleCitationChange: null,
+  _clearGeminiData: null,
   _isExpanded: false,
 
   get expanded() {
@@ -115,7 +114,7 @@ const findbar = {
     this.hide();
     if (!gemini.godMode) {
       gemini.setSystemPrompt(null);
-      gemini.clearHistory();
+      gemini.clearData();
     }
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
@@ -269,8 +268,7 @@ const findbar = {
 
     clearBtn.addEventListener("click", () => {
       container.querySelector("#chat-messages").innerHTML = "";
-      gemini.setSystemPrompt(null);
-      gemini.clearHistory();
+      gemini.clearData();
     });
 
     chatMessages.addEventListener("click", async (e) => {
@@ -489,13 +487,12 @@ const findbar = {
     this._updateFindbar = this.updateFindbar.bind(this);
     this._addKeymaps = this.addKeymaps.bind(this);
     this._handleInputKeyPress = this.handleInputKeyPress.bind(this);
-    this._handleGodModeChange = gemini.updateSystemPrompt.bind(gemini);
-    this._handleCitationChange = gemini.updateSystemPrompt.bind(gemini);
+    this._clearGeminiData = gemini.clearData.bind(gemini);
 
     gBrowser.tabContainer.addEventListener("TabSelect", this._updateFindbar);
     document.addEventListener("keydown", this._addKeymaps);
-    UC_API.Prefs.addListener(GOD_MODE, this._handleGodModeChange);
-    UC_API.Prefs.addListener(CITATIONS_ENABLED, this._handleCitationChange);
+    UC_API.Prefs.addListener(GOD_MODE, this._clearGeminiData);
+    UC_API.Prefs.addListener(CITATIONS_ENABLED, this._clearGeminiData);
   },
   removeListeners() {
     if (this.findbar)
@@ -505,14 +502,13 @@ const findbar = {
       );
     gBrowser.tabContainer.removeEventListener("TabSelect", this._updateFindbar);
     document.removeEventListener("keydown", this._addKeymaps);
-    UC_API.Prefs.removeListener(GOD_MODE, this._handleGodModeChange);
-    UC_API.Prefs.removeListener(CITATIONS_ENABLED, this._handleCitationChange);
+    UC_API.Prefs.removeListener(GOD_MODE, this._clearGeminiData);
+    UC_API.Prefs.removeListener(CITATIONS_ENABLED, this._clearGeminiData);
 
     this._handleInputKeyPress = null;
     this._updateFindbar = null;
     this._addKeymaps = null;
-    this._handleGodModeChange = null;
-    this._handleCitationChange = null;
+    this._clearGeminiData = null;
   },
 };
 
