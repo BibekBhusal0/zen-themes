@@ -1,0 +1,301 @@
+[
+  {
+    "property": "extension.findbar-ai.enabled",
+    "label": "Enable Findbar AI",
+    "type": "checkbox",
+    "default": true,
+    "description": "Globally enables or disables the AI-powered findbar."
+  },
+  {
+    "type": "separator",
+    "label": "API Configuration",
+    "id": "api-separator",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "property": "extension.findbar-ai.gemini-api-key",
+    "label": "Gemini API Key",
+    "type": "string",
+    "placeholder": "Enter your Google Gemini API key",
+    "default": "",
+    "description": "Your personal API key from Google AI Studio. This is required for the AI features to work.",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "property": "extension.findbar-ai.gemini-model",
+    "label": "Gemini Model",
+    "type": "dropdown",
+    "default": "gemini-2.0-flash",
+    "description": "Select the Gemini model to use for chat responses.",
+    "options": [
+      {
+        "value": "gemini-2.5-flash",
+        "label": "Gemini 2.5 Flash"
+      },
+      {
+        "value": "gemini-2.5-pro",
+        "label": "Gemini 2.5 Pro"
+      },
+      {
+        "value": "gemini-2.5-flash-lite",
+        "label": "Gemini 2.5 Flash Lite"
+      },
+      {
+        "value": "gemini-2.0-flash",
+        "label": "Gemini 2.0 Flash"
+      },
+      {
+        "value": "gemini-2.0-flash-lite",
+        "label": "Gemini 2.0 Flash Lite"
+      },
+      {
+        "value": "gemini-1.5-flash",
+        "label": "Gemini 1.5 Flash"
+      },
+      {
+        "value": "gemini-1.5-flash-8b",
+        "label": "Gemini 1.5 Flash 8B"
+      },
+      {
+        "value": "gemini-1.5-pro",
+        "label": "Gemini 1.5 Pro"
+      },
+      {
+        "value": "gemini-1.0-pro",
+        "label": "Gemini 1.0 Pro"
+      }
+    ],
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "type": "separator",
+    "label": "AI Resonse",
+    "id": "ai-reposnse-separator",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "property": "extension.findbar-ai.citations-enabled",
+    "label": "Citations",
+    "type": "checkbox",
+    "default": false,
+    "description": "(EXPERIMENTAL) Ai will give link in page where text is from",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "property": "extension.findbar-ai.god-mode",
+    "label": "God Mode",
+    "type": "checkbox",
+    "default": false,
+    "description": "AI can make tool calls like opening links, searching, reading page",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "type": "text",
+    "label": "Using God Mode and Citation both is not recommended",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.god-mode"
+        }
+      },
+      {
+        "if": {
+          "property": "extension.findbar-ai.citations-enabled"
+        }
+      }
+    ],
+    "operator": "AND"
+  },
+  {
+    "type": "checkbox",
+    "label": "Conformation before tool call",
+    "description": "Should AI conform you before making a tool call?",
+    "default": false,
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.god-mode",
+          "value": true
+        }
+      },
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ],
+    "operator": "AND"
+  },
+  {
+    "type": "checkbox",
+    "label": "Show tool call",
+    "description": "Should AI show you the tool call in the chat?",
+    "default": true,
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.god-mode",
+          "value": true
+        }
+      },
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ],
+    "operator": "AND"
+  },
+  {
+    "type": "separator",
+    "label": "Appearance",
+    "id": "appearance-separator",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "property": "extension.findbar-ai.minimal",
+    "label": "Enable Minimal Mode (Arc-style)",
+    "type": "checkbox",
+    "default": true,
+    "description": "Changes the findbar behavior to be similar to Arc Browser. Pressing Enter directly queries the AI with the findbar text, rather than showing a separate chat interface.",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "property": "extension.findbar-ai.dnd-enabled",
+    "label": "Enable Drag and Drop for findbar",
+    "type": "checkbox",
+    "description": "Allows you to drag and drop findbar to specific position and resize the findbar",
+    "default": true,
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled"
+        }
+      },
+      {
+        "not": {
+          "property": "extension.findbar-ai.minimal"
+        }
+      }
+    ],
+    "operator": "AND"
+  },
+  {
+    "property": "extension.findbar-ai.position",
+    "label": "Findbar Position",
+    "type": "dropdown",
+    "default": "top",
+    "options": [
+      {
+        "value": "top",
+        "label": "Top"
+      },
+      {
+        "value": "bottom",
+        "label": "Bottom"
+      },
+      {
+        "value": "left",
+        "label": "Left"
+      },
+      {
+        "value": "right",
+        "label": "right"
+      }
+    ],
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "type": "separator",
+    "label": "Development",
+    "id": "development-separator",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "property": "extension.findbar-ai.debug-mode",
+    "label": "Enable Debug Mode",
+    "type": "checkbox",
+    "default": false,
+    "description": "Enables verbose logging in the Browser Console for troubleshooting.",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  }
+]
