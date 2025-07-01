@@ -62,13 +62,17 @@ You can customize the Findbar AI via `about:config`.
 
 ### Preferences (`about:config`)
 
-| Preference                            | Type    | Default              | Description                                                     |
-| ------------------------------------- | ------- | -------------------- | --------------------------------------------------------------- |
-| `extension.findbar-ai.enabled`        | Boolean | `true`               | Toggles the entire feature on or off.                           |
-| `extension.findbar-ai.gemini-api-key` | String  | _(empty)_            | **Required**. Your Google Gemini API key.                       |
-| `extension.findbar-ai.gemini-model`   | String  | `"gemini-2.0-flash"` | The specific Gemini model to use for chat.                      |
-| `extension.findbar-ai.debug-mode`     | Boolean | `false`              | Set to `true` to enable verbose logging in the Browser Console. |
-| `extension.findbar-ai.god-mode`       | Boolean | `false`              | When `true` AI can make tool calls.                             |
+| Preference                               | Type    | Default              | Description                                                                 |
+| ---------------------------------------- | ------- | -------------------- | --------------------------------------------------------------------------- |
+| `extension.findbar-ai.enabled`           | Boolean | `true`               | Toggles the entire feature on or off.                                       |
+| `extension.findbar-ai.gemini-api-key`    | String  | _(empty)_            | **Required**. Your Google Gemini API key.                                   |
+| `extension.findbar-ai.gemini-model`      | String  | `"gemini-2.0-flash"` | The specific Gemini model to use for chat.                                  |
+| `extension.findbar-ai.debug-mode`        | Boolean | `false`              | Set to `true` to enable verbose logging in the Browser Console.             |
+| `extension.findbar-ai.god-mode`          | Boolean | `false`              | When `true` AI can make tool calls.                                         |
+| `extension.findbar-ai.citations-enabled` | Boolean | `false`              | When `true` AI will give source where it the statement from (experimental). |
+
+> [!WARNING]
+> Don't turn both god-mode and citation at the same time. AI might not function properly.
 
 ### Keymaps
 
@@ -105,8 +109,9 @@ More tools will be comming soon.
 - [x] Improve system prompts
 - [x] Markdown formatting
 - [x] Minimal styles (like Arc Browser)
-- [ ] Highlight text in page that corresponds to AI's answer
-- [ ] AI interacting with page content (beyond reading)
+- [x] Highlight text in page that corresponds to AI's answer
+- [ ] AI interacting with page content (filling forms, clicking buttons)
+- [ ] Conformation before calling tools
 - [x] Tool calls (opening links, changing workspaces)
 - [ ] Browser management tools
 - [ ] Add support for other AI models (Claude, OpenAI)
