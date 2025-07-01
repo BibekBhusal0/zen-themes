@@ -347,14 +347,16 @@ Therse are just examples for you on how you can use tools calls, each example gi
 - **When to Cite**: For any statement of fact that is directly supported by the provided page content, you **SHOULD** provide a citation. You can create multiple citations if your answer uses information from different parts of the source text.
 - **How to Cite**: In your \`"answer"\`, append a marker like \`[1]\`, \`[2]\`. Each marker must correspond to a citation object in the array.
 - **Citation Object**: Each object in the \`citations\` array may have:
-    - \`"id"\`: The number corresponding to the marker in the answer.
+    - \`"id"\`: The number corresponding to the marker in the answer, **Must** be unique.
     - \`"source_quote"\`: The **exact, verbatim, and short (usually a single sentence)** text from the page content that serves as the source.
     - \`"prefix_context"\`: (Optional) A small snippet of text immediately preceding the source_quote.
     - \`"suffix_context"\`: (Optional) A small snippet of text immediately following the source_quote.
-- Do **not** cite your explanation of your own abilities, or in simple greetings.
-- Only cite sources that are from current page.
-- Make sure there are no duplicates in citation array.
-- If you call a tool, you **must not** provide citations in the same turn.
+- **CRITICAL RULES FOR CITATIONS**:
+    1.  **source_quote**: This MUST be the **exact, verbatim text** from the page. It must be short. NEVER use more than 3 sentence.
+    2.  **prefix_context / suffix_context**: These are OPTIONAL. Only use them if the \`source_quote\` is very common in the page. They must contain text that is *different* from the \`source_quote\`. They should be short snippets from before and after the quote.
+    3.  **Accuracy**: All three fields (\`prefix_context\`, \`source_quote\`, \`suffix_context\`) must be identical to the text on the page (don't append marker here), including punctuation and casing.
+- **When to Cite**: Cite any statement of fact that is directly supported by the page content. Do NOT cite your own abilities or general greetings.
+- **Tool Calls**: If you call a tool, you **must not** provide citations in the same turn.
 `;
     } else {
       systemPrompt += `
@@ -371,8 +373,6 @@ Here is the initial info about the current page:
       const pageContext = await windowManagerAPI.getPageTextContent();
       systemPrompt += JSON.stringify(pageContext);
     }
-    // __AUTO_GENERATED_PRINT_VAR_START__
-    console.log("getSystemPrompt#if systemPrompt:", systemPrompt); // __AUTO_GENERATED_PRINT_VAR_END__
 
     return systemPrompt;
   },

@@ -283,10 +283,16 @@ const findbar = {
           const citations = JSON.parse(messageEl.dataset.citations);
           const citation = citations.find((c) => c.id == citationId);
           if (citation && citation.source_quote) {
-            const searchText =
-              (citation.prefix_context || "") +
-              citation.source_quote +
-              (citation.suffix_context || "");
+            let prefix = citation.prefix_context || "";
+            let suffix = citation.suffix_context || "";
+
+            if (prefix.endsWith(citation.source_quote))
+              prefix = prefix.slice(0, -citation.source_quote.length);
+            if (suffix.startsWith(citation.source_quote))
+              suffix = suffix.slice(citation.source_quote.length);
+
+            const searchText = prefix + citation.source_quote + suffix;
+
             console.log(
               `[findbar-ai] Citation [${citationId}] clicked. Requesting highlight for:`,
               searchText,

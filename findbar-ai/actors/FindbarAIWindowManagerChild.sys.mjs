@@ -115,50 +115,88 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
   }
 
   findRangeFromText(searchText) {
-    const bodyText = this.document.body.innerText;
-
-    const escapedText = searchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const searchRegex = new RegExp(escapedText.replace(/\s+/g, "\\s+"));
-
-    const match = bodyText.match(searchRegex);
-    if (!match) {
-      this.debugError("Regex search failed to find a match for:", searchText);
-      return null;
-    }
-
-    const startIndex = match.index;
-    const endIndex = startIndex + match[0].length;
-
-    this.debugLog(`Regex match found. Start: ${startIndex}, End: ${endIndex}`);
-
-    const range = this.document.createRange();
+    this.debugLog(`Starting search for: "${searchText}"`);
     const walker = this.document.createTreeWalker(
       this.document.body,
       NodeFilter.SHOW_TEXT,
-      null,
-      false,
+    );
+    const nodes = [];
+    let fullText = "";
+
+    let node;
+    while ((node = walker.nextNode())) {
+      const parent = node.parentElement;
+      if (
+        parent &&
+        (parent.closest("script, style, noscript, [hidden]") ||
+          getComputedStyle(parent).display === "none")
+      ) {
+        continue;
+      }
+      nodes.push({
+        node: node,
+        start: fullText.length,
+        end: fullText.length + node.textContent.length,
+      });
+      fullText += node.textContent;
+    }
+    this.debugLog(
+      `Constructed text from ${nodes.length} visible nodes. Total length: ${fullText.length} characters.`,
     );
 
-    let charCount = 0;
+    const escapedText = searchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const searchRegex = new RegExp(escapedText.replace(/\s+/g, "\\s+"), "i");
+    this.debugLog("Created Regex:", searchRegex);
+
+    const match = fullText.match(searchRegex);
+    if (!match) {
+      this.debugError(
+        "Regex search failed. The provided text could not be found in the page's visible content.",
+        `Searched for: "${searchText}"`,
+      );
+      return null;
+    }
+
+    const matchStartIndex = match.index;
+    const matchEndIndex = matchStartIndex + match[0].length;
+    this.debugLog(
+      `Regex match found. Start Index: ${matchStartIndex}, End Index: ${matchEndIndex}`,
+    );
+
     let startNode, startOffset, endNode, endOffset;
 
-    while (walker.nextNode()) {
-      const node = walker.currentNode;
-      const nodeLength = node.textContent.length;
-
-      if (!startNode && startIndex < charCount + nodeLength) {
-        startNode = node;
-        startOffset = startIndex - charCount;
+    this.debugLog("Mapping indices to DOM nodes...");
+    for (const nodeInfo of nodes) {
+      if (
+        !startNode &&
+        matchStartIndex >= nodeInfo.start &&
+        matchStartIndex < nodeInfo.end
+      ) {
+        startNode = nodeInfo.node;
+        startOffset = matchStartIndex - nodeInfo.start;
+        this.debugLog(
+          `Found startNode. Node:`,
+          startNode,
+          `Offset: ${startOffset}`,
+        );
       }
-      if (!endNode && endIndex <= charCount + nodeLength) {
-        endNode = node;
-        endOffset = endIndex - charCount;
+      if (
+        !endNode &&
+        matchEndIndex > nodeInfo.start &&
+        matchEndIndex <= nodeInfo.end
+      ) {
+        endNode = nodeInfo.node;
+        endOffset = matchEndIndex - nodeInfo.start;
+        this.debugLog(`Found endNode. Node:`, endNode, `Offset: ${endOffset}`);
         break;
       }
-      charCount += nodeLength;
     }
 
     if (startNode && endNode) {
+      this.debugLog(
+        "Successfully found both start and end nodes. Creating range...",
+      );
+      const range = this.document.createRange();
       range.setStart(startNode, startOffset);
       range.setEnd(endNode, endOffset);
       return range;
@@ -176,6 +214,7 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
     const range = this.findRangeFromText(text);
 
     if (range) {
+      this.debugLog("Range object created successfully:", range);
       const mark = this.document.createElement("mark");
       mark.className = "findbar-ai-highlight";
       try {
@@ -187,15 +226,32 @@ export class FindbarAIWindowManagerChild extends JSWindowActorChild {
           () => this.clearHighlight(),
           3000,
         );
-
         return { success: true };
       } catch (e) {
-        this.debugError("Failed to wrap selection with <mark>:", e);
-        return { success: false, error: "Could not highlight text." };
+        this.debugError(
+          "Highlight failed. Could not wrap the found range with a <mark> tag:",
+          e,
+        );
+        this.debugLog("Falling back to selecting the range and scrolling.");
+        this.browsingContext.top.window.getSelection().removeAllRanges();
+        this.browsingContext.top.window.getSelection().addRange(range);
+        range.startContainer.parentElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+        return {
+          success: false,
+          error: "Could not highlight text, but scrolled to it.",
+        };
       }
     } else {
-      this.debugError("Text not found on page.");
-      return { success: false, error: "Text not found on page." };
+      this.debugError(
+        `Highlight failed. A DOM range could not be created for the text: "${text}"`,
+      );
+      return {
+        success: false,
+        error: "Text not found or could not be mapped in the DOM.",
+      };
     }
   }
 }
