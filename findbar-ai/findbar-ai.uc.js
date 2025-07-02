@@ -18,9 +18,9 @@ const GOD_MODE = "extension.findbar-ai.god-mode";
 const CITATIONS_ENABLED = "extension.findbar-ai.citations-enabled";
 
 // TODO: impliment this
+const CONTEXT_MENU_ENABLED = "extension.findbar-ai.context-menu-enabled";
 const CONFORMATION = "extension.findbar-ai.confirmation-before-tool-call";
 const SHOW_TOOL_CALL = "extension.findbar-ai.show-tool-call";
-const CONTEXT_MENU_ENABLED = "extension.findbar-ai.context-menu-enabled";
 const DND_ENABLED = "extension.findbar-ai.dnd-enabled";
 const POSITION = "extension.findbar-ai.position";
 
@@ -68,6 +68,9 @@ const findbar = {
   _handleInputKeyPress: null,
   _clearGeminiData: null,
   _isExpanded: false,
+  _handleContextMenuPrefChange: null,
+  _updateContextMenuVisibility: null,
+  contextMenuItem: null,
 
   get expanded() {
     return this._isExpanded;
@@ -426,12 +429,16 @@ const findbar = {
     if (!this.enabled) return;
     this.updateFindbar();
     this.addListeners();
+    if (this.contextMenuEnabled) {
+      setTimeout(() => this.addContextMenuItem(), 200);
+    }
   },
   destroy() {
     this.findbar = null;
     this.expanded = false;
     this.removeListeners();
     this.removeExpandButton();
+    this.removeContextMenuItem();
     this.removeAIInterface();
   },
 
@@ -469,9 +476,96 @@ const findbar = {
     }
   },
 
-  //TODO: add context menu intrigation
-  addContextMenuItem: function() { },
-  removeContextMenuItem: function() { },
+  get contextMenuEnabled() {
+    return getPref(CONTEXT_MENU_ENABLED, true);
+  },
+
+  addContextMenuItem() {
+    if (this.contextMenuItem) return;
+    const contextMenu = document.getElementById("contentAreaContextMenu");
+    if (!contextMenu) return;
+
+    const menuItem = document.createXULElement("menuitem");
+    menuItem.id = "ai-findbar-context-menu";
+    menuItem.setAttribute("label", "Ask AI");
+    menuItem.setAttribute("hidden", true);
+    // menuItem.setAttribute("accesskey", accessKey);
+
+    menuItem.addEventListener(
+      "command",
+      this.handleContextMenuClick.bind(this),
+    );
+    this.contextMenuItem = menuItem;
+
+    const searchSelectItem = contextMenu.querySelector("#context-searchselect");
+
+    if (searchSelectItem) {
+      // Insert right after the searchselect item
+      if (searchSelectItem.nextSibling) {
+        contextMenu.insertBefore(menuItem, searchSelectItem.nextSibling);
+      } else {
+        contextMenu.appendChild(menuItem);
+      }
+    } else {
+      // Fallback: insert after context-sep-redo separator
+      const redoSeparator = contextMenu.querySelector("#context-sep-redo");
+      if (redoSeparator) {
+        if (redoSeparator.nextSibling) {
+          contextMenu.insertBefore(menuItem, redoSeparator.nextSibling);
+        } else {
+          contextMenu.appendChild(menuItem);
+        }
+      } else {
+        // Final fallback: don't add the menu item if neither element is found
+        return;
+      }
+    }
+
+    this._updateContextMenuVisibility =
+      this.updateContextMenuVisibility.bind(this);
+    contextMenu.addEventListener(
+      "popupshowing",
+      this._updateContextMenuVisibility,
+    );
+  },
+
+  removeContextMenuItem: function() {
+    this?.contextMenuItem?.remove();
+    this.contextMenuItem = null;
+    document
+      ?.getElementById("contentAreaContextMenu")
+      ?.removeEventListener("popupshowing", this._updateContextMenuVisibility);
+  },
+  handleContextMenuClick: async function() {
+    const selection = await windowManagerAPI.getSelectedText();
+    // __AUTO_GENERATED_PRINT_VAR_START__
+    console.log("(anon) selection:", selection); // __AUTO_GENERATED_PRINT_VAR_END__
+    if (!selection.hasSelection && selection.selectedText) return;
+
+    const selectedText = selection.selectedText
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .map((line) => "> " + line)
+      .join("\n");
+    // __AUTO_GENERATED_PRINT_VAR_START__
+    console.log("(anon) selectedText:", selectedText); // __AUTO_GENERATED_PRINT_VAR_END__
+    this.expanded = true;
+    this.sendMessage(
+      "Explain this in context of current page\n" + selectedText,
+    );
+  },
+
+  handleContextMenuPrefChange: function(pref) {
+    if (pref.value) this.addContextMenuItem();
+    else this.removeContextMenuItem();
+  },
+  updateContextMenuVisibility() {
+    if (!this.contextMenuEnabled) return;
+    if (!this.contextMenuItem) return;
+    const hasSelection = gContextMenu?.isTextSelected === true;
+    this.contextMenuItem.hidden = !hasSelection;
+  },
 
   //TODO: add drag and drop
   doResize: function() { },
@@ -509,11 +603,17 @@ const findbar = {
     this._addKeymaps = this.addKeymaps.bind(this);
     this._handleInputKeyPress = this.handleInputKeyPress.bind(this);
     this._clearGeminiData = gemini.clearData.bind(gemini);
+    this._handleContextMenuPrefChange =
+      this.handleContextMenuPrefChange.bind(this);
 
     gBrowser.tabContainer.addEventListener("TabSelect", this._updateFindbar);
     document.addEventListener("keydown", this._addKeymaps);
     UC_API.Prefs.addListener(GOD_MODE, this._clearGeminiData);
     UC_API.Prefs.addListener(CITATIONS_ENABLED, this._clearGeminiData);
+    UC_API.Prefs.addListener(
+      CONTEXT_MENU_ENABLED,
+      this._handleContextMenuPrefChange,
+    );
   },
   removeListeners() {
     if (this.findbar)
@@ -525,10 +625,15 @@ const findbar = {
     document.removeEventListener("keydown", this._addKeymaps);
     UC_API.Prefs.removeListener(GOD_MODE, this._clearGeminiData);
     UC_API.Prefs.removeListener(CITATIONS_ENABLED, this._clearGeminiData);
+    UC_API.Prefs.removeListener(
+      CONTEXT_MENU_ENABLED,
+      this._handleContextMenuPrefChange,
+    );
 
     this._handleInputKeyPress = null;
     this._updateFindbar = null;
     this._addKeymaps = null;
+    this._handleContextMenuPrefChange = null;
     this._clearGeminiData = null;
   },
 };
