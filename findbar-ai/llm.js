@@ -1,5 +1,7 @@
 import { sendGeminiMessage, GEMINI_MODELS } from "./gemini-api.js";
 import { sendMistralMessage, MISTRAL_MODELS } from "./mistral-api.js";
+import { windowManagerAPI } from "./windowManager.js";
+import getPref from "../utils/getPref.mjs";
 
 // Tool declarations for godMode
 export const toolDeclarations = [
@@ -32,7 +34,7 @@ export const toolDeclarations = [
       {
         name: "openLink",
         description:
-          "Opens a given URL in a specified location. Can also create a split view with the current tab.",
+          "Opens a given URL in a specified location. Can also create a split view with the current tab, but should only do this if the user explicitly asks for it.",
         parameters: {
           type: "OBJECT",
           properties: {
@@ -86,11 +88,9 @@ export const toolDeclarations = [
   },
 ];
 
-// Tool registry for godMode
-const toolRegistry = {
-  // Example: 'search': async (args) => { ... },
-  // You can extend this with real tool implementations
-};
+export const DEFAULT_SYSTEM_INSTRUCTION_MARKDOWN = "You are a helpful assistant. Answer user questions about the current web page, and use tools if needed. Respond in markdown if appropriate.";
+export const DEFAULT_SYSTEM_INSTRUCTION_PLAINTEXT = "You are a helpful assistant. Answer user questions about the current web page, and use tools if needed. Please respond in plaintext, **NOT** markdown or LaTeX.";
+const MARKDOWN_ENABLED = "extension.findbar-ai.markdown-enabled";
 
 export async function sendMessage({ provider, prompt, context, model, godMode, toolDeclarations, ...options }) {
   let sendFn, MODELS;
@@ -106,7 +106,8 @@ export async function sendMessage({ provider, prompt, context, model, godMode, t
 
   // Track conversation history for tool use
   let history = options.history || [];
-  let systemInstruction = options.systemInstruction;
+  let markdownEnabled = getPref(MARKDOWN_ENABLED, true);
+  let systemInstruction = markdownEnabled ? DEFAULT_SYSTEM_INSTRUCTION_MARKDOWN : DEFAULT_SYSTEM_INSTRUCTION_PLAINTEXT;
   let lastResponse;
 
   // First LLM call
@@ -176,4 +177,119 @@ export function getAvailableModels(provider) {
   if (provider === "gemini") return GEMINI_MODELS;
   if (provider === "mistral") return MISTRAL_MODELS;
   return [];
-} 
+}
+
+// --- Internal Helper for Search ---
+async function getSearchURL(engineName, searchTerm) {
+  try {
+    const engine = await Services.search.getEngineByName(engineName);
+    if (engine) {
+      const submission = engine.getSubmission(searchTerm.trim());
+      return submission.uri.spec;
+    }
+    return null;
+  } catch (e) {
+    console.error(`Error getting search URL for engine "${engineName}".`, e);
+    return null;
+  }
+}
+
+// --- Tool Implementations ---
+async function openLink(args) {
+  const { link, where = "new tab" } = args;
+  if (!link) return { error: "openLink requires a link." };
+  const whereNormalized = where?.toLowerCase()?.trim();
+  try {
+    switch (whereNormalized) {
+      case "current tab":
+        openTrustedLinkIn(link, "current");
+        break;
+      case "new tab":
+        openTrustedLinkIn(link, "tab");
+        break;
+      case "new window":
+        openTrustedLinkIn(link, "window");
+        break;
+      case "incognito":
+      case "private":
+        window.openTrustedLinkIn(link, "window", { private: true });
+        break;
+      case "glance":
+        if (window.gZenGlanceManager) {
+          const rect = gBrowser.selectedBrowser.getBoundingClientRect();
+          window.gZenGlanceManager.openGlance({
+            url: link,
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+            width: 10,
+            height: 10,
+          });
+        } else {
+          openTrustedLinkIn(link, "tab");
+          return { result: `Glance not available. Opened in a new tab.` };
+        }
+        break;
+      case "vsplit":
+      case "hsplit":
+        if (window.gZenViewSplitter) {
+          const sep = whereNormalized === "vsplit" ? "vsep" : "hsep";
+          const tab1 = gBrowser.selectedTab;
+          await openTrustedLinkIn(link, "tab");
+          const tab2 = gBrowser.selectedTab;
+          gZenViewSplitter.splitTabs([tab1, tab2], sep, 1);
+        } else return { error: "Split view is not available." };
+        break;
+      default:
+        openTrustedLinkIn(link, "tab");
+        return {
+          result: `Unknown location "${where}". Opened in a new tab as fallback.`,
+        };
+    }
+    return { result: `Successfully opened ${link} in ${where}.` };
+  } catch (e) {
+    console.error(`Failed to open link "${link}" in "${where}".`, e);
+    return { error: `Failed to open link.` };
+  }
+}
+
+async function search(args) {
+  const { searchTerm, engineName, where } = args;
+  const defaultEngine = Services.search.defaultEngine.name;
+  const searchEngine = engineName || defaultEngine;
+  if (!searchTerm) return { error: "Search tool requires a searchTerm." };
+  const url = await getSearchURL(searchEngine, searchTerm);
+  if (url) {
+    return await openLink({ link: url, where });
+  } else {
+    return { error: `Could not find search engine named '${searchEngine}'.` };
+  }
+}
+
+async function newSplit(args) {
+  const { link1, link2, type = "vertical" } = args;
+  if (!window.gZenViewSplitter)
+    return { error: "Split view function is not available." };
+  if (!link1 || !link2) return { error: "newSplit requires two links." };
+  try {
+    const sep = type.toLowerCase() === "vertical" ? "vsep" : "hsep";
+    await openTrustedLinkIn(link1, "tab");
+    const tab1 = gBrowser.selectedTab;
+    await openTrustedLinkIn(link2, "tab");
+    const tab2 = gBrowser.selectedTab;
+    gZenViewSplitter.splitTabs([tab1, tab2], sep, 1);
+    return {
+      result: `Successfully created ${type} split view with the provided links.`,
+    };
+  } catch (e) {
+    console.error("Failed to create split view.", e);
+    return { error: "Failed to create split view." };
+  }
+}
+
+export const toolRegistry = {
+  search,
+  openLink,
+  newSplit,
+  getPageTextContent: windowManagerAPI.getPageTextContent.bind(windowManagerAPI),
+  getHTMLContent: windowManagerAPI.getHTMLContent.bind(windowManagerAPI),
+}; 
