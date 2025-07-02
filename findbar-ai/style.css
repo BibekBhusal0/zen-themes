@@ -1,3 +1,11 @@
+/* Required for blur rendering */
+browser {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* Natsumi Findbar With Custom Tweaks*/
+/* This theme is hevily based off of the natsumi findbar (RIP Natsumi, great project and my insperation */
+
 @keyframes initial-animation {
   from {
     top: 0;
@@ -85,12 +93,25 @@ findbar:not([hidden="true"]) {
   description {
     display: none !important;
   }
+  
+  .ai-float-close {
+    position: absolute !important;
+    top: 5px !important;
+    right: 0 !important;
+  }
 
   hbox[anonid="findbar-textbox-wrapper"] {
-    .findbar-textbox {
-      border: none !important;
-      box-shadow: none !important;
-      background: transparent !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+      .findbar-textbox {
+        border: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        text-overflow: ellipsis !important;
+    }
+    .findbar-find-previous {
+      margin-left: auto !important;
     }
   }
 
@@ -117,31 +138,53 @@ findbar:not([hidden="true"]) {
     overflow-y: scroll !important;
     overflow-x: hidden !important;
     .user-prompt {
-      font-size: 20px;
+      font-size: 16px;
       font-weight: 600 !important;
     }
     .ai-response {
       align-self: flex-end !important;
-      width: 95% !important;
+      width: 93% !important;
       position: relative !important;
-      &:before {
-        content: '';
-        position: absolute;
-        left: -15px;
-        top: .5%;
-        height: 100%;
-        width: 0;
-        border-left: 3px solid #fff;
-        pointer-events: none; /* so it doesn't interfere with interactions */
+      padding: 7px !important;
+      p {
+      font-size: 12px !important;
       }
     }
   }
   
+  .findbar-container:has(.found-matches:not([hidden])) {
+       .findbar-textbox {
+        max-width: 160px !important;
+    }
+  }
+  
+    .findbar-container:has(.found-matches[hidden="true"]) {
+       .findbar-textbox {
+        max-width: 100% !important;
+      }
+  }
+
+  
   .findbar-container {
     display: flex !important;
     flex-direction: row !important;
-    height: fit-content !important;
-    max-height: none !important;
+    width: 100% !important;
+    .findbar-textbox {
+      justify-self: flex-start !important;
+    }
+    .findbar-label {
+      position: absolute !important;
+      right: 140px !important;
+    }
+    #findbar-ask-btn {
+      margin-left: auto !important;
+      margin-right: 10px;
+      border: none !important;
+      background-color: var(--zen-primary-color) !important;
+      padding-inline-start: 5px !important;
+      padding-inline-end: 5px !important;
+      color: color-mix(in srgb, var(--zen-primary-color) 30%, white 70%);
+      
+    }
   }
-  
 }
