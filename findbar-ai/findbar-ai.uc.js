@@ -64,11 +64,11 @@ const windowManager = () => {
   decl[windowManagerName] = {
     parent: {
       esModuleURI:
-        "chrome://userscripts/content/custom/findbar-ai/actors/FindbarAIWindowManagerParent.sys.mjs",
+        "chrome://userscripts/content/FindbarAIWindowManagerParent.sys.mjs",
     },
     child: {
       esModuleURI:
-        "chrome://userscripts/content/custom/findbar-ai/actors/FindbarAIWindowManagerChild.sys.mjs",
+        "chrome://userscripts/content/FindbarAIWindowManagerChild.sys.mjs",
       events: {
         DOMContentLoaded: {},
       },
