@@ -16,6 +16,11 @@ const CONTEXT_MENU_ENABLED = "extension.findbar-ai.context-menu-enabled";
 const DND_ENABLED = "extension.findbar-ai.dnd-enabled";
 const POSITION = "extension.findbar-ai.position";
 
+//default configurations
+UC_API.Prefs.setIfUnset(MINIMAL, true);
+UC_API.Prefs.setIfUnset(ENABLED, true);
+UC_API.Prefs.setIfUnset(CITATIONS_ENABLED, false); // experimental
+
 const getPref = (key, defaultValue) => {
   try {
     const pref = UC_API.Prefs.get(key);
@@ -791,10 +796,6 @@ const createHTMLElement = (htmlString) => {
   else element = element.head.firstChild;
   return element;
 };
-
-//default configurations
-UC_API.Prefs.setIfUnset(MINIMAL, true);
-UC_API.Prefs.setIfUnset(CITATIONS_ENABLED, false); // experimental
 
 var markdownStylesInjected = false;
 const injectMarkdownStyles = () => {
