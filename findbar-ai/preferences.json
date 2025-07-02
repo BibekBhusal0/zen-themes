@@ -193,6 +193,56 @@
   },
   {
     "type": "separator",
+    "label": "Context Menu",
+    "id": "context-menu Section",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "property": "extension.findbar-ai.context-menu-enabled",
+    "label": "Enable Context Menu",
+    "type": "checkbox",
+    "default": true,
+    "description": "Adds item in right click context menu for asking AI about selected content.",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "property": "extension.findbar-ai.context-menu-autosend",
+    "label": "Context Menu Auto Send",
+    "type": "checkbox",
+    "default": true,
+    "description": "If true, message will be autometically be send to AI after you click in context menu item.",
+    "operator": "AND",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.findbar-ai.enabled",
+          "value": true
+        }
+      },
+      {
+        "if": {
+          "property": "extension.findbar-ai.context-menu-enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "type": "separator",
     "label": "Development",
     "id": "development-separator",
     "conditions": [
