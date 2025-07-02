@@ -5,7 +5,6 @@
     filter: blur(5px);
     transform: translateY(-10px);
   }
-
   to {
     top: 20px;
     opacity: 1;
@@ -19,12 +18,10 @@
     backdrop-filter: blur(10px);
     opacity: 1;
   }
-
   99% {
     backdrop-filter: blur(10px);
     opacity: 0.1;
   }
-
   100% {
     backdrop-filter: none;
     opacity: 0;
@@ -32,750 +29,119 @@
 }
 
 @keyframes pulse {
-  0% {
-    opacity: 0.4;
-  }
-
-  50% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0.4;
-  }
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
 }
 
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-
-  100% {
-    background-position: 200% 0;
-  }
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-@media -moz-pref("extension.findbar-ai.enabled") {
-  findbar {
-    --findbar-ai-bg: light-dark(color-mix(in srgb, var(--zen-primary-color) 25%, white 75%),
-        color-mix(in srgb, var(--zen-primary-color) 25%, black 75%));
-    --findbar-ai-bg-secondary: color-mix(in srgb,
-        var(--zen-themed-toolbar-bg) 65%,
-        transparent 35%);
-    --findbar-ai-border: color-mix(in srgb,
-        var(--zen-primary-color) 25%,
-        transparent 75%);
-    --findbar-ai-border-hover: color-mix(in srgb,
-        var(--zen-primary-color) 40%,
-        transparent 60%);
-    --findbar-ai-text: light-dark(#1a1a1a, #f0f0f0);
-    --findbar-ai-text-secondary: light-dark(#4a4a4a, #b0b0b0);
-    --findbar-ai-accent: var(--zen-primary-color);
-    --findbar-ai-accent-muted: color-mix(in srgb,
-        var(--zen-primary-color) 20%,
-        transparent 80%);
-    --findbar-ai-shadow: 0 8px 32px color-mix(in srgb, var(--zen-primary-color) 15%, transparent 85%);
-    --findbar-ai-shadow-hover: 0 12px 40px color-mix(in srgb, var(--zen-primary-color) 25%, transparent 75%);
-    --findbar-ai-glass-bg: color-mix(in srgb,
-        var(--zen-themed-toolbar-bg) 75%,
-        transparent 25%);
-    --findbar-ai-input-bg: color-mix(in srgb,
-        var(--zen-themed-toolbar-bg) 60%,
-        transparent 40%);
-    --findbar-ai-input-border: color-mix(in srgb,
-        var(--zen-primary-color) 30%,
-        transparent 70%);
-    --findbar-ai-button-bg: color-mix(in srgb,
-        var(--zen-themed-toolbar-bg) 80%,
-        var(--zen-primary-color) 20%);
-    --findbar-ai-button-hover: color-mix(in srgb,
-        var(--zen-primary-color) 30%,
-        var(--zen-themed-toolbar-bg) 70%);
-    --findbar-ai-button-text: var(--findbar-ai-text);
-    --findbar-ai-button-padding: 8px 16px;
-    --findbar-ai-button-border-radius: 8px;
-    --findbar-ai-error: light-dark(#dc3545, #ff6b7a);
-    --findbar-ai-error-bg: color-mix(in srgb,
-        var(--findbar-ai-error) 10%,
-        transparent 90%);
-    --findbar-ai-success: light-dark(#28a745, #4caf50);
-    --findbar-ai-warning: light-dark(#ffc107, #ff9800);
+:root {
+  --acrylic-background: rgba(36, 37, 39, 0.6) !important;
+  --acrylic-backdrop: blur(32px) brightness(0.7) saturate(2.5) !important;
+  --acrylic-border: 0.5px solid rgba(255, 255, 255, 0.1);
+  --acrylic-shadow: 0 8px 32px color-mix(in srgb, var(--zen-primary-color) 15%, transparent 85%);
+  --acrylic-radius: 8px;
+  --acrylic-glass-bg: color-mix(in srgb, var(--zen-themed-toolbar-bg) 80%, transparent 20%);
+  --acrylic-glass-blur: blur(20px);
+  --acrylic-glass-border: 1.5px solid color-mix(in srgb, var(--zen-primary-color) 20%, transparent 80%);
+}
 
-    background-color: var(--findbar-ai-bg) !important;
-    position: absolute;
-    top: 20px;
-    width: min(580px, 90%);
-    right: 20px;
-    min-height: 80px;
-    height: auto !important;
-    flex-wrap: wrap;
-    flex-direction: column;
-    border-radius: 16px;
-    border: 1px solid var(--findbar-ai-border) !important;
-    background: var(--findbar-ai-glass-bg);
-    backdrop-filter: blur(20px);
-    box-shadow: var(--findbar-ai-shadow);
-    opacity: 1;
-    animation: initial-animation 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: blur(0);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/*noinspection CssInvalidFunction*/
 
-    &:is([hidden="true"]) {
-      visibility: inherit !important;
-      pointer-events: none !important;
-      opacity: 0 !important;
-      top: 0 !important;
-      animation: glass-disappear 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      animation-fill-mode: forwards !important;
-      filter: blur(5px);
-      transform: translateY(-10px);
+:root {
+--toolbar-field-focus-border-color: transparent !important;
+}
+
+/* Minimal Findbar */
+findbar:not([hidden="true"]) {
+  padding: none !important;
+  padding-inline: 5px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  box-sizing: border-box;
+  position: fixed;
+  top: 1% !important;
+  right: 1% !important;
+  width: min-content !important;
+  min-width: 400px !important;
+  border-radius: var(--acrylic-radius) !important;
+  box-shadow: var(--acrylic-shadow) !important;
+  background: var(--acrylic-glass-bg) !important;
+  backdrop-filter: var(--acrylic-backdrop) var(--acrylic-glass-blur);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: initial-animation 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 9999;
+  opacity: 1;
+  
+  .findbar-match-diacritics,
+  .findbar-case-sensitive,
+  .findbar-highlight,
+  .findbar-entire-word,
+  description {
+    display: none !important;
+  }
+
+  hbox[anonid="findbar-textbox-wrapper"] {
+    .findbar-textbox {
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
     }
+  }
 
-    .findbar-closebutton {
-      outline: none !important;
-      position: absolute !important;
-      top: 12px !important;
-      right: 0 !important;
-      padding: var(--findbar-ai-button-padding) !important;
-      border-radius: var(--findbar-ai-button-border-radius) !important;
-      background: var(--findbar-ai-button-bg) !important;
-      border: 2px solid var(--findbar-ai-border) !important;
-      color: var(--findbar-ai-button-text) !important;
+  toolbarbutton {
+    &:hover {
+      background-color: color-mix(
+        in srgb,
+        var(--zen-primary-color) 50%,
+        transparent 50%
+      ) !important;
+    }
+  }
+
+  .findbar-closebutton {
+    order: 999 !important;
+  }
+  
+  .ai-response-container {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    margin: 5px !important;
+    max-height: 200px !important;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    .user-prompt {
+      font-size: 20px;
       font-weight: 600 !important;
-      transition: all 0.2s ease !important;
-
-      &:hover {
-        background: var(--findbar-ai-button-hover) !important;
-        border-color: var(--findbar-ai-border-hover) !important;
-        scale: 1.1 !important;
-      }
-
-      &:active {
-        scale: 0.9 !important;
-      }
     }
-
-    &.ai-expanded .findbar-closebutton {
-      display: none !important;
-    }
-
-    .findbar-container {
-      margin-left: 10px !important;
-      margin-right: 10px !important;
-      margin-bottom: 5px !important;
-      flex-wrap: wrap;
-      height: auto !important;
-      row-gap: 10px;
-
-      &> :first-child {
-        width: calc(100% - 40px) !important;
-        margin-top: 8px !important;
-        padding-bottom: 10px !important;
-        border-bottom: 1px solid var(--findbar-ai-border) !important;
-        position: relative;
-
-        &::before {
-          content: "";
-          width: 18px !important;
-          min-width: 18px !important;
-          background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23fff" d="M10.5 2c.58 0 1.15.058 1.699.17a1 1 0 1 1-.398 1.96a6.5 6.5 0 1 0 5.069 7.671a1 1 0 1 1 1.96.398a8.5 8.5 0 0 1-1.457 3.303l-.197.26l3.652 3.652a1 1 0 0 1-1.32 1.498l-.094-.084l-3.652-3.652A8.5 8.5 0 1 1 10.5 2M19 1a1 1 0 0 1 .898.56l.048.117l.13.378a3 3 0 0 0 1.684 1.8l.185.07l.378.129a1 1 0 0 1 .118 1.844l-.118.048l-.378.13a3 3 0 0 0-1.8 1.684l-.07.185l-.129.378a1 1 0 0 1-1.844.117l-.048-.117l-.13-.378a3 3 0 0 0-1.684-1.8l-.185-.07l-.378-.129a1 1 0 0 1-.118-1.844l.118-.048l.378-.13a3 3 0 0 0 1.8-1.684l.07-.185l.129-.378A1 1 0 0 1 19 1m0 3.196a5 5 0 0 1-.804.804q.448.355.804.804q.355-.448.804-.804A5 5 0 0 1 19 4.196" /></svg>') !important;
-          background-repeat: no-repeat;
-          margin-top: 9px;
-          margin-right: 15px;
-          margin-left: 5px;
-        }
-
-        /* not being able to hide this when input has value*/
-        /* &::after {
-          content: "Press Alt + Enter to ask AI" !important;
-          position: absolute !important;
-          font-size: 14px !important;
-          left: 36px !important;
-          top: 50% !important;
-          transform: translateY(-50%) !important;
-          color: var(--findbar-ai-text-secondary) !important;
-          pointer-events: none !important;
-          opacity: 0.7 !important;
-          z-index: 10 !important;
-        } */
-
-        .findbar-textbox {
-          background: none !important;
-          padding: 0 !important;
-          font-size: 16px !important;
-          font-weight: 500 !important;
-          box-shadow: none !important;
-          width: 100% !important;
-          border: none !important;
-          color: var(--findbar-ai-text) !important;
-          caret-color: var(--findbar-ai-accent);
-
-          &::placeholder {
-            /* opacity: 0 !important; */
-            /* color: transparent !important; */
-            color: var(--findbar-ai-text-secondary);
-          }
-
-          &:focus {
-            outline: none !important;
-          }
-        }
-
-        toolbarbutton {
-          width: 38px !important;
-          height: 32px !important;
-          justify-content: center !important;
-          align-content: center !important;
-          padding: 0 !important;
-          margin-left: 6px !important;
-          margin-right: 0 !important;
-          border-radius: var(--findbar-ai-button-border-radius) !important;
-          background: var(--findbar-ai-button-bg) !important;
-          border: 2px solid var(--findbar-ai-border) !important;
-          color: var(--findbar-ai-button-text) !important;
-          font-weight: 600 !important;
-          transition: all 0.2s ease !important;
-
-          label {
-            display: none !important;
-          }
-
-          &:hover {
-            background: var(--findbar-ai-button-hover) !important;
-            border-color: var(--findbar-ai-border-hover) !important;
-            scale: 1.1 !important;
-          }
-
-          &:active {
-            scale: 0.9 !important;
-          }
-        }
-      }
-
-      checkbox,
-      label,
-      description {
-        margin-left: 8px !important;
-        margin-right: 8px !important;
-        color: var(--findbar-ai-text) !important;
-      }
-
-      .findbar-label {
-        display: flex;
-        flex-basis: 100% !important;
-
-        &:is([hidden="true"]) {
-          display: none;
-        }
-      }
-
-      .found-matches {
-        font-size: 14px !important;
-        font-weight: 500 !important;
-        margin-top: 12px !important;
-        padding: 6px 12px;
-        margin: auto !important;
-        border-radius: 12px;
-        border: 1px solid var(--findbar-ai-border);
-        color: var(--findbar-ai-text) !important;
-        background: var(--findbar-ai-accent-muted);
-
-        &:not([hidden])::before {
-          background-image: url("chrome://browser/skin/zen-icons/search-page.svg") !important;
-          background-repeat: no-repeat !important;
-          padding-left: 25px !important;
-        }
-      }
-
-      .findbar-find-status {
-        display: none;
-        margin-left: 32px !important;
-
-        &:is([status="notfound"]) {
-          font-size: 14px !important;
-          font-weight: 500 !important;
-          margin-top: 12px !important;
-          padding: 6px 12px;
-          margin: auto !important;
-          border-radius: 12px;
-          background: var(--findbar-ai-error-bg);
-          color: var(--findbar-ai-error);
-          padding: 8px 12px;
-          border-radius: 8px;
-          border: 1px solid color-mix(in srgb, var(--findbar-ai-error) 30%, transparent 70%);
-
-          &::before {
-            content: "";
-            min-width: 18px !important;
-            min-height: 18px !important;
-            background-image: url(chrome://global/skin/icons/close.svg) !important;
-            margin-right: 10px !important;
-            background-repeat: no-repeat !important;
-          }
-        }
-      }
-
-      .findbar-find-status:is([data-l10n-id]) {
-        display: flex;
-      }
-
-      .checkbox-label {
-        font-size: 12px !important;
-        font-weight: 500 !important;
-      }
-    }
-
-    &.ai-expanded .findbar-container {
-      display: none !important;
-    }
-
-    @media (prefers-color-scheme: dark) {
-
-      .findbar-find-status:is([status="notfound"])::before,
-      .found-matches:not([hidden])::before {
-        filter: invert();
-      }
-    }
-
-    .findbar-ai-setup,
-    .findbar-ai-chat {
-      width: 100%;
-      padding: 8px 20px 20px 20px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .findbar-ai-setup {
-      .ai-setup-content {
-        text-align: center;
-
-        h3 {
-          margin: 0 0 8px 0;
-          font-size: 22px;
-          font-weight: 700;
-          color: var(--findbar-ai-text);
-          background: linear-gradient(45deg,
-              var(--findbar-ai-accent),
-              color-mix(in srgb, var(--findbar-ai-accent) 70%, white 30%));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-
-        p {
-          margin: 0 0 12px 0;
-          font-size: 15px;
-          color: var(--findbar-ai-text-secondary);
-          line-height: 1.4;
-        }
-      }
-
-      .api-key-input-group {
-        display: flex;
-        gap: 8px;
-
-        input {
-          flex-grow: 1;
-          border-radius: var(--button-border-radius);
-          border: 2px solid var(--findbar-ai-input-border);
-          background: var(--findbar-ai-input-bg);
-          padding: 10px 12px;
-          font-size: 14px;
-          color: var(--findbar-ai-text);
-          transition: all 0.2s ease;
-
-          &:focus {
-            outline: none;
-            border-color: var(--findbar-ai-accent);
-            box-shadow: 0 0 0 3px var(--findbar-ai-accent-muted);
-          }
-
-          &::placeholder {
-            color: var(--findbar-ai-text-secondary);
-          }
-        }
-
-        button {
-          padding: var(--button-padding);
-          border-radius: var(--button-border-radius);
-          border: 2px solid var(--findbar-ai-border);
-          background: var(--findbar-ai-button-primary);
-          color: var(--findbar-ai-text);
-          cursor: pointer;
-          font-weight: 600;
-          transition: all 0.2s ease;
-          position: relative;
-          overflow: hidden;
-
-          &:hover {
-            background: var(--findbar-ai-button-hover);
-            border-color: var(--findbar-ai-border-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px var(--findbar-ai-accent-muted);
-          }
-
-          &:active {
-            transform: translateY(0);
-          }
-
-          &:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-          }
-        }
-      }
-
-      .api-key-links {
-        margin-top: 12px;
-        font-size: 12px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-
-        button {
-          background: none;
-          border: none;
-          text-decoration: underline;
-          cursor: pointer;
-          color: var(--findbar-ai-accent);
-          padding: 4px 8px;
-          font-size: 12px;
-          border-radius: 4px;
-          transition: all 0.2s ease;
-
-          &:hover {
-            background: var(--findbar-ai-accent-muted);
-            text-decoration: none;
-          }
-        }
-      }
-    }
-
-    .findbar-ai-chat {
-      .ai-chat-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-        gap: 12px;
-      }
-
-      .model-selector {
-        flex-grow: 1;
-        max-width: 220px;
-        border-radius: var(--button-border-radius) !important;
-        padding: 8px 12px;
-        border: 2px solid var(--findbar-ai-input-border) !important;
-        background: var(--findbar-ai-input-bg) !important;
-        color: var(--findbar-ai-text) !important;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.2s ease;
-
-        &:focus {
-          outline: none;
-          border-color: var(--findbar-ai-accent);
-          box-shadow: 0 0 0 3px var(--findbar-ai-accent-muted);
-        }
-
-        &:hover {
-          border-color: var(--findbar-ai-border-hover);
-        }
-      }
-
-      .clear-chat-btn {
-        padding: var(--findbar-ai-button-padding);
-        border-radius: var(--findbar-ai-button-border-radius);
-        border: 2px solid var(--findbar-ai-border);
-        background: var(--findbar-ai-button-bg);
-        color: var(--findbar-ai-button-text);
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.2s ease;
-
-        &:hover {
-          background: var(--findbar-ai-button-hover);
-          border-color: var(--findbar-ai-border-hover);
-          transform: translateY(-1px);
-        }
-
-        &:active {
-          transform: translateY(0);
-        }
-      }
-
-      .ai-chat-messages {
-        max-height: 320px;
-        overflow-y: auto;
-        background: var(--findbar-ai-bg-secondary);
-        border-radius: 12px;
-        padding: 14px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-bottom: 12px;
-        border: 1px solid var(--findbar-ai-border);
-        scrollbar-width: thin;
-        scrollbar-color: var(--findbar-ai-accent) transparent;
-
-        &:empty {
-          display: none;
-        }
-      }
-
-      .chat-message {
-        max-width: 85%;
-        padding: 10px 14px;
-        border-radius: 16px;
-        word-wrap: break-word;
-        line-height: 1.4;
-        font-size: 14px;
-        position: relative;
-      }
-
-      .chat-message-user {
-        align-self: flex-end;
-        background: color-mix(in srgb,
-            var(--findbar-ai-bg) 50%,
-            var(--zen-primary-color) 50%);
-        color: var(--findbar-ai-text);
-        border-bottom-right-radius: 4px;
-        font-weight: 500;
-        box-shadow: 0 2px 8px var(--findbar-ai-accent-muted);
-        border: 1px solid var(--findbar-ai-border);
-      }
-
-      .chat-message-ai {
-        align-self: flex-start;
-        background: var(--findbar-ai-input-bg);
-        color: var(--findbar-ai-text);
-        border: 1px solid var(--findbar-ai-border);
-        border-bottom-left-radius: 4px;
-      }
-
-      .chat-message-error {
-        align-self: flex-start;
-        background: var(--findbar-ai-error-bg);
-        color: var(--findbar-ai-error);
-        border: 1px solid color-mix(in srgb, var(--findbar-ai-error) 30%, transparent 70%);
-      }
-
-      .ai-chat-input-group {
-        display: flex;
-        gap: 8px;
-        align-items: flex-end;
-
-        textarea {
-          flex-grow: 1 !important;
-          border-radius: var(--button-border-radius) !important;
-          padding: 12px !important;
-          min-height: 44px !important;
-          max-height: 160px !important;
-          resize: none !important;
-          border: 2px solid var(--findbar-ai-input-border) !important;
-          background: var(--findbar-ai-input-bg) !important;
-          color: var(--findbar-ai-text) !important;
-          font-size: 14px !important;
-          line-height: 1.4 !important;
-          transition: all 0.2s ease !important;
-
-          &:focus {
-            outline: none !important;
-            border-color: var(--findbar-ai-accent) !important;
-            box-shadow: 0 0 0 3px var(--findbar-ai-accent-muted) !important;
-          }
-
-          &::placeholder {
-            color: var(--findbar-ai-text-secondary) !important;
-          }
-        }
-
-        .send-btn {
-          height: 44px;
-          padding: var(--findbar-ai-button-padding);
-          border-radius: var(--findbar-ai-button-border-radius);
-          background: var(--findbar-ai-button-bg);
-          color: var(--findbar-ai-button-text);
-          border: 2px solid var(--findbar-ai-border);
-          cursor: pointer;
-          font-weight: 600;
-          transition: all 0.2s ease;
-          position: relative;
-          overflow: hidden;
-
-          &:hover:not(:disabled) {
-            background: var(--findbar-ai-button-hover);
-            border-color: var(--findbar-ai-border-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px var(--findbar-ai-accent-muted);
-          }
-
-          &:active:not(:disabled) {
-            transform: translateY(0);
-          }
-
-          &:disabled {
-            background: var(--findbar-ai-text-secondary);
-            border-color: var(--findbar-ai-text-secondary);
-            cursor: not-allowed;
-            opacity: 0.6;
-          }
-        }
-      }
-
-      .chat-message-loading {
-        align-self: flex-start;
-        background: var(--findbar-ai-input-bg);
-        color: var(--findbar-ai-text);
-        border: 1px solid var(--findbar-ai-border);
-        border-bottom-left-radius: 4px;
-
-        .message-content {
-          animation: pulse 1.5s ease-in-out infinite;
-          background: linear-gradient(90deg,
-              transparent,
-              var(--findbar-ai-accent-muted),
-              transparent);
-          background-size: 200% 100%;
-          animation: shimmer 2s infinite;
-        }
-      }
-    }
-
-    .citation-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--findbar-ai-accent-muted);
-      color: var(--findbar-ai-accent);
-      border: 1px solid var(--findbar-ai-border);
-      width: 1.7em !important;
-      height: 1.7em !important;
-      font-size: 0.75em !important;
-      font-weight: 700 !important;
-      cursor: pointer;
-      margin: 0 3px;
-      vertical-align: middle;
-      padding: 0 !important;
-    }
-
-    #findbar-expand {
-      position: relative;
-      text-align: center;
-      cursor: pointer;
-      margin: 8px 12px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      padding: var(--findbar-ai-button-padding);
-      border-radius: var(--findbar-ai-button-border-radius);
-      background: var(--findbar-ai-button-bg);
-      color: var(--findbar-ai-button-text);
-      border: 2px solid var(--findbar-ai-border);
-      font-weight: 600;
-      box-shadow: 0 2px 8px var(--findbar-ai-accent-muted);
-
-      &::before {
-        content: "Expand";
-        display: block;
-        width: 100%;
-        text-align: center;
-        font-size: 16px;
-        font-weight: 700;
-      }
-
-      &:hover {
-        background: var(--findbar-ai-button-hover);
-        border-color: var(--findbar-ai-border-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px var(--findbar-ai-accent-muted);
-      }
-
-      &:active {
-        transform: translateY(0);
-      }
-    }
-
-    &.ai-expanded #findbar-expand::before {
-      content: "Collapse";
-    }
-
-    @media -moz-pref("extension.findbar-ai.minimal") {
-      max-width: 420px !important;
-      flex-direction: row !important;
-      min-height: 56px !important;
-      align-items: center !important;
-      border-radius: 28px !important;
-
-      .findbar-closebutton {
-        top: 12px !important;
-        padding: 3px !important;
-      }
-
-      #findbar-expand {
-        margin: 0 !important;
-        right: 40px !important;
-
-        &:hover {
-          transform: translateY(0) !important;
-          scale: 1.07 !important;
-        }
-
-        &::before {
-          content: "Ask" !important;
-          font-size: 14px !important;
-        }
-      }
-
-      &.ai-expanded {
-        padding-top: 16px !important;
-        border-radius: 16px !important;
-
-        .findbar-closebutton {
-          display: flex !important;
-          top: 8px !important;
-        }
-
-        #findbar-expand {
-          display: none !important;
-        }
-      }
-
-      .findbar-container {
-        margin-bottom: 0 !important;
-        height: 32px !important;
-
-        &> :first-child {
-          border-bottom: 0 !important;
-          width: calc(100% - 33px) !important;
-
-          &::before {
-            margin-top: 2px !important;
-          }
-
-          toolbarbutton {
-            display: none !important;
-          }
-        }
-
-        hbox[anonid="findbar-textbox-wrapper"] {
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-
-        checkbox,
-        label,
-        description {
-          display: none !important;
-        }
-      }
-
-      .model-selector,
-      .clear-chat-btn {
-        display: none !important;
+    .ai-response {
+      align-self: flex-end !important;
+      width: 95% !important;
+      position: relative !important;
+      &:before {
+        content: '';
+        position: absolute;
+        left: -15px;
+        top: .5%;
+        height: 100%;
+        width: 0;
+        border-left: 3px solid #fff;
+        pointer-events: none; /* so it doesn't interfere with interactions */
       }
     }
   }
+  
+  .findbar-container {
+    display: flex !important;
+    flex-direction: row !important;
+    height: fit-content !important;
+    max-height: none !important;
+  }
+  
 }
