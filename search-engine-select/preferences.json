@@ -1,0 +1,34 @@
+[
+  {
+    "property": "extension.search-engine-select.enabled",
+    "label": "Enable Search Engine Select",
+    "type": "checkbox",
+    "placeholder": false,
+    "default": true,
+    "description": "Globally enables or disables the floating search engine switcher UI."
+  },
+  {
+    "property": "extension.search-engine-select.remember-position",
+    "label": "Remember UI Position",
+    "type": "checkbox",
+    "placeholder": false,
+    "default": true,
+    "description": "Saves the vertical position of the switcher after you drag it. Disabling this will reset the position to the middle of the screen on each new search.",
+    "conditions": [
+      {
+        "if": {
+          "property": "extension.search-engine-select.enabled",
+          "value": true
+        }
+      }
+    ]
+  },
+  {
+    "property": "extension.search-engine-select.debug-mode",
+    "label": "Enable Debug Mode",
+    "type": "checkbox",
+    "placeholder": false,
+    "default": false,
+    "description": "Outputs detailed script information to the Browser Console (Ctrl+Shift+J) for troubleshooting."
+  }
+]
