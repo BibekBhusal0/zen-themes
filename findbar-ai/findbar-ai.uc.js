@@ -19,6 +19,7 @@ const CITATIONS_ENABLED = "extension.findbar-ai.citations-enabled";
 
 // TODO: impliment this
 const CONTEXT_MENU_ENABLED = "extension.findbar-ai.context-menu-enabled";
+const CONTEXT_MENU_AUTOSEND = "extension.findbar-ai.context-menu-autosend";
 const CONFORMATION = "extension.findbar-ai.confirmation-before-tool-call";
 const SHOW_TOOL_CALL = "extension.findbar-ai.show-tool-call";
 const DND_ENABLED = "extension.findbar-ai.dnd-enabled";
@@ -480,6 +481,10 @@ const findbar = {
     return getPref(CONTEXT_MENU_ENABLED, true);
   },
 
+  get contextMenuAutoSend() {
+    return getPref(CONTEXT_MENU_AUTOSEND, true);
+  },
+
   addContextMenuItem() {
     if (this.contextMenuItem) return;
     const contextMenu = document.getElementById("contentAreaContextMenu");
@@ -538,22 +543,25 @@ const findbar = {
   },
   handleContextMenuClick: async function() {
     const selection = await windowManagerAPI.getSelectedText();
-    // __AUTO_GENERATED_PRINT_VAR_START__
-    console.log("(anon) selection:", selection); // __AUTO_GENERATED_PRINT_VAR_END__
     if (!selection.hasSelection && selection.selectedText) return;
 
-    const selectedText = selection.selectedText
+    const selectedTextFormatted = selection.selectedText
       .split("\n")
       .map((line) => line.trim())
       .filter((line) => line.length > 0)
       .map((line) => "> " + line)
       .join("\n");
-    // __AUTO_GENERATED_PRINT_VAR_START__
-    console.log("(anon) selectedText:", selectedText); // __AUTO_GENERATED_PRINT_VAR_END__
+
+    const finalMessage =
+      "Explain this in context of current page\n" + selectedTextFormatted;
     this.expanded = true;
-    this.sendMessage(
-      "Explain this in context of current page\n" + selectedText,
-    );
+    if (this.contextMenuAutoSend) {
+      this.sendMessage(finalMessage);
+    } else {
+      const promptInput = this.chatContainer?.querySelector("#ai-prompt");
+      promptInput.value = finalMessage;
+      promptInput?.focus();
+    }
   },
 
   handleContextMenuPrefChange: function(pref) {
