@@ -73,6 +73,7 @@ const findbar = {
   _isExpanded: false,
   aiResponseDiv: null,
   aiUserQuestionDiv: null,
+  labelIntervalId: null,
 
   get expanded() {
     return this._isExpanded;
@@ -148,11 +149,13 @@ const findbar = {
   },
 
   updateFindbar() {
+    console.log('findbar-ai updateFindbar() called');
     if (this.debug) console.log("updateFindbar called");
     this.removeExpandButton();
     this.hide();
     this.expanded = false;
     gBrowser.getFindBar().then((findbar) => {
+      console.log('findbar-ai gBrowser.getFindBar() resolved:', findbar);
       this.findbar = findbar;
       if (this.debug) console.log("findbar set:", this.findbar);
       this.addExpandButton();
@@ -165,9 +168,13 @@ const findbar = {
   },
 
   show() {
+    console.log('findbar-ai show() called');
     if (!this.findbar) return false;
+    console.log('findbar-ai this.findbar:', this.findbar);
     this.findbar.hidden = false;
     if (!this.expanded) this.findbar._findField.focus();
+    // Log the findbar DOM structure for debugging
+    console.log('[findbar-ai] findbar DOM subtree:', this.findbar, this.findbar.outerHTML);
     return true;
   },
   hide() {
@@ -252,27 +259,35 @@ const findbar = {
 
   async sendAIQuery(prompt) {
     if (!this.findbar || !prompt) return;
-    this.removeAIResponse();
+    if (this.findbar._findField) this.findbar._findField.value = '';
     const container = this.findbar.querySelector('.findbar-container');
     if (!container) return;
-    if (this.findbar._findField) this.findbar._findField.value = '';
-    const aiResponseDiv = document.createElement('div');
-    aiResponseDiv.className = 'ai-response-container';
+    // Ensure a single .ai-response-container exists above .findbar-container
+    let aiResponseDiv = this.findbar.parentNode.querySelector('.ai-response-container');
+    if (!aiResponseDiv) {
+      aiResponseDiv = document.createElement('div');
+      aiResponseDiv.className = 'ai-response-container';
+      if (container.parentNode) {
+        container.parentNode.insertBefore(aiResponseDiv, container);
+      }
+    }
+    // Add user prompt
     const userPromptDiv = document.createElement('div');
     userPromptDiv.className = 'user-prompt';
     userPromptDiv.textContent = prompt;
     aiResponseDiv.appendChild(userPromptDiv);
+    // Add AI response (placeholder)
     const aiResponseContentDiv = document.createElement('div');
     aiResponseContentDiv.className = 'ai-response';
     aiResponseContentDiv.textContent = 'Loading...';
     aiResponseDiv.appendChild(aiResponseContentDiv);
-    if (container.parentNode) {
-      container.parentNode.insertBefore(aiResponseDiv, container);
-    }
-    this.aiResponseDiv = aiResponseDiv;
-    this.aiResponseContentDiv = aiResponseContentDiv;
+    // Add ai-active class to .findbar
     this.findbar.classList.add('ai-active');
+    // Move close button out of .findbar-container to .findbar (top right)
     const closeBtn = this.findbar.querySelector('.findbar-closebutton');
+    if (closeBtn && closeBtn.parentElement !== this.findbar) {
+      this.findbar.appendChild(closeBtn);
+    }
     if (closeBtn) closeBtn.classList.add('ai-float-close');
     const pageContext = {
       url: gBrowser.currentURI.spec,
@@ -294,15 +309,17 @@ const findbar = {
   },
 
   removeAIResponse() {
-    if (this.aiResponseDiv) {
-      this.aiResponseDiv.remove();
-      this.aiResponseDiv = null;
-    }
-    this.aiResponseContentDiv = null;
+    // Remove the single .ai-response-container (for when closing/clearing)
+    const aiResponseDiv = this.findbar?.parentNode?.querySelector('.ai-response-container');
+    if (aiResponseDiv) aiResponseDiv.remove();
     if (this.findbar) {
       this.findbar.classList.remove('ai-active');
       const closeBtn = this.findbar.querySelector('.findbar-closebutton');
       if (closeBtn) closeBtn.classList.remove('ai-float-close');
+      const container = this.findbar.querySelector('.findbar-container');
+      if (closeBtn && container && closeBtn.parentElement !== container) {
+        container.appendChild(closeBtn);
+      }
     }
   },
 
