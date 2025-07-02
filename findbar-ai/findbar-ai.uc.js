@@ -26,6 +26,7 @@ const POSITION = "extension.findbar-ai.position";
 
 //default configurations
 UC_API.Prefs.setIfUnset(MINIMAL, true);
+UC_API.Prefs.setIfUnset(ENABLED, true);
 UC_API.Prefs.setIfUnset(CITATIONS_ENABLED, false); // experimental
 
 var markdownStylesInjected = false;
