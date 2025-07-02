@@ -70,7 +70,7 @@ const findbar = {
   _clearGeminiData: null,
   _isExpanded: false,
   _handleContextMenuPrefChange: null,
-  _updateContextMenuVisibility: null,
+  _updateContextMenuText: null,
   contextMenuItem: null,
 
   get expanded() {
@@ -493,8 +493,7 @@ const findbar = {
     const menuItem = document.createXULElement("menuitem");
     menuItem.id = "ai-findbar-context-menu-item";
     menuItem.setAttribute("label", "Ask AI");
-    menuItem.setAttribute("hidden", true);
-    // menuItem.setAttribute("accesskey", accessKey);
+    menuItem.setAttribute("accesskey", "A");
 
     menuItem.addEventListener(
       "command",
@@ -526,12 +525,8 @@ const findbar = {
       }
     }
 
-    this._updateContextMenuVisibility =
-      this.updateContextMenuVisibility.bind(this);
-    contextMenu.addEventListener(
-      "popupshowing",
-      this._updateContextMenuVisibility,
-    );
+    this._updateContextMenuText = this.updateContextMenuText.bind(this);
+    contextMenu.addEventListener("popupshowing", this._updateContextMenuText);
   },
 
   removeContextMenuItem: function() {
@@ -539,21 +534,24 @@ const findbar = {
     this.contextMenuItem = null;
     document
       ?.getElementById("contentAreaContextMenu")
-      ?.removeEventListener("popupshowing", this._updateContextMenuVisibility);
+      ?.removeEventListener("popupshowing", this._updateContextMenuText);
   },
   handleContextMenuClick: async function() {
     const selection = await windowManagerAPI.getSelectedText();
-    if (!selection.hasSelection && selection.selectedText) return;
+    let finalMessage = "";
+    if (!selection.hasSelection) {
+      finalMessage = "Summarize current page";
+    } else {
+      finalMessage += "Explain this in context of current page\n";
+      const selectedTextFormatted = selection?.selectedText
+        ?.split("\n")
+        ?.map((line) => line.trim())
+        ?.filter((line) => line.length > 0)
+        ?.map((line) => "> " + line)
+        ?.join("\n");
 
-    const selectedTextFormatted = selection.selectedText
-      .split("\n")
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0)
-      .map((line) => "> " + line)
-      .join("\n");
-
-    const finalMessage =
-      "Explain this in context of current page\n" + selectedTextFormatted;
+      finalMessage += selectedTextFormatted;
+    }
     this.expanded = true;
     if (this.contextMenuAutoSend) {
       this.sendMessage(finalMessage);
@@ -568,11 +566,11 @@ const findbar = {
     if (pref.value) this.addContextMenuItem();
     else this.removeContextMenuItem();
   },
-  updateContextMenuVisibility() {
+  updateContextMenuText() {
     if (!this.contextMenuEnabled) return;
     if (!this.contextMenuItem) return;
     const hasSelection = gContextMenu?.isTextSelected === true;
-    this.contextMenuItem.hidden = !hasSelection;
+    this.contextMenuItem.label = hasSelection ? "Ask AI" : "Summarize with AI";
   },
 
   //TODO: add drag and drop
