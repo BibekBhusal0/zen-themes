@@ -16,6 +16,7 @@ https://github.com/user-attachments/assets/73413ee0-15b6-4ef3-bc16-faa0302c622f
 - **Buildin Keyboard Shortcuts**: Use the `Ctrl+Shift+F`, `alt+Enter` keymap to open findbar.
 - **Customizable**: Many customization options from `about:config`.
 - **AI Interacting with Browser**: AI can make tool calls to control the browser.
+- **Context Menu**: Directoly ask question about current page to AI from context Menu.
 
 ## 🚨 Caution 🚨
 
@@ -68,14 +69,16 @@ You can customize the Findbar AI via `about:config`.
 
 ### Preferences (`about:config`)
 
-| Preference                               | Type    | Default              | Description                                                                 |
-| ---------------------------------------- | ------- | -------------------- | --------------------------------------------------------------------------- |
-| `extension.findbar-ai.enabled`           | Boolean | `true`               | Toggles the entire feature on or off.                                       |
-| `extension.findbar-ai.gemini-api-key`    | String  | _(empty)_            | **Required**. Your Google Gemini API key.                                   |
-| `extension.findbar-ai.gemini-model`      | String  | `"gemini-2.0-flash"` | The specific Gemini model to use for chat.                                  |
-| `extension.findbar-ai.debug-mode`        | Boolean | `false`              | Set to `true` to enable verbose logging in the Browser Console.             |
-| `extension.findbar-ai.god-mode`          | Boolean | `false`              | When `true` AI can make tool calls.                                         |
-| `extension.findbar-ai.citations-enabled` | Boolean | `false`              | When `true` AI will give source where it the statement from (experimental). |
+| Preference                                   | Type    | Default              | Description                                                                        |
+| -------------------------------------------- | ------- | -------------------- | ---------------------------------------------------------------------------------- |
+| `extension.findbar-ai.enabled`               | Boolean | `true`               | Toggles the entire feature on or off.                                              |
+| `extension.findbar-ai.gemini-api-key`        | String  | _(empty)_            | **Required**. Your Google Gemini API key.                                          |
+| `extension.findbar-ai.gemini-model`          | String  | `"gemini-2.0-flash"` | The specific Gemini model to use for chat.                                         |
+| `extension.findbar-ai.context-menu-enabled`  | Boolean | `true`               | Weather or not to enable context menu item                                         |
+| `extension.findbar-ai.context-menu-autosend` | Boolean | `true`               | When true, message is autometically send to AI after clicking in context menu item |
+| `extension.findbar-ai.debug-mode`            | Boolean | `false`              | Set to `true` to enable verbose logging in the Browser Console.                    |
+| `extension.findbar-ai.god-mode`              | Boolean | `false`              | When `true` AI can make tool calls.                                                |
+| `extension.findbar-ai.citations-enabled`     | Boolean | `false`              | When `true` AI will give source where it the statement from (experimental).        |
 
 > [!WARNING]
 > Don't turn both god-mode and citation at the same time. AI might not function properly.
@@ -123,7 +126,7 @@ More tools will be comming soon.
 - [ ] Add support for other AI models (Claude, OpenAI)
 - [ ] Drag-and-drop to resize and move the findbar (optional)
 - [ ] Pin/unpin the findbar (optional)
-- [ ] Context Menu integration (optional)
+- [x] Context Menu integration
 - [ ] Different themes (glass, light, dark, etc.)
 - [ ] Smooth animations for all interactions
 - [ ] Custom system prompts
