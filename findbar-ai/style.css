@@ -56,6 +56,12 @@
 }
 
 @media -moz-pref("extension.findbar-ai.enabled") {
+  @media -moz-pref("extension.findbar-ai.context-menu-enabled") {
+    #ai-findbar-context-menu-item{
+      --menu-image: url('chrome://browser/skin/trending.svg');
+    }
+  }
+
   findbar {
     --findbar-ai-bg: light-dark(color-mix(in srgb, var(--zen-primary-color) 25%, white 75%),
         color-mix(in srgb, var(--zen-primary-color) 25%, black 75%));

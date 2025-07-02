@@ -491,7 +491,7 @@ const findbar = {
     if (!contextMenu) return;
 
     const menuItem = document.createXULElement("menuitem");
-    menuItem.id = "ai-findbar-context-menu";
+    menuItem.id = "ai-findbar-context-menu-item";
     menuItem.setAttribute("label", "Ask AI");
     menuItem.setAttribute("hidden", true);
     // menuItem.setAttribute("accesskey", accessKey);
