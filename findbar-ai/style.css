@@ -1,11 +1,3 @@
-/* Required for blur rendering */
-browser {
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-}
-
-/* Natsumi Findbar With Custom Tweaks*/
-/* This theme is hevily based off of the natsumi findbar (RIP Natsumi, great project and my insperation */
-
 @keyframes initial-animation {
   from {
     top: 0;
@@ -21,20 +13,21 @@ browser {
   }
 }
 
-@keyframes glass-disappear {
-  0% {
-    backdrop-filter: blur(10px);
+@keyframes closing-animation {
+  from {
+    top: 20px;
     opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
   }
-  99% {
-    backdrop-filter: blur(10px);
-    opacity: 0.1;
-  }
-  100% {
-    backdrop-filter: none;
+  to {
+    top: 0;
     opacity: 0;
+    filter: blur(5px);
+    transform: translateY(-10px);
   }
 }
+
 
 @keyframes pulse {
   0% { opacity: 0.4; }
@@ -64,8 +57,31 @@ browser {
 --toolbar-field-focus-border-color: transparent !important;
 }
 
-/* Minimal Findbar */
 findbar:not([hidden="true"]) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: initial-animation 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+findbar[hidden="true"] {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: closing-animation 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+  .ai-active {
+    .findbar-container:before {
+      content: "";
+      width: 93% !important;
+      height: 1px !important;
+      background-color: rgba(255, 255, 255, 0.15) !important;
+      position: absolute !important;
+      display: flex !important;
+      bottom: 30px !important;
+      left: 3.5% !important;
+    }
+  }
+
+/* Minimal Findbar */
+findbar {
   padding: none !important;
   padding-inline: 5px !important;
   display: flex !important;
@@ -81,8 +97,6 @@ findbar:not([hidden="true"]) {
   box-shadow: var(--acrylic-shadow) !important;
   background: var(--acrylic-glass-bg) !important;
   backdrop-filter: var(--acrylic-backdrop) var(--acrylic-glass-blur);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: initial-animation 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 9999;
   opacity: 1;
   
@@ -139,11 +153,20 @@ findbar:not([hidden="true"]) {
     overflow-x: hidden !important;
     .user-prompt {
       font-size: 16px;
-      font-weight: 600 !important;
+      align-self: flex-end !important;
+      max-width: 83% !important;
+      width: fit-content !important;
+      padding-inline: 7px !important;
+      background-color: light-dark(rgba(0, 0, 0, .70), rgba(255, 255, 255, 0.05)) !important;
+      border-top-right-radius: 10px !important;
+      border-bottom-left-radius: 10px !important;
+      border-top-left-radius: 10px !important;
+      margin-right: 3px !important;
     }
     .ai-response {
-      align-self: flex-end !important;
-      width: 93% !important;
+      align-self: flex-start !important;
+      margin-left: 3px;
+      width: 83% !important;
       position: relative !important;
       padding: 7px !important;
       p {
@@ -151,6 +174,7 @@ findbar:not([hidden="true"]) {
       }
     }
   }
+ 
   
   .findbar-container:has(.found-matches:not([hidden])) {
        .findbar-textbox {
@@ -161,9 +185,12 @@ findbar:not([hidden="true"]) {
     .findbar-container:has(.found-matches[hidden="true"]) {
        .findbar-textbox {
         max-width: 100% !important;
+         width: 95% !important;
+      }
+      .findbar-find-previous, .findbar-find-next {
+        display: none !important;
       }
   }
-
   
   .findbar-container {
     display: flex !important;
@@ -187,4 +214,33 @@ findbar:not([hidden="true"]) {
       
     }
   }
+  
+}
+
+.markdown-body {
+  font-size: 15px !important;
+  line-height: 1.5;
+}
+.markdown-body h1 {
+  font-size: 15px !important;
+  margin: 0.5em 0 0.3em 0;
+}
+.markdown-body h2 {
+  font-size: 14px !important;
+  margin: 0.5em 0 0.3em 0;
+}
+.markdown-body h3 {
+  font-size: 13px !important;
+  margin: 0.5em 0 0.3em 0;
+}
+.markdown-body p,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body li {
+  font-size: 11px !important;
+  margin: 0.2em 0;
+}
+.markdown-body code,
+.markdown-body pre {
+  font-size: 11px !important;
 }
