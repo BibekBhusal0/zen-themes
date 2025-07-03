@@ -28,18 +28,6 @@
   }
 }
 
-
-@keyframes pulse {
-  0% { opacity: 0.4; }
-  50% { opacity: 1; }
-  100% { opacity: 0.4; }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
 :root {
   --acrylic-background: rgba(36, 37, 39, 0.6) !important;
   --acrylic-backdrop: blur(32px) brightness(0.7) saturate(2.5) !important;
@@ -179,6 +167,7 @@ findbar {
   .findbar-container:has(.found-matches:not([hidden])) {
        .findbar-textbox {
         max-width: 160px !important;
+         text-overflow: ellipsis !important;
     }
   }
   
@@ -201,7 +190,8 @@ findbar {
     }
     .findbar-label {
       position: absolute !important;
-      right: 140px !important;
+      right: 145px !important;
+      transform-origin: right !important;
     }
     #findbar-ask-btn {
       margin-left: auto !important;
