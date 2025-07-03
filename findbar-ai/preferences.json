@@ -67,7 +67,9 @@
     "description": "Select the Mistral model to use for chat responses.",
     "options": [
       { "value": "mistral-small", "label": "Mistral Small" },
-      { "value": "mistral-large-latest", "label": "Mistral Large Latest" }
+      { "value": "mistral-medium-latest", "label": "Mistral Medium Latest" },
+      { "value": "mistral-large-latest", "label": "Mistral Large Latest" },
+      { "value": "pixtral-large-latest", "label": "Pixtral Large Latest" }
     ],
     "conditions": [{ "if": { "property": "extension.findbar-ai.llm-provider", "value": "mistral" } }]
   },
@@ -109,13 +111,6 @@
     "label": "Output Settings"
   },
   {
-    "property": "extension.findbar-ai.citations-enabled",
-    "label": "Citations",
-    "type": "checkbox",
-    "default": false,
-    "description": "(EXPERIMENTAL) AI will give link in page where text is from."
-  },
-  {
     "property": "extension.findbar-ai.markdown-enabled",
     "label": "Enable Markdown Output",
     "type": "checkbox",
@@ -152,13 +147,6 @@
   {
     "type": "separator",
     "label": "Debug"
-  },
-  {
-    "property": "extension.findbar-ai.debug-mode",
-    "label": "Enable Debug Mode",
-    "type": "checkbox",
-    "default": false,
-    "description": "Enables verbose logging in the Browser Console for troubleshooting."
   },
   {
     "property": "extension.findbar-ai.debug",
