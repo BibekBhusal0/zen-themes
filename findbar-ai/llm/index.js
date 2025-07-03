@@ -11,14 +11,17 @@ import PREFS, { debugLog, debugError } from "../prefs.js";
 const llm = {
   history: [],
   systemInstruction: null,
-  currentProvider: mistral,
   AVAILABLE_PROVIDERS: {
     gemini: gemini,
     mistral: mistral,
   },
+  get currentProvider() {
+    const providerName = PREFS.llmProvider || "gemini";
+    return this.AVAILABLE_PROVIDERS[providerName];
+  },
   setProvider(providerName) {
     if (this.AVAILABLE_PROVIDERS[providerName]) {
-      this.currentProvider = this.AVAILABLE_PROVIDERS[providerName];
+      PREFS.llmProvider = providerName;
       this.clearData();
       debugLog(`Switched LLM provider to: ${providerName}`);
     } else {

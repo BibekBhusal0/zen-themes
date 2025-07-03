@@ -10,6 +10,7 @@ export const PREFS = {
 
   DEBUG_MODE: "extension.findbar-ai.debug-mode",
 
+  LLM_PROVIDER: "extension.findbar-ai.llm-provider",
   MISTRAL_API_KEY: "extension.findbar-ai.mistral-api-key",
   MISTRAL_MODEL: "extension.findbar-ai.mistral-model",
 
@@ -86,6 +87,13 @@ export const PREFS = {
     UC_API.Prefs.set(this.CONTEXT_MENU_AUTOSEND, value);
   },
 
+  get llmProvider() {
+    return this.getPref(this.LLM_PROVIDER);
+  },
+  set llmProvider(value) {
+    UC_API.Prefs.set(this.LLM_PROVIDER, value);
+  },
+
   get mistralApiKey() {
     return this.getPref(this.MISTRAL_API_KEY);
   },
@@ -141,6 +149,7 @@ PREFS.defaultValues = {
   [PREFS.CITATIONS_ENABLED]: false,
   [PREFS.CONTEXT_MENU_ENABLED]: true,
   [PREFS.CONTEXT_MENU_AUTOSEND]: true,
+  [PREFS.LLM_PROVIDER]: "gemini",
   [PREFS.MISTRAL_API_KEY]: "",
   [PREFS.MISTRAL_MODEL]: "mistral-medium-latest",
   [PREFS.GEMINI_API_KEY]: "",

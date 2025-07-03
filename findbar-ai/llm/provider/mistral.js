@@ -56,6 +56,11 @@ function normalizeSchemaTypes(obj) {
 }
 
 const mistral = {
+  name: "mistral",
+  label: "Mistral AI",
+  faviconUrl:
+    "https://www.google.com/s2/favicons?sz=64&domain_url=https%3A%2F%2Fmistral.ai%2F",
+  apiKeyUrl: "https://console.mistral.ai/api-keys/",
   AVAILABLE_MODELS: [
     "mistral-small",
     "mistral-medium-latest",

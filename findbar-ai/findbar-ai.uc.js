@@ -143,13 +143,30 @@ const findbar = {
   },
 
   createAPIKeyInterface() {
+    const currentProviderName = llm.currentProvider.name;
     const html = `
       <div class="findbar-ai-setup">
         <div class="ai-setup-content">
-          <h3>Gemini AI Setup Required</h3>
-          <p>To use AI features, you need a Gemini API key.</p>
+          <h3>AI Setup Required</h3>
+          <p>To use AI features, you need to set up your API key and select a provider.</p>
+          <div class="provider-selection-group">
+            <label for="provider-selector">Select Provider:</label>
+            <select id="provider-selector">
+              ${Object.entries(llm.AVAILABLE_PROVIDERS)
+        .map(
+          ([name, provider]) => `
+                <option value="${name}" ${name === currentProviderName ? "selected" : ""
+            }>
+                  <img class="favicon" src="${provider.faviconUrl}" alt="${provider.label} Favicon">
+                  ${provider.label}
+                </option>
+              `,
+        )
+        .join("")}
+            </select>
+          </div>
           <div class="api-key-input-group">
-            <input type="password" id="gemini-api-key" placeholder="Enter your Gemini API key" />
+            <input type="password" id="api-key" placeholder="Enter your API key" />
             <button id="save-api-key">Save</button>
           </div>
           <div class="api-key-links">
@@ -159,14 +176,32 @@ const findbar = {
       </div>`;
     const container = createHTMLElement(html);
 
-    const input = container.querySelector("#gemini-api-key");
+    const providerSelector = container.querySelector("#provider-selector");
+    const input = container.querySelector("#api-key");
     const saveBtn = container.querySelector("#save-api-key");
     const getApiKeyLink = container.querySelector("#get-api-key-link");
 
-    getApiKeyLink.addEventListener("click", () => {
-      openTrustedLinkIn("https://aistudio.google.com/app/apikey", "tab");
+    // Initialize the input and link based on the currently selected provider
+    input.value = llm.currentProvider.apiKey || "";
+    getApiKeyLink.disabled = !llm.currentProvider.apiKeyUrl;
+    getApiKeyLink.title = llm.currentProvider.apiKeyUrl
+      ? "Get API Key"
+      : "No API key link available for this provider.";
+
+    providerSelector.addEventListener("change", () => {
+      const selectedProviderName = providerSelector.value;
+      llm.setProvider(selectedProviderName);
+      input.value = llm.currentProvider.apiKey || "";
+      getApiKeyLink.disabled = !llm.currentProvider.apiKeyUrl;
+      getApiKeyLink.title = llm.currentProvider.apiKeyUrl
+        ? "Get API Key"
+        : "No API key link available for this provider.";
     });
-    if (llm.currentProvider.apiKey) input.value = llm.currentProvider.apiKey;
+
+    getApiKeyLink.addEventListener("click", () => {
+      openTrustedLinkIn(llm.currentProvider.apiKeyUrl, "tab");
+    });
+
     saveBtn.addEventListener("click", () => {
       const key = input.value.trim();
       if (key) {
