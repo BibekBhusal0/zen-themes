@@ -4,7 +4,6 @@
 // │                        BOOKMARKS                        │
 // ╰─────────────────────────────────────────────────────────╯
 
-
 /**
  * Searches bookmarks based on a query.
  * @param {object} args - The arguments object.

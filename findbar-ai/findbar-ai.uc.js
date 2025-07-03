@@ -1,7 +1,7 @@
 import windowManager, { windowManagerAPI } from "./windowManager.js";
 import { markedStyles } from "chrome://userscripts/content/engine/marked.js";
 import getPref from "../utils/getPref.mjs";
-import gemini from "./gemini.js";
+import { llm } from "./llm/index.js";
 windowManager();
 
 const createHTMLElement = (htmlString) => {
@@ -67,7 +67,7 @@ const findbar = {
   _updateFindbar: null,
   _addKeymaps: null,
   _handleInputKeyPress: null,
-  _clearGeminiData: null,
+  _clearLLMData: null,
   _isExpanded: false,
   _handleContextMenuPrefChange: null,
   _updateContextMenuText: null,
@@ -125,9 +125,9 @@ const findbar = {
     this.removeAIInterface();
     this.hide();
     this.expanded = false;
-    if (!gemini.godMode) {
-      gemini.setSystemPrompt(null);
-      gemini.clearData();
+    if (!llm.godMode) {
+      llm.setSystemPrompt(null);
+      llm.clearData();
     }
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
@@ -182,11 +182,11 @@ const findbar = {
     getApiKeyLink.addEventListener("click", () => {
       openTrustedLinkIn("https://aistudio.google.com/app/apikey", "tab");
     });
-    if (gemini.apiKey) input.value = gemini.apiKey;
+    if (llm.currentProvider.apiKey) input.value = llm.currentProvider.apiKey;
     saveBtn.addEventListener("click", () => {
       const key = input.value.trim();
       if (key) {
-        gemini.apiKey = key;
+        llm.currentProvider.apiKey = key;
         this.showAIInterface();
       }
     });
@@ -224,7 +224,7 @@ const findbar = {
     }
 
     try {
-      const response = await gemini.sendMessage(prompt, pageContext);
+      const response = await llm.sendMessage(prompt, pageContext);
       if (response && response.answer) {
         this.addChatMessage(response, "ai");
       }
@@ -241,10 +241,10 @@ const findbar = {
   },
 
   createChatInterface() {
-    const modelOptions = gemini.AVAILABLE_MODELS.map((model) => {
+    const modelOptions = llm.currentProvider.AVAILABLE_MODELS.map((model) => {
       const displayName =
         model.charAt(0).toUpperCase() + model.slice(1).replace(/-/g, " ");
-      return `<option value="${model}" ${model === gemini.model ? "selected" : ""
+      return `<option value="${model}" ${model === llm.currentProvider.model ? "selected" : ""
         }>${displayName}</option>`;
     }).join("");
 
@@ -269,7 +269,7 @@ const findbar = {
     const clearBtn = container.querySelector("#clear-chat");
 
     modelSelector.addEventListener("change", (e) => {
-      gemini.model = e.target.value;
+      llm.currentProvider.model = e.target.value;
     });
     const handleSend = () => this.sendMessage(promptInput.value.trim());
     sendBtn.addEventListener("click", handleSend);
@@ -282,7 +282,7 @@ const findbar = {
 
     clearBtn.addEventListener("click", () => {
       container.querySelector("#chat-messages").innerHTML = "";
-      gemini.clearData();
+      llm.clearData();
     });
 
     chatMessages.addEventListener("click", async (e) => {
@@ -351,12 +351,12 @@ const findbar = {
     if (!this.findbar) return;
     this.removeAIInterface();
 
-    if (!gemini.apiKey) {
+    if (!llm.currentProvider.apiKey) {
       this.apiKeyContainer = this.createAPIKeyInterface();
       this.findbar.insertBefore(this.apiKeyContainer, this.expandButton);
     } else {
       this.chatContainer = this.createChatInterface();
-      const history = gemini.getHistory();
+      const history = llm.getHistory();
       for (const message of history) {
         if (
           message.role === "tool" ||
@@ -370,7 +370,7 @@ const findbar = {
 
         let responsePayload = {};
 
-        if (isModel && gemini.citationsEnabled) {
+        if (isModel && llm.citationsEnabled) {
           try {
             responsePayload = JSON.parse(textContent);
           } catch (e) {
@@ -608,14 +608,14 @@ const findbar = {
     this._updateFindbar = this.updateFindbar.bind(this);
     this._addKeymaps = this.addKeymaps.bind(this);
     this._handleInputKeyPress = this.handleInputKeyPress.bind(this);
-    this._clearGeminiData = gemini.clearData.bind(gemini);
+    this._clearLLMData = llm.clearData.bind(llm);
     this._handleContextMenuPrefChange =
       this.handleContextMenuPrefChange.bind(this);
 
     gBrowser.tabContainer.addEventListener("TabSelect", this._updateFindbar);
     document.addEventListener("keydown", this._addKeymaps);
-    UC_API.Prefs.addListener(GOD_MODE, this._clearGeminiData);
-    UC_API.Prefs.addListener(CITATIONS_ENABLED, this._clearGeminiData);
+    UC_API.Prefs.addListener(GOD_MODE, this._clearLLMData);
+    UC_API.Prefs.addListener(CITATIONS_ENABLED, this._clearLLMData);
     UC_API.Prefs.addListener(
       CONTEXT_MENU_ENABLED,
       this._handleContextMenuPrefChange,
@@ -629,8 +629,8 @@ const findbar = {
       );
     gBrowser.tabContainer.removeEventListener("TabSelect", this._updateFindbar);
     document.removeEventListener("keydown", this._addKeymaps);
-    UC_API.Prefs.removeListener(GOD_MODE, this._clearGeminiData);
-    UC_API.Prefs.removeListener(CITATIONS_ENABLED, this._clearGeminiData);
+    UC_API.Prefs.removeListener(GOD_MODE, this._clearLLMData);
+    UC_API.Prefs.removeListener(CITATIONS_ENABLED, this._clearLLMData);
     UC_API.Prefs.removeListener(
       CONTEXT_MENU_ENABLED,
       this._handleContextMenuPrefChange,
@@ -640,10 +640,11 @@ const findbar = {
     this._updateFindbar = null;
     this._addKeymaps = null;
     this._handleContextMenuPrefChange = null;
-    this._clearGeminiData = null;
+    this._clearLLMData = null;
   },
 };
 
 findbar.init();
 UC_API.Prefs.addListener(ENABLED, findbar.handleEnabledChange.bind(findbar));
 window.findbar = findbar;
+
