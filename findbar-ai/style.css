@@ -57,7 +57,7 @@
 
 @media -moz-pref("extension.findbar-ai.enabled") {
   @media -moz-pref("extension.findbar-ai.context-menu-enabled") {
-    #ai-findbar-context-menu-item{
+    #ai-findbar-context-menu-item {
       --menu-image: url('chrome://browser/skin/trending.svg');
     }
   }
@@ -125,6 +125,51 @@
     animation: initial-animation 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     filter: blur(0);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+
+    input {
+      flex-grow: 1 !important;
+      border-radius: var(--button-border-radius) !important;
+      border: 2px solid var(--findbar-ai-input-border) !important;
+      background: var(--findbar-ai-input-bg) !important;
+      padding: 10px 12px !important;
+      font-size: 14px !important;
+      color: var(--findbar-ai-text) !important;
+      transition: all 0.2s ease !important;
+
+      &:focus {
+        outline: none !important;
+        border-color: var(--findbar-ai-accent) !important;
+        box-shadow: 0 0 0 3px var(--findbar-ai-accent-muted) !important;
+      }
+
+      &::placeholder {
+        color: var(--findbar-ai-text-secondary);
+      }
+    }
+
+    select {
+      max-width: 220px;
+      border-radius: var(--button-border-radius) !important;
+      padding: 8px 12px;
+      border: 2px solid var(--findbar-ai-input-border) !important;
+      background: var(--findbar-ai-input-bg) !important;
+      color: var(--findbar-ai-text) !important;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: var(--findbar-ai-accent);
+        box-shadow: 0 0 0 3px var(--findbar-ai-accent-muted);
+      }
+
+      &:hover {
+        border-color: var(--findbar-ai-border-hover);
+      }
+    }
+
 
     &:is([hidden="true"]) {
       visibility: inherit !important;
@@ -358,24 +403,28 @@
         text-align: center;
 
         h3 {
-          margin: 0 0 8px 0;
-          font-size: 22px;
-          font-weight: 700;
-          color: var(--findbar-ai-text);
+          margin: 0 0 8px 0 !important;
+          font-size: 22px !important;
+          font-weight: 700 !important;
+          color: var(--findbar-ai-text) !important;
           background: linear-gradient(45deg,
               var(--findbar-ai-accent),
-              color-mix(in srgb, var(--findbar-ai-accent) 70%, white 30%));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+              color-mix(in srgb, var(--findbar-ai-accent) 70%, white 30%)) !important;
+          -webkit-background-clip: text !important;
+          -webkit-text-fill-color: transparent !important;
+          background-clip: text !important;
         }
 
         p {
-          margin: 0 0 12px 0;
-          font-size: 15px;
-          color: var(--findbar-ai-text-secondary);
-          line-height: 1.4;
+          margin: 0 0 12px 0 !important;
+          font-size: 15px !important;
+          color: var(--findbar-ai-text-secondary) !important;
+          line-height: 1.4 !important;
         }
+      }
+
+      .provider-selection-group {
+        padding: 10px 0px !important;
       }
 
       .api-key-input-group {
@@ -383,24 +432,7 @@
         gap: 8px;
 
         input {
-          flex-grow: 1;
-          border-radius: var(--button-border-radius);
-          border: 2px solid var(--findbar-ai-input-border);
-          background: var(--findbar-ai-input-bg);
-          padding: 10px 12px;
-          font-size: 14px;
-          color: var(--findbar-ai-text);
-          transition: all 0.2s ease;
-
-          &:focus {
-            outline: none;
-            border-color: var(--findbar-ai-accent);
-            box-shadow: 0 0 0 3px var(--findbar-ai-accent-muted);
-          }
-
-          &::placeholder {
-            color: var(--findbar-ai-text-secondary);
-          }
+          flex-grow: 1 !important;
         }
 
         button {
@@ -472,25 +504,6 @@
 
       .model-selector {
         flex-grow: 1;
-        max-width: 220px;
-        border-radius: var(--button-border-radius) !important;
-        padding: 8px 12px;
-        border: 2px solid var(--findbar-ai-input-border) !important;
-        background: var(--findbar-ai-input-bg) !important;
-        color: var(--findbar-ai-text) !important;
-        cursor: pointer;
-        font-weight: 500;
-        transition: all 0.2s ease;
-
-        &:focus {
-          outline: none;
-          border-color: var(--findbar-ai-accent);
-          box-shadow: 0 0 0 3px var(--findbar-ai-accent-muted);
-        }
-
-        &:hover {
-          border-color: var(--findbar-ai-border-hover);
-        }
       }
 
       .clear-chat-btn {
