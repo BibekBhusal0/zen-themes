@@ -1,22 +1,4 @@
-import getPref from "../../../utils/getPref.mjs";
-
-// Prefs keys
-const API_KEY = "extension.findbar-ai.gemini-api-key";
-const MODEL = "extension.findbar-ai.gemini-model";
-const DEBUG_MODE = "extension.findbar-ai.debug-mode";
-
-// Debug logging helper
-const debugLog = (...args) => {
-  if (getPref(DEBUG_MODE, false)) {
-    console.log("FindbarAI [Gemini]:", ...args);
-  }
-};
-
-const debugError = (...args) => {
-  if (getPref(DEBUG_MODE, false)) {
-    console.error("FindbarAI [Gemini]:", ...args);
-  }
-};
+import PREFS from "../../prefs.js";
 
 const gemini = {
   AVAILABLE_MODELS: [
@@ -32,17 +14,17 @@ const gemini = {
   ],
 
   get apiKey() {
-    return getPref(API_KEY, "");
+    return PREFS.geminiApiKey;
   },
   set apiKey(value) {
-    UC_API.Prefs.set(API_KEY, value || "");
+    if (typeof value === "string") PREFS.geminiApiKey = value;
   },
 
   get model() {
-    return getPref(MODEL, "gemini-2.0-flash");
+    return PREFS.geminiModel;
   },
   set model(value) {
-    if (this.AVAILABLE_MODELS.includes(value)) UC_API.Prefs.set(MODEL, value);
+    if (this.AVAILABLE_MODELS.includes(value)) PREFS.geminiModel = value;
   },
 
   get apiUrl() {

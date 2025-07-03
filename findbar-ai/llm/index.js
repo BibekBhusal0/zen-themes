@@ -1,30 +1,12 @@
 import gemini from "./provider/gemini.js";
 import mistral from "./provider/mistral.js";
-import getPref from "../../utils/getPref.mjs";
 import {
   toolDeclarations,
   availableTools,
   getToolSystemPrompt,
 } from "./tools.js";
 import { windowManagerAPI } from "../windowManager.js";
-
-// Prefs keys
-const GOD_MODE = "extension.findbar-ai.god-mode";
-const CITATIONS_ENABLED = "extension.findbar-ai.citations-enabled";
-const DEBUG_MODE = "extension.findbar-ai.debug-mode";
-
-// Debug logging helper
-const debugLog = (...args) => {
-  if (getPref(DEBUG_MODE, false)) {
-    console.log("FindbarAI :", ...args);
-  }
-};
-
-const debugError = (...args) => {
-  if (getPref(DEBUG_MODE, false)) {
-    console.error("FindbarAI :", ...args);
-  }
-};
+import PREFS, { debugLog, debugError } from "../prefs.js";
 
 const llm = {
   history: [],
@@ -33,12 +15,6 @@ const llm = {
   AVAILABLE_PROVIDERS: {
     gemini: gemini,
     mistral: mistral,
-  },
-  get godMode() {
-    return getPref(GOD_MODE, false);
-  },
-  get citationsEnabled() {
-    return getPref(CITATIONS_ENABLED, true);
   },
   setProvider(providerName) {
     if (this.AVAILABLE_PROVIDERS[providerName]) {
@@ -60,11 +36,11 @@ const llm = {
 ## Your Instructions:
 - Be concise, accurate, and helpful.`;
 
-    if (this.godMode) {
+    if (PREFS.godMode) {
       systemPrompt += await getToolSystemPrompt();
     }
 
-    if (this.citationsEnabled) {
+    if (PREFS.citationsEnabled) {
       systemPrompt += `
 
 ## Citation Instructions
@@ -196,7 +172,7 @@ This example is correct, note that it contain unique \`id\`, and each in text ci
 `;
     }
 
-    if (!this.godMode) {
+    if (!PREFS.godMode) {
       systemPrompt += `
 - Strictly base all your answers on the webpage content provided below.
 - If the user's question cannot be answered from the content, state that the information is not available on the page.
@@ -226,11 +202,11 @@ Here is the initial info about the current page:
       contents: this.history,
       systemInstruction: this.systemInstruction,
     };
-    if (this.citationsEnabled) {
+    if (PREFS.citationsEnabled) {
       requestBody.generationConfig = { responseMimeType: "application/json" };
     }
 
-    if (this.godMode) {
+    if (PREFS.godMode) {
       requestBody.tools = toolDeclarations;
     }
     let modelResponse = await this.currentProvider.sendMessage(requestBody);
@@ -244,7 +220,7 @@ Here is the initial info about the current page:
       (part) => part.functionCall,
     );
 
-    if (this.godMode && functionCalls.length > 0) {
+    if (PREFS.godMode && functionCalls.length > 0) {
       debugLog("Function call(s) requested by model:", functionCalls);
 
       const functionResponses = [];
@@ -273,7 +249,7 @@ Here is the initial info about the current page:
       requestBody = {
         contents: this.history,
         systemInstruction: this.systemInstruction,
-        generationConfig: this.citationsEnabled
+        generationConfig: PREFS.citationsEnabled
           ? { responseMimeType: "application/json" }
           : {},
       };
@@ -282,7 +258,7 @@ Here is the initial info about the current page:
       this.history.push(modelResponse);
     }
 
-    if (this.citationsEnabled) {
+    if (PREFS.citationsEnabled) {
       try {
         const responseText =
           modelResponse.parts.find((part) => part.text)?.text || "{}";

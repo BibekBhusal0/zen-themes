@@ -1,21 +1,4 @@
-import getPref from "../../../utils/getPref.mjs";
-
-const API_KEY = "extension.findbar-ai.mistral-api-key";
-const MODEL = "extension.findbar-ai.mistral-model";
-const DEBUG_MODE = "extension.findbar-ai.debug-mode";
-
-// Debug logging helper
-const debugLog = (...args) => {
-  if (getPref(DEBUG_MODE, false)) {
-    console.log("FindbarAI [Mistral]:", ...args);
-  }
-};
-
-const debugError = (...args) => {
-  if (getPref(DEBUG_MODE, false)) {
-    console.error("FindbarAI [Mistral]:", ...args);
-  }
-};
+import PREFS, { debugLog, debugError } from "../../prefs.js";
 
 // --- Mistral API Rate Limiting ---
 let mistralRequestQueue = [];
@@ -74,24 +57,24 @@ function normalizeSchemaTypes(obj) {
 
 const mistral = {
   AVAILABLE_MODELS: [
-    "mistral-small-latest",
+    "mistral-small",
     "mistral-medium-latest",
     "mistral-large-latest",
     "pixtral-large-latest",
   ],
 
   get apiKey() {
-    return getPref(API_KEY, "");
+    return PREFS.mistralApiKey;
   },
   set apiKey(value) {
-    UC_API.Prefs.set(API_KEY, value || "");
+    if (typeof value === "string") PREFS.mistralApiKey = value;
   },
 
   get model() {
-    return getPref(MODEL, "mistral-medium-latest");
+    return PREFS.mistralModel;
   },
   set model(value) {
-    if (this.AVAILABLE_MODELS.includes(value)) UC_API.Prefs.set(MODEL, value);
+    if (this.AVAILABLE_MODELS.includes(value)) PREFS.mistralModel = value;
   },
 
   get apiUrl() {

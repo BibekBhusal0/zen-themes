@@ -2,16 +2,7 @@
 // ===========================================================
 // Module to read HTML content (and maybe modify if I implement it)
 // ===========================================================
-const getPref = (key, defaultValue) => {
-  try {
-    const pref = UC_API.Prefs.get(key);
-    if (!pref) return defaultValue;
-    if (!pref.exists()) return defaultValue;
-    return pref.value;
-  } catch {
-    return defaultValue;
-  }
-};
+import { debugError, debugLog } from "./prefs.js";
 
 const getUrlAndTitle = () => {
   return {
@@ -27,19 +18,6 @@ ChromeUtils.defineESModuleGetters(_lazy, {
 });
 
 const windowManagerName = "FindbarAIWindowManager";
-
-// Debug logging helper
-const debugLog = (...args) => {
-  if (getPref("extension.findbar-ai.debug-mode", false)) {
-    console.log(...args);
-  }
-};
-
-const debugError = (...args) => {
-  if (getPref("extension.findbar-ai.debug-mode", false)) {
-    console.error(...args);
-  }
-};
 
 const windowManager = () => {
   if (_actors.has(windowManagerName)) {

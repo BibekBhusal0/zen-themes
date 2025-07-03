@@ -1,7 +1,8 @@
 import windowManager, { windowManagerAPI } from "./windowManager.js";
 import { markedStyles } from "chrome://userscripts/content/engine/marked.js";
-import getPref from "../utils/getPref.mjs";
 import { llm } from "./llm/index.js";
+import { PREFS } from "./prefs.js";
+
 windowManager();
 
 const createHTMLElement = (htmlString) => {
@@ -11,24 +12,7 @@ const createHTMLElement = (htmlString) => {
   return element;
 };
 
-// prefs keys
-const ENABLED = "extension.findbar-ai.enabled";
-const MINIMAL = "extension.findbar-ai.minimal";
-const GOD_MODE = "extension.findbar-ai.god-mode";
-const CITATIONS_ENABLED = "extension.findbar-ai.citations-enabled";
-
-// TODO: impliment this
-const CONTEXT_MENU_ENABLED = "extension.findbar-ai.context-menu-enabled";
-const CONTEXT_MENU_AUTOSEND = "extension.findbar-ai.context-menu-autosend";
-const CONFORMATION = "extension.findbar-ai.confirmation-before-tool-call";
-const SHOW_TOOL_CALL = "extension.findbar-ai.show-tool-call";
-const DND_ENABLED = "extension.findbar-ai.dnd-enabled";
-const POSITION = "extension.findbar-ai.position";
-
-//default configurations
-UC_API.Prefs.setIfUnset(MINIMAL, true);
-UC_API.Prefs.setIfUnset(ENABLED, true);
-UC_API.Prefs.setIfUnset(CITATIONS_ENABLED, false); // experimental
+PREFS.setInitialPrefs();
 
 var markdownStylesInjected = false;
 const injectMarkdownStyles = () => {
@@ -100,10 +84,10 @@ const findbar = {
   },
 
   get enabled() {
-    return getPref(ENABLED, true);
+    return PREFS.enabled;
   },
   set enabled(value) {
-    if (typeof value === "boolean") UC_API.Prefs.set(ENABLED, value);
+    if (typeof value === "boolean") PREFS.enabled = value;
   },
   toggleEnabled() {
     this.enabled = !this.enabled;
@@ -114,10 +98,10 @@ const findbar = {
   },
 
   get minimal() {
-    return getPref(MINIMAL, true);
+    return PREFS.minimal;
   },
   set minimal(value) {
-    if (typeof value === "boolean") UC_API.Prefs.set(MINIMAL, value);
+    if (typeof value === "boolean") PREFS.minimal = value;
   },
 
   updateFindbar() {
@@ -430,7 +414,7 @@ const findbar = {
     if (!this.enabled) return;
     this.updateFindbar();
     this.addListeners();
-    if (this.contextMenuEnabled) {
+    if (PREFS.contextMenuEnabled) {
       setTimeout(() => this.addContextMenuItem(), 200);
     }
   },
@@ -475,14 +459,6 @@ const findbar = {
       this.expanded = true;
       this.sendMessage(inpText);
     }
-  },
-
-  get contextMenuEnabled() {
-    return getPref(CONTEXT_MENU_ENABLED, true);
-  },
-
-  get contextMenuAutoSend() {
-    return getPref(CONTEXT_MENU_AUTOSEND, true);
   },
 
   addContextMenuItem() {
@@ -553,7 +529,7 @@ const findbar = {
       finalMessage += selectedTextFormatted;
     }
     this.expanded = true;
-    if (this.contextMenuAutoSend) {
+    if (PREFS.contextMenuAutoSend) {
       this.sendMessage(finalMessage);
     } else {
       const promptInput = this.chatContainer?.querySelector("#ai-prompt");
@@ -567,7 +543,7 @@ const findbar = {
     else this.removeContextMenuItem();
   },
   updateContextMenuText() {
-    if (!this.contextMenuEnabled) return;
+    if (!PREFS.contextMenuEnabled) return;
     if (!this.contextMenuItem) return;
     const hasSelection = gContextMenu?.isTextSelected === true;
     this.contextMenuItem.label = hasSelection ? "Ask AI" : "Summarize with AI";
@@ -614,10 +590,10 @@ const findbar = {
 
     gBrowser.tabContainer.addEventListener("TabSelect", this._updateFindbar);
     document.addEventListener("keydown", this._addKeymaps);
-    UC_API.Prefs.addListener(GOD_MODE, this._clearLLMData);
-    UC_API.Prefs.addListener(CITATIONS_ENABLED, this._clearLLMData);
+    UC_API.Prefs.addListener(PREFS.GOD_MODE, this._clearLLMData);
+    UC_API.Prefs.addListener(PREFS.CITATIONS_ENABLED, this._clearLLMData);
     UC_API.Prefs.addListener(
-      CONTEXT_MENU_ENABLED,
+      PREFS.CONTEXT_MENU_ENABLED,
       this._handleContextMenuPrefChange,
     );
   },
@@ -629,10 +605,10 @@ const findbar = {
       );
     gBrowser.tabContainer.removeEventListener("TabSelect", this._updateFindbar);
     document.removeEventListener("keydown", this._addKeymaps);
-    UC_API.Prefs.removeListener(GOD_MODE, this._clearLLMData);
-    UC_API.Prefs.removeListener(CITATIONS_ENABLED, this._clearLLMData);
+    UC_API.Prefs.removeListener(PREFS.GOD_MODE, this._clearLLMData);
+    UC_API.Prefs.removeListener(PREFS.CITATIONS_ENABLED, this._clearLLMData);
     UC_API.Prefs.removeListener(
-      CONTEXT_MENU_ENABLED,
+      PREFS.CONTEXT_MENU_ENABLED,
       this._handleContextMenuPrefChange,
     );
 
@@ -645,6 +621,8 @@ const findbar = {
 };
 
 findbar.init();
-UC_API.Prefs.addListener(ENABLED, findbar.handleEnabledChange.bind(findbar));
+UC_API.Prefs.addListener(
+  PREFS.ENABLED,
+  findbar.handleEnabledChange.bind(findbar),
+);
 window.findbar = findbar;
-
