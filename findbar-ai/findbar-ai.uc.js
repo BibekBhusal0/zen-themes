@@ -15,10 +15,10 @@ const createHTMLElement = (htmlString) => {
 const ENABLED = "extension.findbar-ai.enabled";
 const MINIMAL = "extension.findbar-ai.minimal";
 const GOD_MODE = "extension.findbar-ai.god-mode";
-const CITATIONS_ENABLED = "extension.findbar-ai.citations-enabled";
 const PROVIDER_PREF = "extension.findbar-ai.llm-provider";
 const DEBUG = "extension.findbar-ai.debug";
 const ASK_BUTTON_ENABLED = "extension.findbar-ai.ask-button-enabled";
+const COPY_BTN_ENABLED = "extension.findbar-ai.copy-btn-enabled";
 
 // TODO: impliment this
 const CONFORMATION = "extension.findbar-ai.confirmation-before-tool-call";
@@ -30,8 +30,8 @@ const POSITION = "extension.findbar-ai.position";
 
 //default configurations
 UC_API.Prefs.setIfUnset(MINIMAL, true);
-UC_API.Prefs.setIfUnset(CITATIONS_ENABLED, false); // experimental
 UC_API.Prefs.setIfUnset(ASK_BUTTON_ENABLED, true);
+UC_API.Prefs.setIfUnset(COPY_BTN_ENABLED, true);
 
 var markdownStylesInjected = false;
 const injectMarkdownStyles = () => {
@@ -48,6 +48,14 @@ const injectMarkdownStyles = () => {
 };
 
 function parseMD(markdown) {
+  if (Array.isArray(markdown)) {
+    // If array of objects, render as markdown code blocks; if array of strings, as bullet points
+    if (markdown.every(item => typeof item === 'object')) {
+      markdown = markdown.map(item => `\n\n\`\`\`json\n${JSON.stringify(item, null, 2)}\n\`\`\``).join('');
+    } else {
+      markdown = markdown.map(item => `- ${typeof item === 'object' ? JSON.stringify(item, null, 2) : String(item)}`).join('\n');
+    }
+  }
   const markedOptions = { breaks: true, gfm: true };
   if (!markdownStylesInjected) {
     injectMarkdownStyles();
@@ -60,6 +68,13 @@ function parseMD(markdown) {
   );
 
   return htmlContent;
+}
+
+// Add a helper for debug logging
+function debugLog(...args) {
+  if (getPref('extension.findbar-ai.debug', false)) {
+    console.log('[findbar-ai]', ...args);
+  }
 }
 
 const findbar = {
@@ -159,9 +174,16 @@ const findbar = {
     return getPref(CONTEXT_MENU_AUTOSEND, true);
   },
 
+  get copyBtnEnabled() {
+    return getPref(COPY_BTN_ENABLED, true);
+  },
+  set copyBtnEnabled(value) {
+    UC_API.Prefs.set(COPY_BTN_ENABLED, !!value);
+  },
+
   updateFindbar(retryCount = 0) {
-    console.log('findbar-ai updateFindbar() called');
-    if (this.debug) console.log("updateFindbar called");
+    debugLog('findbar-ai updateFindbar() called');
+    if (this.debug) debugLog("updateFindbar called");
     this.removeExpandButton();
     this.hide();
     this.expanded = false;
@@ -170,9 +192,9 @@ const findbar = {
         setTimeout(() => this.updateFindbar(retryCount + 1), 500);
         return;
       }
-      console.log('findbar-ai gBrowser.getFindBar() resolved:', findbar);
+      debugLog('findbar-ai gBrowser.getFindBar() resolved:', findbar);
       this.findbar = findbar;
-      if (this.debug) console.log("findbar set:", this.findbar);
+      if (this.debug) debugLog("findbar set:", this.findbar);
       this.addExpandButton();
       this.findbar._findField.addEventListener(
         "keypress",
@@ -183,13 +205,13 @@ const findbar = {
   },
 
   show() {
-    console.log('findbar-ai show() called');
+    debugLog('findbar-ai show() called');
     if (!this.findbar) return false;
-    console.log('findbar-ai this.findbar:', this.findbar);
+    debugLog('findbar-ai this.findbar:', this.findbar);
     this.findbar.hidden = false;
     if (!this.expanded) this.findbar._findField.focus();
     // Log the findbar DOM structure for debugging
-    console.log('[findbar-ai] findbar DOM subtree:', this.findbar, this.findbar.outerHTML);
+    debugLog('[findbar-ai] findbar DOM subtree:', this.findbar, this.findbar.outerHTML);
     return true;
   },
   hide() {
@@ -306,35 +328,45 @@ const findbar = {
     const provider = providerOverride || this.provider || 'gemini';
     const godMode = this.godMode;
     try {
+      if (this.debug) debugLog('[sendAIQuery] Prompt:', prompt, 'Provider:', provider, 'GodMode:', godMode);
       const response = await sendMessage({ provider, prompt, context: pageContext, godMode, toolDeclarations });
+      if (this.debug) {
+        debugLog('[sendAIQuery] Raw AI response:', response);
+        if (response && response.answer && typeof response.answer === 'object') {
+          debugLog('[sendAIQuery] AI answer is object/array:', response.answer);
+        }
+        if (response && response.toolCalls) {
+          debugLog('[sendAIQuery] Tool calls:', response.toolCalls);
+        }
+        // Log special features in the prompt
+        if (/getPageTextContent|getHTMLContent|openLink|search|newSplit/.test(prompt)) {
+          debugLog('[sendAIQuery] Prompt may trigger tool call:', prompt);
+        }
+      }
       aiResponseContentDiv.innerHTML = '';
       if (response && response.answer) {
         aiResponseContentDiv.appendChild(parseMD(response.answer));
-      }
-      // Render citations if present
-      if (response && response.citations && response.citations.length > 0) {
-        const citationsDiv = document.createElement('div');
-        citationsDiv.className = 'ai-citations';
-        response.citations.forEach((citation, idx) => {
-          const btn = document.createElement('button');
-          btn.className = 'citation-link';
-          btn.textContent = `[${idx + 1}]`;
-          btn.addEventListener('click', async () => {
-            if (citation.source_quote) {
-              await windowManagerAPI.highlightAndScrollToText(citation.source_quote);
-            } else if (citation.url) {
-              openTrustedLinkIn(citation.url, 'tab');
-            }
+        if (this.copyBtnEnabled) {
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'ai-copy-btn';
+          copyBtn.textContent = 'Copy';
+          copyBtn.style.marginLeft = '8px';
+          copyBtn.addEventListener('click', () => {
+            // Copy plain text (not HTML)
+            const temp = document.createElement('div');
+            temp.innerHTML = response.answer;
+            const text = temp.textContent || temp.innerText || '';
+            navigator.clipboard.writeText(text);
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => (copyBtn.textContent = 'Copy'), 1200);
           });
-          citationsDiv.appendChild(btn);
-        });
-        aiResponseContentDiv.appendChild(citationsDiv);
+          aiResponseContentDiv.appendChild(copyBtn);
+        }
       }
-      if (!response || (!response.answer && (!response.citations || response.citations.length === 0))) {
-        aiResponseContentDiv.textContent = 'No response from AI.';
-      }
+      // No citation UI or click handling remains
     } catch (e) {
       aiResponseContentDiv.textContent = `Error: ${e.message}`;
+      if (this.debug) debugLog('[sendAIQuery] Error:', e);
     }
   },
 
@@ -374,7 +406,7 @@ const findbar = {
   },
 
   init() {
-    if (this.debug) console.log("findbar.init called");
+    if (this.debug) debugLog("findbar.init called");
     if (!this.enabled) return;
     this.updateFindbar();
     this.addListeners();
@@ -389,7 +421,16 @@ const findbar = {
   },
 
   addExpandButton() {
-    if (this.debug) console.log("addExpandButton called", this.findbar);
+    if (!this.askButtonEnabled) {
+      // Always move the close button into the container even if ask button is disabled
+      const container = this.findbar?.querySelector('.findbar-container');
+      const closeBtn = this.findbar?.querySelector('.findbar-closebutton');
+      if (container && closeBtn && closeBtn.parentElement !== container) {
+        container.appendChild(closeBtn);
+      }
+      return false;
+    }
+    if (this.debug) debugLog("addExpandButton called", this.findbar);
     if (!this.findbar) return false;
     const button_id = "findbar-ask-btn";
     const container = this.findbar.querySelector('.findbar-container');
@@ -405,7 +446,7 @@ const findbar = {
     });
     container.appendChild(askBtn);
     this.expandButton = askBtn;
-    if (this.debug) console.log("Ask button injected", askBtn);
+    if (this.debug) debugLog("Ask button injected", askBtn);
     const closeBtn = this.findbar.querySelector('.findbar-closebutton');
     if (closeBtn && closeBtn.parentElement !== container) {
       container.appendChild(closeBtn);
@@ -458,34 +499,192 @@ const findbar = {
     if (this.contextMenuItem) return;
     const contextMenu = document.getElementById("contentAreaContextMenu");
     if (!contextMenu) return;
-    const menuItem = document.createXULElement("menuitem");
-    menuItem.id = "ai-findbar-context-menu-item";
-    menuItem.setAttribute("label", "Ask AI");
-    menuItem.setAttribute("accesskey", "A");
-    menuItem.addEventListener(
-      "command",
-      this.handleContextMenuClick.bind(this),
-    );
-    this.contextMenuItem = menuItem;
+
+    // Create Ask AI menu
+    const aiMenu = document.createXULElement("menu");
+    aiMenu.id = "ai-findbar-context-menu";
+    aiMenu.setAttribute("label", "Ask AI");
+
+    // Helper to create menu items
+    const createMenuItem = (id, label, handler) => {
+      const item = document.createXULElement("menuitem");
+      item.id = id;
+      item.setAttribute("label", label);
+      item.addEventListener("command", handler);
+      return item;
+    };
+
+    // Handlers for each action
+    const handleSummarizePage = async () => {
+      this.expanded = true;
+      const prompt = "Summarize the current page.";
+      if (this.contextMenuAutoSend) {
+        const provider = this.provider || 'gemini';
+        this.sendAIQuery(prompt, provider);
+      } else {
+        if (this.findbar && this.findbar._findField) {
+          this.findbar._findField.value = prompt;
+          this.findbar._findField.focus();
+        }
+      }
+    };
+    const handleExplainSelection = async () => {
+      const selection = await windowManagerAPI.getSelectedText();
+      let prompt = "Explain this in context of the current page.\n";
+      if (selection && selection.hasSelection) {
+        const selectedTextFormatted = selection.selectedText
+          .split("\n")
+          .map(line => line.trim())
+          .filter(line => line.length > 0)
+          .map(line => "> " + line)
+          .join("\n");
+        prompt += selectedTextFormatted;
+      } else {
+        prompt = "Explain the current page.";
+      }
+      this.expanded = true;
+      if (this.contextMenuAutoSend) {
+        const provider = this.provider || 'gemini';
+        this.sendAIQuery(prompt, provider);
+      } else {
+        if (this.findbar && this.findbar._findField) {
+          this.findbar._findField.value = prompt;
+          this.findbar._findField.focus();
+        }
+      }
+    };
+    const handleTranslateSelection = async () => {
+      const selection = await windowManagerAPI.getSelectedText();
+      let prompt = "Translate this to English.\n";
+      if (selection && selection.hasSelection) {
+        const selectedTextFormatted = selection.selectedText
+          .split("\n")
+          .map(line => line.trim())
+          .filter(line => line.length > 0)
+          .map(line => "> " + line)
+          .join("\n");
+        prompt += selectedTextFormatted;
+      } else {
+        prompt = "Translate the current page to English.";
+      }
+      this.expanded = true;
+      if (this.contextMenuAutoSend) {
+        const provider = this.provider || 'gemini';
+        this.sendAIQuery(prompt, provider);
+      } else {
+        if (this.findbar && this.findbar._findField) {
+          this.findbar._findField.value = prompt;
+          this.findbar._findField.focus();
+        }
+      }
+    };
+    const handleQuizSelection = async () => {
+      const selection = await windowManagerAPI.getSelectedText();
+      let prompt = "Generate a quiz (with answers) based on this text.\n";
+      if (selection && selection.hasSelection) {
+        const selectedTextFormatted = selection.selectedText
+          .split("\n")
+          .map(line => line.trim())
+          .filter(line => line.length > 0)
+          .map(line => "> " + line)
+          .join("\n");
+        prompt += selectedTextFormatted;
+      } else {
+        prompt = "Generate a quiz (with answers) based on the current page.";
+      }
+      this.expanded = true;
+      if (this.contextMenuAutoSend) {
+        const provider = this.provider || 'gemini';
+        this.sendAIQuery(prompt, provider);
+      } else {
+        if (this.findbar && this.findbar._findField) {
+          this.findbar._findField.value = prompt;
+          this.findbar._findField.focus();
+        }
+      }
+    };
+    const handleContinueWriting = async () => {
+      const selection = await windowManagerAPI.getSelectedText();
+      let prompt = "Continue writing from here.\n";
+      if (selection && selection.hasSelection) {
+        const selectedTextFormatted = selection.selectedText
+          .split("\n")
+          .map(line => line.trim())
+          .filter(line => line.length > 0)
+          .map(line => "> " + line)
+          .join("\n");
+        prompt += selectedTextFormatted;
+      } else {
+        prompt = "Continue writing based on the current page.";
+      }
+      this.expanded = true;
+      if (this.contextMenuAutoSend) {
+        const provider = this.provider || 'gemini';
+        this.sendAIQuery(prompt, provider);
+      } else {
+        if (this.findbar && this.findbar._findField) {
+          this.findbar._findField.value = prompt;
+          this.findbar._findField.focus();
+        }
+      }
+    };
+    const handleRewriteSelection = async () => {
+      const selection = await windowManagerAPI.getSelectedText();
+      let prompt = "Rewrite this to improve clarity and style.\n";
+      if (selection && selection.hasSelection) {
+        const selectedTextFormatted = selection.selectedText
+          .split("\n")
+          .map(line => line.trim())
+          .filter(line => line.length > 0)
+          .map(line => "> " + line)
+          .join("\n");
+        prompt += selectedTextFormatted;
+      } else {
+        prompt = "Rewrite the current page to improve clarity and style.";
+      }
+      this.expanded = true;
+      if (this.contextMenuAutoSend) {
+        const provider = this.provider || 'gemini';
+        this.sendAIQuery(prompt, provider);
+      } else {
+        if (this.findbar && this.findbar._findField) {
+          this.findbar._findField.value = prompt;
+          this.findbar._findField.focus();
+        }
+      }
+    };
+
+    // Create the <menupopup> and add items
+    const aiMenuPopup = document.createXULElement("menupopup");
+    aiMenuPopup.appendChild(createMenuItem("ai-findbar-summarize", "Summarize Page", handleSummarizePage));
+    aiMenuPopup.appendChild(createMenuItem("ai-findbar-explain", "Explain Selection", handleExplainSelection));
+    aiMenuPopup.appendChild(createMenuItem("ai-findbar-translate", "Translate Selection", handleTranslateSelection));
+    aiMenuPopup.appendChild(createMenuItem("ai-findbar-quiz", "Generate Quiz from Selection", handleQuizSelection));
+    aiMenuPopup.appendChild(createMenuItem("ai-findbar-continue", "Continue Writing", handleContinueWriting));
+    aiMenuPopup.appendChild(createMenuItem("ai-findbar-rewrite", "Rewrite Selection", handleRewriteSelection));
+    aiMenu.appendChild(aiMenuPopup);
+
+    // Insert menu after searchselect or redo separator
     const searchSelectItem = contextMenu.querySelector("#context-searchselect");
     if (searchSelectItem) {
       if (searchSelectItem.nextSibling) {
-        contextMenu.insertBefore(menuItem, searchSelectItem.nextSibling);
+        contextMenu.insertBefore(aiMenu, searchSelectItem.nextSibling);
       } else {
-        contextMenu.appendChild(menuItem);
+        contextMenu.appendChild(aiMenu);
       }
     } else {
       const redoSeparator = contextMenu.querySelector("#context-sep-redo");
       if (redoSeparator) {
         if (redoSeparator.nextSibling) {
-          contextMenu.insertBefore(menuItem, redoSeparator.nextSibling);
+          contextMenu.insertBefore(aiMenu, redoSeparator.nextSibling);
         } else {
-          contextMenu.appendChild(menuItem);
+          contextMenu.appendChild(aiMenu);
         }
       } else {
         return;
       }
     }
+    this.contextMenuItem = aiMenu;
     this._updateContextMenuText = this.updateContextMenuText.bind(this);
     contextMenu.addEventListener("popupshowing", this._updateContextMenuText);
   },
@@ -495,32 +694,6 @@ const findbar = {
     document
       ?.getElementById("contentAreaContextMenu")
       ?.removeEventListener("popupshowing", this._updateContextMenuText);
-  },
-  handleContextMenuClick: async function() {
-    const selection = await windowManagerAPI.getSelectedText();
-    let finalMessage = "";
-    if (!selection.hasSelection) {
-      finalMessage = "Summarize current page";
-    } else {
-      finalMessage += "Explain this in context of current page\n";
-      const selectedTextFormatted = selection?.selectedText
-        ?.split("\n")
-        ?.map((line) => line.trim())
-        ?.filter((line) => line.length > 0)
-        ?.map((line) => "> " + line)
-        ?.join("\n");
-      finalMessage += selectedTextFormatted;
-    }
-    this.expanded = true;
-    if (this.contextMenuAutoSend) {
-      const provider = this.provider || 'gemini';
-      this.sendAIQuery(finalMessage, provider);
-    } else {
-      if (this.findbar && this.findbar._findField) {
-        this.findbar._findField.value = finalMessage;
-        this.findbar._findField.focus();
-      }
-    }
   },
   handleContextMenuPrefChange: function(pref) {
     if (pref.value) this.addContextMenuItem();
@@ -542,8 +715,8 @@ const findbar = {
     gBrowser.tabContainer.addEventListener("TabSelect", this._updateFindbar);
     document.addEventListener("keydown", this._addKeymaps);
     UC_API.Prefs.addListener(GOD_MODE, this._clearGeminiData);
-    UC_API.Prefs.addListener(CITATIONS_ENABLED, this._clearGeminiData);
     UC_API.Prefs.addListener(CONTEXT_MENU_ENABLED, this._handleContextMenuPrefChange);
+    UC_API.Prefs.addListener(ASK_BUTTON_ENABLED, () => this.updateFindbar());
   },
   removeListeners() {
     if (this.findbar)
@@ -554,7 +727,6 @@ const findbar = {
     gBrowser.tabContainer.removeEventListener("TabSelect", this._updateFindbar);
     document.removeEventListener("keydown", this._addKeymaps);
     UC_API.Prefs.removeListener(GOD_MODE, this._clearGeminiData);
-    UC_API.Prefs.removeListener(CITATIONS_ENABLED, this._clearGeminiData);
     UC_API.Prefs.removeListener(CONTEXT_MENU_ENABLED, this._handleContextMenuPrefChange);
     this._handleInputKeyPress = null;
     this._updateFindbar = null;
@@ -567,3 +739,19 @@ const findbar = {
 findbar.init();
 UC_API.Prefs.addListener(ENABLED, findbar.handleEnabledChange.bind(findbar));
 window.findbar = findbar;
+
+// Ensure context menu is injected on first open if config is enabled
+(function ensureContextMenuInjection() {
+  let injected = false;
+  function maybeInjectAIContextMenu() {
+    if (injected) return;
+    if (!findbar.contextMenuEnabled) return;
+    const contextMenu = document.getElementById("contentAreaContextMenu");
+    if (contextMenu) {
+      findbar.addContextMenuItem();
+      injected = true;
+      contextMenu.removeEventListener("popupshowing", maybeInjectAIContextMenu);
+    }
+  }
+  document.addEventListener("popupshowing", maybeInjectAIContextMenu);
+})();
