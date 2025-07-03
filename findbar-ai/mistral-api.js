@@ -5,17 +5,54 @@ const API_KEY = "extension.findbar-ai.mistral-api-key";
 const MODEL = "extension.findbar-ai.mistral-model";
 
 export const MISTRAL_MODELS = [
-  "mistral-tiny",
   "mistral-small",
-  "mistral-medium",
+  "mistral-medium-latest",
   "mistral-large-latest",
+  "pixtral-large-latest",
 ];
 
 function getApiKey() {
   return getPref(API_KEY, "");
 }
 function getModel() {
-  return getPref(MODEL, "mistral-large-latest");
+  return getPref(MODEL, "mistral-medium-latest");
+}
+
+// --- Mistral API Rate Limiting ---
+let mistralRequestQueue = [];
+let lastMistralRequestTime = 0;
+
+function enqueueMistralRequest(fn) {
+  return new Promise((resolve, reject) => {
+    mistralRequestQueue.push({ fn, resolve, reject });
+    processMistralQueue();
+  });
+}
+
+async function processMistralQueue() {
+  if (processMistralQueue.running) return;
+  processMistralQueue.running = true;
+  while (mistralRequestQueue.length > 0) {
+    const now = Date.now();
+    const wait = Math.max(0, 1000 - (now - lastMistralRequestTime));
+    if (wait > 0) await new Promise(res => setTimeout(res, wait));
+    const { fn, resolve, reject } = mistralRequestQueue.shift();
+    try {
+      const result = await fn();
+      lastMistralRequestTime = Date.now();
+      console.log('Mistral API request completed at', new Date().toISOString());
+      resolve(result);
+    } catch (e) {
+      lastMistralRequestTime = Date.now();
+      console.log('Mistral API request failed at', new Date().toISOString());
+      reject(e);
+    }
+  }
+  processMistralQueue.running = false;
+  // If new requests were added while we were processing, start again
+  if (mistralRequestQueue.length > 0) {
+    processMistralQueue();
+  }
 }
 
 // Recursively convert all type fields to lowercase (OpenAI/Mistral schema compliance)
@@ -34,6 +71,13 @@ function normalizeSchemaTypes(obj) {
     return newObj;
   }
   return obj;
+}
+
+// Add a helper for debug logging
+function debugLog(...args) {
+  if (getPref('extension.findbar-ai.debug', false)) {
+    console.log('[findbar-ai]', ...args);
+  }
 }
 
 export async function sendMistralMessage(prompt, context, options = {}) {
@@ -76,13 +120,15 @@ export async function sendMistralMessage(prompt, context, options = {}) {
 
   let response;
   try {
-    response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
+    response = await enqueueMistralRequest(async () => {
+      return await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      });
     });
   } catch (e) {
     console.error("Failed to connect to Mistral API:", e);
@@ -115,9 +161,15 @@ export async function sendMistralMessage(prompt, context, options = {}) {
       } catch (e) {
         fnArgs = {};
       }
+      if (getPref && getPref('extension.findbar-ai.debug', false)) {
+        console.log('[findbar-ai][mistral-api.js] Tool call:', fnName, 'Args:', fnArgs);
+      }
       let toolResult;
       if (toolRegistry[fnName]) {
         toolResult = await toolRegistry[fnName](fnArgs);
+        if (getPref && getPref('extension.findbar-ai.debug', false)) {
+          console.log('[findbar-ai][mistral-api.js] Tool result for', fnName, ':', toolResult);
+        }
       } else {
         toolResult = { error: `Tool '${fnName}' not implemented.` };
       }
@@ -147,13 +199,15 @@ export async function sendMistralMessage(prompt, context, options = {}) {
     };
     let followupResponse;
     try {
-      followupResponse = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(followupBody)
+      followupResponse = await enqueueMistralRequest(async () => {
+        return await fetch(apiUrl, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(followupBody)
+        });
       });
     } catch (e) {
       console.error("Failed to connect to Mistral API (follow-up):", e);
@@ -174,7 +228,6 @@ export async function sendMistralMessage(prompt, context, options = {}) {
     const followupChoice = followupData.choices?.[0];
     return {
       answer: followupChoice?.message?.content || "[Mistral] No response from model after tool call.",
-      citations: [],
     };
   }
 
@@ -182,6 +235,5 @@ export async function sendMistralMessage(prompt, context, options = {}) {
   const answer = choice?.message?.content;
   return {
     answer,
-    citations: [], // Mistral does not provide citations
   };
 } 
