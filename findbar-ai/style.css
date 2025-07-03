@@ -37,17 +37,23 @@ browser {
   --acrylic-background: rgba(36, 37, 39, 0.6) !important;
   --acrylic-backdrop: blur(32px) brightness(0.7) saturate(2.5) !important;
   --acrylic-border: 0.5px solid rgba(255, 255, 255, 0.1);
-  --acrylic-shadow: 0 8px 32px color-mix(in srgb, var(--zen-primary-color) 15%, transparent 85%);
+  --acrylic-shadow: 0 8px 32px
+    color-mix(in srgb, var(--zen-primary-color) 15%, transparent 85%);
   --acrylic-radius: 8px;
-  --acrylic-glass-bg: color-mix(in srgb, var(--zen-themed-toolbar-bg) 80%, transparent 20%);
+  --acrylic-glass-bg: color-mix(
+    in srgb,
+    var(--zen-themed-toolbar-bg) 80%,
+    transparent 20%
+  );
   --acrylic-glass-blur: blur(20px);
-  --acrylic-glass-border: 1.5px solid color-mix(in srgb, var(--zen-primary-color) 20%, transparent 80%);
+  --acrylic-glass-border: 1.5px solid
+    color-mix(in srgb, var(--zen-primary-color) 20%, transparent 80%);
 }
 
 /*noinspection CssInvalidFunction*/
 
 :root {
---toolbar-field-focus-border-color: transparent !important;
+  --toolbar-field-focus-border-color: transparent !important;
 }
 
 findbar:not([hidden="true"]) {
@@ -60,18 +66,18 @@ findbar[hidden="true"] {
   animation: closing-animation 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-  .ai-active {
-    .findbar-container:before {
-      content: "";
-      width: 93% !important;
-      height: 1px !important;
-      background-color: rgba(255, 255, 255, 0.15) !important;
-      position: absolute !important;
-      display: flex !important;
-      bottom: 37px !important;
-      left: 3.5% !important;
-    }
+.ai-active {
+  .findbar-container:before {
+    content: "";
+    width: 93% !important;
+    height: 1px !important;
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    position: absolute !important;
+    display: flex !important;
+    bottom: 37px !important;
+    left: 3.5% !important;
   }
+}
 
 /* Minimal Findbar */
 findbar {
@@ -92,7 +98,7 @@ findbar {
   backdrop-filter: var(--acrylic-backdrop) var(--acrylic-glass-blur);
   z-index: 9999;
   opacity: 1;
-  
+
   .findbar-match-diacritics,
   .findbar-case-sensitive,
   .findbar-highlight,
@@ -100,7 +106,7 @@ findbar {
   description {
     display: none !important;
   }
-  
+
   .ai-float-close {
     position: absolute !important;
     top: 5px !important;
@@ -111,11 +117,11 @@ findbar {
     width: 100% !important;
     display: flex !important;
     flex-direction: row !important;
-      .findbar-textbox {
-        border: none !important;
-        box-shadow: none !important;
-        background: transparent !important;
-        text-overflow: ellipsis !important;
+    .findbar-textbox {
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      text-overflow: ellipsis !important;
     }
     .findbar-find-previous {
       margin-left: auto !important;
@@ -135,7 +141,7 @@ findbar {
   .findbar-closebutton {
     order: 999 !important;
   }
-  
+
   .ai-response-container {
     display: flex !important;
     flex-direction: column !important;
@@ -150,7 +156,10 @@ findbar {
       max-width: 83% !important;
       width: fit-content !important;
       padding-inline: 7px !important;
-      background-color: light-dark(rgba(0, 0, 0, .70), rgba(255, 255, 255, 0.05)) !important;
+      background-color: light-dark(
+        rgba(0, 0, 0, 0.7),
+        rgba(255, 255, 255, 0.05)
+      ) !important;
       border-top-right-radius: 10px !important;
       border-bottom-left-radius: 10px !important;
       border-top-left-radius: 10px !important;
@@ -163,51 +172,36 @@ findbar {
       position: relative !important;
       padding: 7px !important;
       p {
-      font-size: 12px !important;
+        font-size: 12px !important;
       }
     }
   }
- 
-  
+
   .findbar-container:has(.found-matches:not([hidden])) {
-       .findbar-textbox {
-        max-width: 160px !important;
-         text-overflow: ellipsis !important;
+    .findbar-textbox {
+      max-width: 160px !important;
+      text-overflow: ellipsis !important;
     }
   }
-  
-    .findbar-container:has(.found-matches[hidden="true"]) {
-       .findbar-textbox {
-        max-width: 100% !important;
-         width: 95% !important;
-      }
-      .findbar-find-previous, .findbar-find-next {
-        display: none !important;
-      }
+
+  .findbar-container:has(.found-matches[hidden="true"]) {
+    .findbar-textbox {
+      max-width: 100% !important;
+      width: 95% !important;
+    }
+    .findbar-find-previous,
+    .findbar-find-next {
+      display: none !important;
+    }
   }
-  
+
   .findbar-container {
+    min-height: 25px !important;
     display: flex !important;
     flex-direction: row !important;
     width: 100% !important;
     .findbar-textbox {
       justify-self: flex-start !important;
-    }
-    
-    &:not(.ai-float-close) {
-    .findbar-label {
-        position: absolute !important;
-        right: 145px !important;
-        transform-origin: right !important;
-      }
-    }
-    
-    &:has(.ai-float-close) {
-    .findbar-label {
-        position: absolute !important;
-        right: 105px !important;
-        transform-origin: right !important;
-      }
     }
 
     #findbar-ask-btn {
@@ -218,10 +212,24 @@ findbar {
       padding-inline-start: 5px !important;
       padding-inline-end: 5px !important;
       color: color-mix(in srgb, var(--zen-primary-color) 30%, white 70%);
-      
     }
   }
-  
+
+  &:not(.ai-float-close) {
+    .findbar-label {
+      position: absolute !important;
+      right: 145px !important;
+      transform-origin: right !important;
+    }
+  }
+
+  &:has(.ai-float-close) {
+    .findbar-label {
+      position: absolute !important;
+      right: 105px !important;
+      transform-origin: right !important;
+    }
+  }
 }
 
 .markdown-body {
