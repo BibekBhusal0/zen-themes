@@ -1,4 +1,5 @@
 import gemini from "./provider/gemini.js";
+import mistral from "./provider/mistral.js";
 import getPref from "../../utils/getPref.mjs";
 import {
   toolDeclarations,
@@ -28,12 +29,25 @@ const debugError = (...args) => {
 const llm = {
   history: [],
   systemInstruction: null,
-  currentProvider: gemini,
+  currentProvider: mistral,
+  AVAILABLE_PROVIDERS: {
+    gemini: gemini,
+    mistral: mistral,
+  },
   get godMode() {
     return getPref(GOD_MODE, false);
   },
   get citationsEnabled() {
     return getPref(CITATIONS_ENABLED, true);
+  },
+  setProvider(providerName) {
+    if (this.AVAILABLE_PROVIDERS[providerName]) {
+      this.currentProvider = this.AVAILABLE_PROVIDERS[providerName];
+      this.clearData();
+      debugLog(`Switched LLM provider to: ${providerName}`);
+    } else {
+      debugError(`Provider "${providerName}" not found.`);
+    }
   },
   async updateSystemPrompt() {
     debugLog("Updating system prompt...");
@@ -276,6 +290,8 @@ Here is the initial info about the current page:
         debugLog("Parsed AI Response:", parsedResponse);
 
         if (!parsedResponse.answer) {
+          if (functionCalls.length > 0)
+            return { answer: "I used my tools to complete your request." };
           this.history.pop();
         }
         return parsedResponse;
