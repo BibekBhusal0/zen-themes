@@ -75,7 +75,7 @@ export const toolDeclarations = [
       {
         name: "getPageTextContent",
         description:
-          "Retrieves the text content of the current web page to answer questions if the initial context is insufficient.",
+          "Retrieves the text content of the current web page to answer questions. This should be used be default",
         parameters: { type: "OBJECT", properties: {} },
       },
       {
@@ -107,7 +107,12 @@ export async function sendMessage({ provider, prompt, context, model, godMode, t
   // Track conversation history for tool use
   let history = options.history || [];
   let markdownEnabled = getPref(MARKDOWN_ENABLED, true);
-  let systemInstruction = markdownEnabled ? DEFAULT_SYSTEM_INSTRUCTION_MARKDOWN : DEFAULT_SYSTEM_INSTRUCTION_PLAINTEXT;
+  let systemInstruction;
+  if (markdownEnabled) {
+    systemInstruction = DEFAULT_SYSTEM_INSTRUCTION_MARKDOWN;
+  } else {
+    systemInstruction = DEFAULT_SYSTEM_INSTRUCTION_PLAINTEXT;
+  }
   let lastResponse;
 
   // First LLM call
@@ -131,8 +136,14 @@ export async function sendMessage({ provider, prompt, context, model, godMode, t
       const functionResponses = [];
       for (const call of functionCalls) {
         const { name, args } = call.functionCall;
+        if (getPref && getPref('extension.findbar-ai.debug', false)) {
+          console.log('[findbar-ai][llm.js] Tool call:', name, 'Args:', args);
+        }
         if (toolRegistry[name]) {
           const toolResult = await toolRegistry[name](args);
+          if (getPref && getPref('extension.findbar-ai.debug', false)) {
+            console.log('[findbar-ai][llm.js] Tool result for', name, ':', toolResult);
+          }
           functionResponses.push({
             functionResponse: { name, response: toolResult },
           });
