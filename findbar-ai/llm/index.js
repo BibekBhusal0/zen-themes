@@ -1,6 +1,11 @@
 import gemini from "./provider/gemini.js";
 import getPref from "../../utils/getPref.mjs";
-import { toolDeclarations, getToolSystemPrompt } from "./tools.js";
+import {
+  toolDeclarations,
+  availableTools,
+  getToolSystemPrompt,
+} from "./tools.js";
+import { windowManagerAPI } from "../windowManager.js";
 
 // Prefs keys
 const GOD_MODE = "extension.findbar-ai.god-mode";
@@ -221,6 +226,48 @@ Here is the initial info about the current page:
     }
     this.history.push(modelResponse);
 
+    const functionCalls = modelResponse.parts.filter(
+      (part) => part.functionCall,
+    );
+
+    if (this.godMode && functionCalls.length > 0) {
+      debugLog("Function call(s) requested by model:", functionCalls);
+
+      const functionResponses = [];
+      for (const call of functionCalls) {
+        const { name, args } = call.functionCall;
+        if (availableTools[name]) {
+          debugLog(`Executing tool: "${name}" with args:`, args);
+          const toolResult = await availableTools[name](args);
+          debugLog(`Tool "${name}" executed. Result:`, toolResult);
+          functionResponses.push({
+            functionResponse: { name, response: toolResult },
+          });
+        } else {
+          debugError(`Tool "${name}" not found!`);
+          functionResponses.push({
+            functionResponse: {
+              name,
+              response: { error: `Tool "${name}" is not available.` },
+            },
+          });
+        }
+      }
+
+      this.history.push({ role: "tool", parts: functionResponses });
+
+      requestBody = {
+        contents: this.history,
+        systemInstruction: this.systemInstruction,
+        generationConfig: this.citationsEnabled
+          ? { responseMimeType: "application/json" }
+          : {},
+      };
+
+      modelResponse = await this.currentProvider.sendMessage(requestBody);
+      this.history.push(modelResponse);
+    }
+
     if (this.citationsEnabled) {
       try {
         const responseText =
@@ -249,7 +296,7 @@ Here is the initial info about the current page:
     } else {
       const responseText =
         modelResponse.parts.find((part) => part.text)?.text || "";
-      if (!responseText) {
+      if (!responseText && functionCalls.length === 0) {
         this.history.pop();
       }
       return {
