@@ -1,3 +1,8 @@
+/* Required for blur rendering */
+browser {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
 @keyframes initial-animation {
   from {
     top: 0;
@@ -63,7 +68,7 @@ findbar[hidden="true"] {
       background-color: rgba(255, 255, 255, 0.15) !important;
       position: absolute !important;
       display: flex !important;
-      bottom: 30px !important;
+      bottom: 37px !important;
       left: 3.5% !important;
     }
   }
@@ -188,11 +193,23 @@ findbar {
     .findbar-textbox {
       justify-self: flex-start !important;
     }
+    
+    &:not(.ai-float-close) {
     .findbar-label {
-      position: absolute !important;
-      right: 145px !important;
-      transform-origin: right !important;
+        position: absolute !important;
+        right: 145px !important;
+        transform-origin: right !important;
+      }
     }
+    
+    &:has(.ai-float-close) {
+    .findbar-label {
+        position: absolute !important;
+        right: 105px !important;
+        transform-origin: right !important;
+      }
+    }
+
     #findbar-ask-btn {
       margin-left: auto !important;
       margin-right: 10px;
