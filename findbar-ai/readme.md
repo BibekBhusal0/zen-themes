@@ -8,6 +8,8 @@ https://github.com/user-attachments/assets/258d2643-6135-4b2b-accc-c1d59f3f76fc
 
 https://github.com/user-attachments/assets/73413ee0-15b6-4ef3-bc16-faa0302c622f
 
+https://github.com/user-attachments/assets/8db50ef3-c704-482f-a5bc-8d002660e796
+
 ## Features
 
 - **Modern, Floating UI**: Replaces the default findbar with a sleek, centered, and collapsible interface.
