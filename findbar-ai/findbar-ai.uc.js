@@ -4,8 +4,12 @@ import { PREFS, debugLog, debugError } from "./prefs.js";
 
 windowManager();
 
-const createHTMLElement = (htmlString) => {
-  let element = new DOMParser().parseFromString(htmlString, "text/html");
+const parseElement = (elementString, type = "html") => {
+  if (type === "xul") {
+    return window.MozXULElement.parseXULToFragment(elementString).firstChild;
+  }
+
+  let element = new DOMParser().parseFromString(elementString, "text/html");
   if (element.body.children.length) element = element.body.firstChild;
   else element = element.head.firstChild;
   return element;
@@ -19,7 +23,7 @@ const injectMarkdownStyles = async () => {
     const { markedStyles } = await import(
       "chrome://userscripts/content/engine/marked.js"
     );
-    const styleTag = createHTMLElement(`<style>${markedStyles}<style>`);
+    const styleTag = parseElement(`<style>${markedStyles}<style>`);
     document.head.appendChild(styleTag);
     markdownStylesInjected = true;
     return true;
@@ -37,9 +41,7 @@ function parseMD(markdown) {
   const content = window.marked
     ? window.marked.parse(markdown, markedOptions)
     : markdown;
-  let htmlContent = createHTMLElement(
-    `<div class="markdown-body">${content}</div>`,
-  );
+  let htmlContent = parseElement(`<div class="markdown-body">${content}</div>`);
 
   return htmlContent;
 }
@@ -191,7 +193,7 @@ const findbar = {
           </div>
         </div>
       </div>`;
-    const container = createHTMLElement(html);
+    const container = parseElement(html);
 
     const providerSelector = container.querySelector("#provider-selector");
     const input = container.querySelector("#api-key");
@@ -296,7 +298,7 @@ const findbar = {
           <button id="send-prompt" class="send-btn">Send</button>
         </div>
       </div>`;
-    const container = createHTMLElement(html);
+    const container = parseElement(html);
 
     const modelSelector = container.querySelector("#model-selector");
     const chatMessages = container.querySelector("#chat-messages");
@@ -352,10 +354,10 @@ const findbar = {
   },
 
   createLoadingIndicator() {
-    const messageDiv = createHTMLElement(
+    const messageDiv = parseElement(
       `<div class="chat-message chat-message-loading"></div>`,
     );
-    const contentDiv = createHTMLElement(
+    const contentDiv = parseElement(
       `<div class="message-content">Loading...</div>`,
     );
     messageDiv.appendChild(contentDiv);
@@ -369,14 +371,14 @@ const findbar = {
       this.chatContainer.querySelector("#chat-messages");
     if (!messagesContainer) return;
 
-    const messageDiv = createHTMLElement(
+    const messageDiv = parseElement(
       `<div class="chat-message chat-message-${type}"></div>`,
     );
     if (citations && citations.length > 0) {
       messageDiv.dataset.citations = JSON.stringify(citations);
     }
 
-    const contentDiv = createHTMLElement(`<div class="message-content"></div>`);
+    const contentDiv = parseElement(`<div class="message-content"></div>`);
     const processedContent = answer.replace(
       /\[(\d+)\]/g,
       `<button class="citation-link" data-citation-id="$1">[$1]</button>`,
@@ -488,7 +490,7 @@ const findbar = {
     if (!this.findbar) return false;
     const button_id = "findbar-expand";
     if (this.findbar.getElement(button_id)) return true;
-    const button = createHTMLElement(
+    const button = parseElement(
       `<button id="${button_id}" anonid="${button_id}"></button>`,
     );
     button.addEventListener("click", () => {
