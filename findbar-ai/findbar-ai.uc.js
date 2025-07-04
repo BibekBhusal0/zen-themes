@@ -1,5 +1,4 @@
 import windowManager, { windowManagerAPI } from "./windowManager.js";
-import { markedStyles } from "chrome://userscripts/content/engine/marked.js";
 import { llm } from "./llm/index.js";
 import { PREFS } from "./prefs.js";
 
@@ -15,9 +14,11 @@ const createHTMLElement = (htmlString) => {
 PREFS.setInitialPrefs();
 
 var markdownStylesInjected = false;
-const injectMarkdownStyles = () => {
-  if (!markedStyles) return false;
+const injectMarkdownStyles = async () => {
   try {
+    const { markedStyles } = await import(
+      "chrome://userscripts/content/engine/marked.js"
+    );
     const styleTag = createHTMLElement(`<style>${markedStyles}<style>`);
     document.head.appendChild(styleTag);
     markdownStylesInjected = true;
