@@ -15,6 +15,16 @@ const parseElement = (elementString, type = "html") => {
   return element;
 };
 
+const escapeXmlAttribute = (str) => {
+  if (typeof str !== "string") return str;
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+};
+
 PREFS.setInitialPrefs();
 
 var markdownStylesInjected = false;
@@ -163,37 +173,52 @@ const findbar = {
 
   createAPIKeyInterface() {
     const currentProviderName = llm.currentProvider.name;
+    const menuItems = Object.entries(llm.AVAILABLE_PROVIDERS)
+      .map(
+        ([name, provider]) => `
+                  <menuitem
+                    value="${name}"
+                    label="${escapeXmlAttribute(provider.label)}"
+                    ${name === currentProviderName ? 'selected="true"' : ""}
+                    ${provider.faviconUrl ? `image="${escapeXmlAttribute(provider.faviconUrl)}"` : ""}
+                  />
+                `,
+      )
+      .join("");
+
+    const menulistXul = `
+        <menulist id="provider-selector" class="provider-selector" value="${currentProviderName}">
+          <menupopup>
+            ${menuItems}
+          </menupopup>
+        </menulist>`;
+
+    const providerSelectorXulElement = parseElement(menulistXul, "xul");
+
     const html = `
-      <div class="findbar-ai-setup">
-        <div class="ai-setup-content">
-          <h3>AI Setup Required</h3>
-          <p>To use AI features, you need to set up your API key and select a provider.</p>
-          <div class="provider-selection-group">
-            <label for="provider-selector">Select Provider:</label>
-            <select id="provider-selector">
-              ${Object.entries(llm.AVAILABLE_PROVIDERS)
-        .map(
-          ([name, provider]) => `
-                <option value="${name}" ${name === currentProviderName ? "selected" : ""
-            }>
-                  <img class="favicon" src="${provider.faviconUrl}" alt="${provider.label} Favicon">
-                  ${provider.label}
-                </option>
-              `,
-        )
-        .join("")}
-            </select>
+        <div class="findbar-ai-setup">
+          <div class="ai-setup-content">
+            <h3>AI Setup Required</h3>
+            <p>To use AI features, you need to set up your API key and select a provider.</p>
+            <div class="provider-selection-group">
+              <label for="provider-selector">Select Provider:</label>
+            </div>
+            <div class="api-key-input-group">
+              <input type="password" id="api-key" placeholder="Enter your API key" />
+              <button id="save-api-key">Save</button>
+            </div>
+            <div class="api-key-links">
+              <button id="get-api-key-link">Get API Key</button>
+            </div>
           </div>
-          <div class="api-key-input-group">
-            <input type="password" id="api-key" placeholder="Enter your API key" />
-            <button id="save-api-key">Save</button>
-          </div>
-          <div class="api-key-links">
-            <button id="get-api-key-link">Get API Key</button>
-          </div>
-        </div>
-      </div>`;
+        </div>`;
     const container = parseElement(html);
+
+    const providerSelectionGroup = container.querySelector(
+      ".provider-selection-group",
+    );
+    // Insert the XUL menulist after the label within the group
+    providerSelectionGroup.appendChild(providerSelectorXulElement);
 
     const providerSelector = container.querySelector("#provider-selector");
     const input = container.querySelector("#api-key");
@@ -207,8 +232,9 @@ const findbar = {
       ? "Get API Key"
       : "No API key link available for this provider.";
 
-    providerSelector.addEventListener("change", () => {
-      const selectedProviderName = providerSelector.value;
+    // Use 'command' event for XUL menulist
+    providerSelector.addEventListener("command", (e) => {
+      const selectedProviderName = e.target.value;
       llm.setProvider(selectedProviderName);
       input.value = llm.currentProvider.apiKey || "";
       getApiKeyLink.disabled = !llm.currentProvider.apiKeyUrl;
