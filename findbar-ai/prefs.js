@@ -1,6 +1,7 @@
 export const PREFS = {
   ENABLED: "extension.findbar-ai.enabled",
   MINIMAL: "extension.findbar-ai.minimal",
+  PERSIST: "extension.findbar-ai.persist-chat",
 
   GOD_MODE: "extension.findbar-ai.god-mode",
   CITATIONS_ENABLED: "extension.findbar-ai.citations-enabled",
@@ -13,7 +14,6 @@ export const PREFS = {
   LLM_PROVIDER: "extension.findbar-ai.llm-provider",
   MISTRAL_API_KEY: "extension.findbar-ai.mistral-api-key",
   MISTRAL_MODEL: "extension.findbar-ai.mistral-model",
-
   GEMINI_API_KEY: "extension.findbar-ai.gemini-api-key",
   GEMINI_MODEL: "extension.findbar-ai.gemini-model",
 
@@ -122,6 +122,13 @@ export const PREFS = {
     UC_API.Prefs.set(this.GEMINI_MODEL, value);
   },
 
+  get persistChat() {
+    return this.getPref(this.PERSIST);
+  },
+  set persistChat(value) {
+    UC_API.Prefs.set(this.PERSIST, value);
+  },
+
   get copyBtnEnabled() {
     return this.getPref(this.COPY_BTN_ENABLED);
   },
@@ -146,6 +153,8 @@ PREFS.defaultValues = {
   [PREFS.ENABLED]: true,
   [PREFS.MINIMAL]: true,
   [PREFS.GOD_MODE]: false,
+  [PREFS.DEBUG_MODE]: false,
+  [PREFS.PERSIST]: false,
   [PREFS.CITATIONS_ENABLED]: false,
   [PREFS.CONTEXT_MENU_ENABLED]: true,
   [PREFS.CONTEXT_MENU_AUTOSEND]: true,

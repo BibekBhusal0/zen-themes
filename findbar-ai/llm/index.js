@@ -179,12 +179,14 @@ This example is correct, note that it contain unique \`id\`, and each in text ci
       systemPrompt += `
 - Strictly base all your answers on the webpage content provided below.
 - If the user's question cannot be answered from the content, state that the information is not available on the page.
+`;
+    }
+    systemPrompt += `
 
 Here is the initial info about the current page:
 `;
-      const pageContext = await windowManagerAPI.getPageTextContent();
-      systemPrompt += JSON.stringify(pageContext);
-    }
+    const pageContext = await windowManagerAPI.getPageTextContent();
+    systemPrompt += JSON.stringify(pageContext);
 
     return systemPrompt;
   },
@@ -195,9 +197,7 @@ Here is the initial info about the current page:
     return this;
   },
   async sendMessage(prompt, pageContext) {
-    if (!this.systemInstruction) {
-      await this.updateSystemPrompt();
-    }
+    await this.updateSystemPrompt();
 
     const fullPrompt = `[Current Page Context: ${JSON.stringify(pageContext || {})}] ${prompt}`;
     this.history.push({ role: "user", parts: [{ text: fullPrompt }] });

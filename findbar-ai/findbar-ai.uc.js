@@ -89,7 +89,7 @@ const findbar = {
       }
     } else {
       this.findbar.classList.remove("ai-expanded");
-      this.hideAIInterface();
+      this.removeAIInterface();
     }
   },
   toggleExpanded() {
@@ -120,19 +120,24 @@ const findbar = {
   updateFindbar() {
     this.removeExpandButton();
     this.removeAIInterface();
-    this.hide();
-    this.expanded = false;
-    if (!llm.godMode) {
-      llm.setSystemPrompt(null);
+    if (!PREFS.persistChat) {
+      this.hide();
+      this.expanded = false;
       llm.clearData();
     }
     gBrowser.getFindBar().then((findbar) => {
       this.findbar = findbar;
       this.addExpandButton();
+      setTimeout(() => {
+        if (PREFS.persistChat) {
+          this.expanded = this.expanded; // just to make sure in new tab UI willl also be visible
+        }
+      }, 200);
       this.findbar._findField.addEventListener(
         "keypress",
         this._handleInputKeyPress,
       );
+
       const originalOnFindbarOpen = this.findbar.browser.finder.onFindbarOpen;
 
       //makeing sure this only runs one time
@@ -483,9 +488,6 @@ const findbar = {
     this.setPromptText(text);
   },
 
-  hideAIInterface() {
-    this.removeAIInterface();
-  },
   removeAIInterface() {
     if (this.apiKeyContainer) {
       this.apiKeyContainer.remove();
