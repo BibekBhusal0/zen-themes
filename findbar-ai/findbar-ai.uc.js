@@ -139,13 +139,15 @@ const findbar = {
       if (!findbar?.openOverWritten) {
         //update placeholder when findbar is opened
         findbar.browser.finder.onFindbarOpen = (...args) => {
-          debugLog("Findbar is being opened");
-          setTimeout(
-            () =>
-            (this.findbar._findField.placeholder =
-              "Press Alt + Enter to ask AI"),
-            10,
-          );
+          if (!this.enabled) {
+            debugLog("Findbar is being opened");
+            setTimeout(
+              () =>
+              (this.findbar._findField.placeholder =
+                "Press Alt + Enter to ask AI"),
+              10,
+            );
+          }
           originalOnFindbarOpen.apply(findbar.browser.finder, args); //making sure orignal function is called
         };
         findbar.openOverWritten = true;
