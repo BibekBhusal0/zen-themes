@@ -121,7 +121,23 @@ const findbar = {
         "keypress",
         this._handleInputKeyPress,
       );
-      this.findbar._findField.placeholder = "Press Alt + Enter to ask AI";
+      const originalOnFindbarOpen = this.findbar.browser.finder.onFindbarOpen;
+
+      //makeing sure this only runs one time
+      if (!findbar?.openOverWritten) {
+        //update placeholder when findbar is opened
+        findbar.browser.finder.onFindbarOpen = (...args) => {
+          debugLog("Findbar is being opened");
+          setTimeout(
+            () =>
+            (this.findbar._findField.placeholder =
+              "Press Alt + Enter to ask AI"),
+            10,
+          );
+          originalOnFindbarOpen.apply(findbar.browser.finder, args); //making sure orignal function is called
+        };
+        findbar.openOverWritten = true;
+      }
     });
   },
 
