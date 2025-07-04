@@ -141,13 +141,14 @@ More tools will be comming soon. [More tools](./llm/more-tools.js) are currently
 - [ ] Copy Button
 - [ ] Markdown Formatting toggle
 
-## 🐛 Bugs (Not so big but, I am working on fixing them)
+## 🐛 Bugs and potential issues (I am working on fixing them)
 
 - Placeholder not changing in first time loading page.
 - Findbar UI being meshy when changing tabs (temporary fix: hide it, it rerenders while keyboard shortcut is triggered)
 - Mistral AI tool calls (not tested, may contain bugs)
 - AI can't make multiple tool calls one after another (just 1 tool call is allowed for now, to keep it simple)
-- Doesnot work without sine, currently it uses file `engine/marked` to add styles for markdown. This will give error if file is not found.
+- Doesnot work without if sine is not installed, currently it uses file `engine/marked` to add styles for markdown. This will give error if file is not found.
+- Link in markdown don't open.
 
 ## Credits
 
