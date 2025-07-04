@@ -1,6 +1,6 @@
 import windowManager, { windowManagerAPI } from "./windowManager.js";
 import { llm } from "./llm/index.js";
-import { PREFS } from "./prefs.js";
+import { PREFS, debugLog, debugError } from "./prefs.js";
 
 windowManager();
 
@@ -24,7 +24,7 @@ const injectMarkdownStyles = async () => {
     markdownStylesInjected = true;
     return true;
   } catch (e) {
-    console.warn(e);
+    debugError(e);
     return false;
   }
 };
@@ -315,7 +315,7 @@ const findbar = {
           const citations = JSON.parse(messageEl.dataset.citations);
           const citation = citations.find((c) => c.id == citationId);
           if (citation && citation.source_quote) {
-            console.log(
+            debugLog(
               `[findbar-ai] Citation [${citationId}] clicked. Requesting highlight for:`,
               citation.source_quote,
             );
@@ -456,7 +456,7 @@ const findbar = {
     this.updateFindbar();
     this.addListeners();
     if (PREFS.contextMenuEnabled) {
-      setTimeout(() => this.addContextMenuItem(), 200);
+      this.addContextMenuItem();
     }
   },
   destroy() {
@@ -502,10 +502,25 @@ const findbar = {
     }
   },
 
-  addContextMenuItem() {
-    if (this.contextMenuItem) return;
+  addContextMenuItem(retryCount = 0) {
+    if (this.contextMenuItem) return; // Already added
+    if (!PREFS.contextMenuEnabled) return;
+
     const contextMenu = document.getElementById("contentAreaContextMenu");
-    if (!contextMenu) return;
+
+    if (!contextMenu) {
+      if (retryCount < 5) {
+        debugLog(
+          `Context menu not found, retrying... (attempt ${retryCount + 1}/5)`,
+        );
+        setTimeout(() => this.addContextMenuItem(retryCount + 1), 200);
+      } else {
+        debugError(
+          "Failed to add context menu item after 5 attempts: Context menu not found.",
+        );
+      }
+      return;
+    }
 
     const menuItem = document.createXULElement("menuitem");
     menuItem.id = "ai-findbar-context-menu-item";
