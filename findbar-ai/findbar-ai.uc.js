@@ -441,17 +441,13 @@ const findbar = {
           continue;
 
         const isModel = message.role === "model";
-        const textContent = message.parts[0].text;
+        const textContent = message.parts[0]?.text;
         if (!textContent) continue;
 
-        let responsePayload = {};
+        let responsePayload = { answer: "" };
 
-        if (isModel && llm.citationsEnabled) {
-          try {
-            responsePayload = JSON.parse(textContent);
-          } catch (e) {
-            responsePayload = { answer: textContent };
-          }
+        if (isModel && PREFS.citationsEnabled) {
+          responsePayload = llm.parseModelResponseText(textContent);
         } else {
           responsePayload.answer = textContent.replace(
             /\[Current Page Context:.*?\]\s*/,

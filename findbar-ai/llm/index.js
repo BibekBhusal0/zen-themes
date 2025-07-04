@@ -196,6 +196,39 @@ Here is the initial info about the current page:
       : null;
     return this;
   },
+
+  parseModelResponseText(responseText) {
+    let answer = responseText;
+    let citations = [];
+
+    if (PREFS.citationsEnabled) {
+      try {
+        const parsedContent = JSON.parse(responseText);
+        if (typeof parsedContent.answer === "string") {
+          answer = parsedContent.answer;
+          if (Array.isArray(parsedContent.citations)) {
+            citations = parsedContent.citations;
+          }
+        } else {
+          // Parsed JSON but 'answer' field is missing or not a string.
+          debugLog(
+            "AI response JSON missing 'answer' field or not a string:",
+            parsedContent,
+          );
+        }
+      } catch (e) {
+        // JSON parsing failed, keep rawText as answer.
+        debugError(
+          "Failed to parse AI message content as JSON:",
+          e,
+          "Raw Text:",
+          responseText,
+        );
+      }
+    }
+    return { answer, citations };
+  },
+
   async sendMessage(prompt, pageContext) {
     await this.updateSystemPrompt();
 
@@ -262,32 +295,22 @@ Here is the initial info about the current page:
     }
 
     if (PREFS.citationsEnabled) {
-      try {
-        const responseText =
-          modelResponse.parts.find((part) => part.text)?.text || "{}";
-        const parsedResponse = JSON.parse(responseText);
-        debugLog("Parsed AI Response:", parsedResponse);
+      const responseText =
+        modelResponse.parts.find((part) => part.text)?.text || "";
+      const parsedResponse = this.parseModelResponseText(responseText);
 
-        if (!parsedResponse.answer) {
-          if (functionCalls.length > 0)
-            return { answer: "I used my tools to complete your request." };
-          this.history.pop();
+      debugLog("Parsed AI Response:", parsedResponse);
+
+      if (!parsedResponse.answer) {
+        if (functionCalls.length > 0) {
+          return { answer: "I used my tools to complete your request." };
         }
-        return parsedResponse;
-      } catch (e) {
-        const rawText = modelResponse.parts[0]?.text || "[Empty Response]";
-        debugError(
-          "Failed to parse JSON response from AI:",
-          e,
-          "Raw Text:",
-          rawText,
-        );
+        this.history.pop();
         return {
-          answer:
-            modelResponse.parts[0].text ||
-            "Sorry, I received an invalid response from the server.",
+          answer: "Sorry, I received an invalid response from the server.",
         };
       }
+      return parsedResponse;
     } else {
       const responseText =
         modelResponse.parts.find((part) => part.text)?.text || "";
