@@ -324,6 +324,11 @@ const findbar = {
             );
           }
         }
+      } else if (e.target?.href) {
+        e.preventDefault();
+        try {
+          openTrustedLinkIn(e.target.href, "tab");
+        } catch (e) { }
       }
     });
 
