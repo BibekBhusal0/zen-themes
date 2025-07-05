@@ -2,19 +2,18 @@
   --acrylic-background: rgba(36, 37, 39, 0.6) !important;
   --acrylic-backdrop: blur(32px) brightness(0.7) saturate(2.5) !important;
   --acrylic-border: 0.5px solid rgba(255, 255, 255, 0.1);
-  --acrylic-shadow: 0 8px 32px
-    color-mix(in srgb, var(--zen-primary-color) 15%, transparent 85%);
+  --acrylic-shadow: 0 8px 32px color-mix(in srgb, var(--zen-primary-color) 15%, transparent 85%);
   --acrylic-radius: 8px;
-  --acrylic-glass-bg: color-mix(
-    in srgb,
-    var(--zen-themed-toolbar-bg) 80%,
-    transparent 20%
-  );
+  --acrylic-glass-bg: color-mix(in srgb,
+      var(--zen-themed-toolbar-bg) 80%,
+      transparent 20%);
   --acrylic-glass-blur: blur(20px);
-  --acrylic-glass-border: 1.5px solid
-    color-mix(in srgb, var(--zen-primary-color) 20%, transparent 80%);
+  --acrylic-glass-border: 1.5px solid color-mix(in srgb, var(--zen-primary-color) 20%, transparent 80%);
 }
 
+browser {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
 
 @keyframes initial-animation {
   from {
@@ -81,24 +80,24 @@
   }
 
   findbar {
-  padding-inline: 5px !important;
-  padding-top: 2px !important;
-  padding-bottom: 2px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  box-sizing: border-box;
-  position: fixed;
-  top: 1% !important;
-  right: 1% !important;
-  width: min-content !important;
-  min-width: 400px !important;
-  border-radius: var(--acrylic-radius) !important;
-  box-shadow: var(--acrylic-shadow) !important;
-  background: var(--acrylic-glass-bg) !important;
-  backdrop-filter: var(--acrylic-backdrop) var(--acrylic-glass-blur);
-  z-index: 9999;
-  opacity: 1;
+    padding-inline: 5px !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    box-sizing: border-box;
+    position: fixed;
+    top: 1% !important;
+    right: 1% !important;
+    width: min-content !important;
+    min-width: 400px !important;
+    border-radius: var(--acrylic-radius) !important;
+    box-shadow: var(--acrylic-shadow) !important;
+    background: var(--acrylic-glass-bg) !important;
+    backdrop-filter: var(--acrylic-backdrop) var(--acrylic-glass-blur);
+    z-index: 9999;
+    opacity: 1;
 
 
     input {
@@ -291,11 +290,12 @@
         }
       }
 
-      .found-matches, .findbar-find-status {
+      .found-matches,
+      .findbar-find-status {
         font-size: 14px !important;
         font-weight: 500 !important;
         margin-top: 12px !important;
-        flex-basis:  0 !important;
+        flex-basis: 0 !important;
         margin: auto !important;
         border-radius: 12px;
         border: 1px solid var(--findbar-ai-border);
@@ -341,11 +341,12 @@
         font-size: 12px !important;
         font-weight: 500 !important;
       }
+
       #findbar-ask {
-          background-color: var(--zen-primary-color) !important;
-          border: none !important;
-          margin-right: 5px !important;
-          overflow: visible !important;
+        background-color: var(--zen-primary-color) !important;
+        border: none !important;
+        margin-right: 5px !important;
+        overflow: visible !important;
       }
     }
 
@@ -368,12 +369,14 @@
       display: flex;
       flex-direction: column;
       gap: 14px;
+
       .ai-chat-header {
         height: 30px;
         display: flex;
         flex-direction: row;
         align-items: center !important;
         gap: 10px !important;
+
         #model-selector {
           color: var(--tab-selected-textcolor) !important;
           display: flex !important;
@@ -383,6 +386,7 @@
           margin: 0 !important;
           font-weight: 400 !important;
         }
+
         .clear-chat-btn {
           /* Not present in minimal mode */
           border-radius: var(--findbar-ai-button-border-radius);
@@ -398,13 +402,14 @@
             background: var(--tab-hover-background-color) !important;
           }
         }
+
         &::before {
           content: "";
           position: absolute !important;
           top: 34px !important;
           left: 0 !important;
           width: 100% !important;
-          border-top: 1px solid rgba(255, 255, 255, 0.15) !important;   
+          border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
         }
       }
     }
@@ -551,13 +556,16 @@
         padding-left: 6px !important;
         padding-right: 6px !important;
         padding-bottom: 3px !important;
+
         &:after {
           content: "";
           position: absolute !important;
           bottom: 57px !important;
+
           @media -moz-pref("extension.findbar-ai.minimal") {
             bottom: 28px !important;
           }
+
           left: 0% !important;
           width: 100% !important;
           border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -579,7 +587,7 @@
           font-size: 14px !important;
           transition: all 0.2s ease !important;
           --focus-outline: none !important;
-         --focus-outline-inset: 0 !important;
+          --focus-outline-inset: 0 !important;
 
           &::placeholder {
             color: var(--toolbox-textcolor-inactive) !important;
@@ -618,8 +626,8 @@
           background: linear-gradient(90deg,
               transparent,
               color-mix(in srgb,
-        var(--zen-primary-color) 20%,
-        transparent 80%),
+                var(--zen-primary-color) 20%,
+                transparent 80%),
               transparent);
           background-size: 200% 100%;
           animation: shimmer 2s infinite;
@@ -647,7 +655,7 @@
 
     #findbar-expand {
       padding: 4px !important;
-      position: relative; 
+      position: relative;
       text-align: center;
       cursor: pointer;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -663,7 +671,7 @@
     }
 
     &.ai-expanded #findbar-expand::before {
-          background-image: url("chrome://browser/skin/fullscreen-exit.svg") !important;
+      background-image: url("chrome://browser/skin/fullscreen-exit.svg") !important;
     }
 
     @media -moz-pref("extension.findbar-ai.minimal") {
@@ -671,7 +679,7 @@
       flex-direction: row !important;
       min-height: 36px !important;
       align-items: center !important;
-      
+
       .findbar-closebutton {
         padding: 3px !important;
         top: unset !important;
