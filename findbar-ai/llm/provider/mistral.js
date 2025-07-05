@@ -154,15 +154,16 @@ const mistral = {
       }));
     }
 
-    const body = {
+    let body = {
       model: this.model,
       messages: messages,
-      response_format:
-        requestBody.generationConfig?.responseMimeType === "application/json"
-          ? { type: "json_object" }
-          : undefined,
-      ...(tools ? { tools } : {}),
     };
+
+    if (tools) {
+      body.tools = tools;
+    } else if (requestBody.generationConfig?.responseMimeType === "application/json") {
+      body.response_format = { type: "json_object" };
+    }
 
     let response;
     try {
