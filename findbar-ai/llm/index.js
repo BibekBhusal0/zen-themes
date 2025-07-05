@@ -219,7 +219,7 @@ Here is the initial info about the current page:
     }
     this.history.push(modelResponse);
 
-    const functionCalls = modelResponse.parts.filter(
+    const functionCalls = modelResponse.parts?.filter(
       (part) => part.functionCall,
     );
 
@@ -264,7 +264,7 @@ Here is the initial info about the current page:
     if (PREFS.citationsEnabled) {
       try {
         const responseText =
-          modelResponse.parts.find((part) => part.text)?.text || "{}";
+          modelResponse.parts?.find((part) => part.text)?.text || "{}";
         let parsedResponse;
         try {
           parsedResponse = JSON.parse(responseText);
@@ -299,7 +299,7 @@ Here is the initial info about the current page:
       }
     } else {
       const responseText =
-        modelResponse.parts.find((part) => part.text)?.text || "";
+        modelResponse.parts?.find((part) => part.text)?.text || "";
       if (!responseText && functionCalls.length === 0) {
         this.history.pop();
       }
