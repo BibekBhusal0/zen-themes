@@ -788,7 +788,7 @@ function updateFoundMatchesDisplay(retry = 0) {
   if (matches && matches.parentElement !== wrapper) wrapper.appendChild(matches);
   if (status && status.parentElement !== wrapper) wrapper.appendChild(status);
 
-  if (status && status.getAttribute('status') === 'notfound') {
+  if (status) {
     status.setAttribute('value', '0/0');
     status.textContent = '0/0';
   }

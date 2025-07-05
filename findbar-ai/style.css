@@ -1,3 +1,4 @@
+/*---------------------------------------------------------------------------*/
 :root {
   --acrylic-background: rgba(36, 37, 39, 0.6) !important;
   --acrylic-backdrop: blur(32px) brightness(0.7) saturate(2.5) !important;
@@ -321,20 +322,10 @@
           color: var(--findbar-ai-error);
           border-radius: 8px;
           border: 1px solid color-mix(in srgb, var(--findbar-ai-error) 30%, transparent 70%);
-
-          &::before {
-            content: "";
-            min-width: 18px !important;
-            min-height: 18px !important;
-            background-image: url(chrome://global/skin/icons/close.svg) !important;
-            margin-right: 10px !important;
-            background-repeat: no-repeat !important;
-          }
         }
-      }
-
-      .findbar-find-status:is([data-l10n-id]) {
-        display: flex;
+        &:not([status="notfound"]) {
+          display: none !important;
+        }
       }
 
       .checkbox-label {
@@ -594,6 +585,10 @@
           padding-inline-start: 5px !important;
           padding-inline-end: 5px !important;
           color: color-mix(in srgb, var(--zen-primary-color) 30%, white 70%);
+
+          &:hover:not(:disabled) {
+            transform: translateY(-1px);
+         }
 
           &:active:not(:disabled) {
             transform: translateY(0);
