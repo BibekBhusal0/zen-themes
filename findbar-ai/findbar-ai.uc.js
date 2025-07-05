@@ -64,10 +64,12 @@ const findbar = {
   _updateFindbar: null,
   _addKeymaps: null,
   _handleInputKeyPress: null,
+  _handleFindFieldInput: null,
   _clearLLMData: null,
   _isExpanded: false,
   _handleContextMenuPrefChange: null,
   _updateContextMenuText: null,
+  _handleMinimalPrefChange: null,
   contextMenuItem: null,
 
   get expanded() {
@@ -127,6 +129,9 @@ const findbar = {
       }
     }
   },
+  handleMinimalPrefChange: function(pref) {
+    this.minimal = pref.value;
+  },
 
   updateFindbar() {
     this.removeExpandButton();
@@ -144,10 +149,25 @@ const findbar = {
           this.expanded = this.expanded; // just to make sure in new tab UI willl also be visible
         }
       }, 200);
+      setTimeout(() => this.updateFoundMatchesDisplay(), 0); // Wait for DOM update
+      this.findbar._findField.removeEventListener(
+        "keypress",
+        this._handleInputKeyPress,
+      );
       this.findbar._findField.addEventListener(
         "keypress",
         this._handleInputKeyPress,
       );
+      this.findbar._findField.removeEventListener(
+        "input",
+        this._handleFindFieldInput,
+      );
+      this.findbar._findField.addEventListener(
+        "input",
+        this._handleFindFieldInput,
+      );
+      // Ensure found-matches is moved and label is updated
+      this.updateFoundMatchesDisplay();
 
       const originalOnFindbarOpen = this.findbar.browser.finder.onFindbarOpen;
 
@@ -279,7 +299,12 @@ const findbar = {
   },
 
   async sendMessage(prompt) {
-    console.log('sendMessage called from:', new Error().stack, 'with prompt:', prompt);
+    console.log(
+      "sendMessage called from:",
+      new Error().stack,
+      "with prompt:",
+      prompt,
+    );
     const container = this.chatContainer;
     if (!container || !prompt) return;
 
@@ -548,10 +573,10 @@ const findbar = {
 
     // Add Ask button in minimal mode, inside .findbar-container
     if (this.minimal) {
-      const container = this.findbar.querySelector('.findbar-container');
-      if (container && !container.querySelector('#findbar-ask')) {
+      const container = this.findbar.querySelector(".findbar-container");
+      if (container && !container.querySelector("#findbar-ask")) {
         const askBtn = parseElement(
-          `<button id="findbar-ask" anonid="findbar-ask">Ask</button>`
+          `<button id="findbar-ask" anonid="findbar-ask">Ask</button>`,
         );
         askBtn.addEventListener("click", () => {
           this.expanded = true;
@@ -566,8 +591,6 @@ const findbar = {
       }
     }
 
-    // Ensure found-matches is moved and label is updated
-    updateFoundMatchesDisplay();
     return true;
   },
 
@@ -729,39 +752,116 @@ const findbar = {
     this._updateFindbar = this.updateFindbar.bind(this);
     this._addKeymaps = this.addKeymaps.bind(this);
     this._handleInputKeyPress = this.handleInputKeyPress.bind(this);
+    this._handleFindFieldInput = this.updateFoundMatchesDisplay.bind(this);
     this._clearLLMData = llm.clearData.bind(llm);
     this._handleContextMenuPrefChange =
       this.handleContextMenuPrefChange.bind(this);
+    this._handleMinimalPrefChange = this.handleMinimalPrefChange.bind(this);
 
     gBrowser.tabContainer.addEventListener("TabSelect", this._updateFindbar);
     document.addEventListener("keydown", this._addKeymaps);
     UC_API.Prefs.addListener(PREFS.GOD_MODE, this._clearLLMData);
     UC_API.Prefs.addListener(PREFS.CITATIONS_ENABLED, this._clearLLMData);
+    UC_API.Prefs.addListener(PREFS.MINIMAL, this._handleMinimalPrefChange);
     UC_API.Prefs.addListener(
       PREFS.CONTEXT_MENU_ENABLED,
       this._handleContextMenuPrefChange,
     );
   },
   removeListeners() {
-    if (this.findbar)
+    if (this.findbar) {
       this.findbar._findField.removeEventListener(
         "keypress",
         this._handleInputKeyPress,
       );
+      this.findbar._findField.removeEventListener(
+        "input",
+        this._handleFindFieldInput,
+      );
+    }
     gBrowser.tabContainer.removeEventListener("TabSelect", this._updateFindbar);
     document.removeEventListener("keydown", this._addKeymaps);
     UC_API.Prefs.removeListener(PREFS.GOD_MODE, this._clearLLMData);
     UC_API.Prefs.removeListener(PREFS.CITATIONS_ENABLED, this._clearLLMData);
+    UC_API.Prefs.removeListener(PREFS.MINIMAL, this._handleMinimalPrefChange);
     UC_API.Prefs.removeListener(
       PREFS.CONTEXT_MENU_ENABLED,
       this._handleContextMenuPrefChange,
     );
 
     this._handleInputKeyPress = null;
+    this._handleFindFieldInput = null;
     this._updateFindbar = null;
     this._addKeymaps = null;
     this._handleContextMenuPrefChange = null;
+    this._handleMinimalPrefChange = null;
     this._clearLLMData = null;
+  },
+
+  updateFoundMatchesDisplay(retry = 0) {
+    if (!this.findbar) return;
+    const matches = this.findbar.querySelector(".found-matches");
+    const status = this.findbar.querySelector(".findbar-find-status");
+    const wrapper = this.findbar.querySelector(
+      'hbox[anonid="findbar-textbox-wrapper"]',
+    );
+    if (!wrapper) {
+      if (retry < 10)
+        setTimeout(() => this.updateFoundMatchesDisplay(retry + 1), 100);
+      return;
+    }
+    if (matches && matches.parentElement !== wrapper)
+      wrapper.appendChild(matches);
+    if (status && status.parentElement !== wrapper) wrapper.appendChild(status);
+
+    if (status && status.getAttribute("status") === "notfound") {
+      status.setAttribute("value", "0/0");
+      status.textContent = "0/0";
+    }
+
+    if (matches) {
+      const labelChild = matches.querySelector("label");
+      let labelValue = labelChild
+        ? labelChild.getAttribute("value")
+        : matches.getAttribute("value");
+      let newLabel = "";
+      if (labelValue) {
+        let normalized = labelValue.replace(
+          /(\d+)\s+of\s+(\d+)(?:\s+match(?:es)?)?/i,
+          "$1/$2",
+        );
+        newLabel = normalized === "1/1" ? "1/1" : normalized;
+      }
+      if (labelChild) {
+        if (labelChild.getAttribute("value") !== newLabel)
+          labelChild.setAttribute("value", newLabel);
+        if (labelChild.textContent !== newLabel)
+          labelChild.textContent = newLabel;
+      } else {
+        if (matches.getAttribute("value") !== newLabel)
+          matches.setAttribute("value", newLabel);
+        if (matches.textContent !== newLabel) matches.textContent = newLabel;
+      }
+      if (matches._observer) matches._observer.disconnect();
+      const observer = new MutationObserver(() =>
+        this.updateFoundMatchesDisplay(),
+      );
+      observer.observe(matches, {
+        attributes: true,
+        attributeFilter: ["value"],
+      });
+      if (labelChild)
+        observer.observe(labelChild, {
+          attributes: true,
+          attributeFilter: ["value"],
+        });
+      if (status)
+        observer.observe(status, {
+          attributes: true,
+          attributeFilter: ["status", "value"],
+        });
+      matches._observer = observer;
+    }
   },
 };
 
@@ -770,69 +870,4 @@ UC_API.Prefs.addListener(
   PREFS.ENABLED,
   findbar.handleEnabledChange.bind(findbar),
 );
-UC_API.Prefs.addListener(PREFS.MINIMAL, (pref) => {
-  findbar.minimal = pref.value;
-});
 window.findbar = findbar;
-
-// Add this utility function to handle the match label and DOM move
-function updateFoundMatchesDisplay(retry = 0) {
-  if (!findbar.findbar) return;
-  const matches = findbar.findbar.querySelector('.found-matches');
-  const status = findbar.findbar.querySelector('.findbar-find-status');
-  const wrapper = findbar.findbar.querySelector('hbox[anonid="findbar-textbox-wrapper"]');
-  if (!wrapper) {
-    if (retry < 10) setTimeout(() => updateFoundMatchesDisplay(retry + 1), 100);
-    return;
-  }
-  if (matches && matches.parentElement !== wrapper) wrapper.appendChild(matches);
-  if (status && status.parentElement !== wrapper) wrapper.appendChild(status);
-
-  if (status && status.getAttribute('status') === 'notfound') {
-    status.setAttribute('value', '0/0');
-    status.textContent = '0/0';
-  }
-
-  if (matches) {
-    const labelChild = matches.querySelector('label');
-    let labelValue = labelChild ? labelChild.getAttribute('value') : matches.getAttribute('value');
-    let newLabel = '';
-    if (labelValue) {
-      let normalized = labelValue.replace(/(\d+)\s+of\s+(\d+)(?:\s+match(?:es)?)?/i, '$1/$2');
-      newLabel = normalized === '1/1' ? '1/1' : normalized;
-    }
-    if (labelChild) {
-      if (labelChild.getAttribute('value') !== newLabel) labelChild.setAttribute('value', newLabel);
-      if (labelChild.textContent !== newLabel) labelChild.textContent = newLabel;
-    } else {
-      if (matches.getAttribute('value') !== newLabel) matches.setAttribute('value', newLabel);
-      if (matches.textContent !== newLabel) matches.textContent = newLabel;
-    }
-    if (matches._observer) matches._observer.disconnect();
-    const observer = new MutationObserver(() => updateFoundMatchesDisplay());
-    observer.observe(matches, { attributes: true, attributeFilter: ['value'] });
-    if (labelChild) observer.observe(labelChild, { attributes: true, attributeFilter: ['value'] });
-    if (status) observer.observe(status, { attributes: true, attributeFilter: ['status', 'value'] });
-    matches._observer = observer;
-  }
-}
-
-// Call this function after updating the findbar UI
-const origUpdateFindbar = findbar.updateFindbar.bind(findbar);
-findbar.updateFindbar = function(...args) {
-  const result = origUpdateFindbar(...args);
-  setTimeout(updateFoundMatchesDisplay, 0); // Wait for DOM update
-  return result;
-};
-
-// Add event listener to the findbar input to update matches label on every input
-const origAddExpandButton = findbar.addExpandButton.bind(findbar);
-findbar.addExpandButton = function(...args) {
-  const result = origAddExpandButton(...args);
-  // Attach input event listener to the findbar input field
-  if (this.findbar && this.findbar._findField) {
-    this.findbar._findField.removeEventListener('input', updateFoundMatchesDisplay);
-    this.findbar._findField.addEventListener('input', updateFoundMatchesDisplay);
-  }
-  return result;
-};
