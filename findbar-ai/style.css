@@ -1,4 +1,7 @@
-/*---------------------------------------------------------------------------*/
+browser {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
 :root {
   --acrylic-background: rgba(36, 37, 39, 0.6) !important;
   --acrylic-backdrop: blur(32px) brightness(0.7) saturate(2.5) !important;
