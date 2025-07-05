@@ -1,3 +1,21 @@
+:root {
+  --acrylic-background: rgba(36, 37, 39, 0.6) !important;
+  --acrylic-backdrop: blur(32px) brightness(0.7) saturate(2.5) !important;
+  --acrylic-border: 0.5px solid rgba(255, 255, 255, 0.1);
+  --acrylic-shadow: 0 8px 32px
+    color-mix(in srgb, var(--zen-primary-color) 15%, transparent 85%);
+  --acrylic-radius: 8px;
+  --acrylic-glass-bg: color-mix(
+    in srgb,
+    var(--zen-themed-toolbar-bg) 80%,
+    transparent 20%
+  );
+  --acrylic-glass-blur: blur(20px);
+  --acrylic-glass-border: 1.5px solid
+    color-mix(in srgb, var(--zen-primary-color) 20%, transparent 80%);
+}
+
+
 @keyframes initial-animation {
   from {
     top: 0;
@@ -47,11 +65,11 @@
 
 @keyframes shimmer {
   0% {
-    background-position: -200% 0;
+    background-position: 200% 0;
   }
 
   100% {
-    background-position: 200% 0;
+    background-position: -200% 0;
   }
 }
 
@@ -63,68 +81,24 @@
   }
 
   findbar {
-    --findbar-ai-bg: light-dark(color-mix(in srgb, var(--zen-primary-color) 25%, white 75%),
-        color-mix(in srgb, var(--zen-primary-color) 25%, black 75%));
-    --findbar-ai-bg-secondary: color-mix(in srgb,
-        var(--zen-themed-toolbar-bg) 65%,
-        transparent 35%);
-    --findbar-ai-border: color-mix(in srgb,
-        var(--zen-primary-color) 25%,
-        transparent 75%);
-    --findbar-ai-border-hover: color-mix(in srgb,
-        var(--zen-primary-color) 40%,
-        transparent 60%);
-    --findbar-ai-text: light-dark(#1a1a1a, #f0f0f0);
-    --findbar-ai-text-secondary: light-dark(#4a4a4a, #b0b0b0);
-    --findbar-ai-accent: var(--zen-primary-color);
-    --findbar-ai-accent-muted: color-mix(in srgb,
-        var(--zen-primary-color) 20%,
-        transparent 80%);
-    --findbar-ai-shadow: 0 8px 32px color-mix(in srgb, var(--zen-primary-color) 15%, transparent 85%);
-    --findbar-ai-shadow-hover: 0 12px 40px color-mix(in srgb, var(--zen-primary-color) 25%, transparent 75%);
-    --findbar-ai-glass-bg: color-mix(in srgb,
-        var(--zen-themed-toolbar-bg) 75%,
-        transparent 25%);
-    --findbar-ai-input-bg: color-mix(in srgb,
-        var(--zen-themed-toolbar-bg) 60%,
-        transparent 40%);
-    --findbar-ai-input-border: color-mix(in srgb,
-        var(--zen-primary-color) 30%,
-        transparent 70%);
-    --findbar-ai-button-bg: color-mix(in srgb,
-        var(--zen-themed-toolbar-bg) 80%,
-        var(--zen-primary-color) 20%);
-    --findbar-ai-button-hover: color-mix(in srgb,
-        var(--zen-primary-color) 30%,
-        var(--zen-themed-toolbar-bg) 70%);
-    --findbar-ai-button-text: var(--findbar-ai-text);
-    --findbar-ai-button-padding: 8px 16px;
-    --findbar-ai-button-border-radius: 8px;
-    --findbar-ai-error: light-dark(#dc3545, #ff6b7a);
-    --findbar-ai-error-bg: color-mix(in srgb,
-        var(--findbar-ai-error) 10%,
-        transparent 90%);
-    --findbar-ai-success: light-dark(#28a745, #4caf50);
-    --findbar-ai-warning: light-dark(#ffc107, #ff9800);
-
-    background-color: var(--findbar-ai-bg) !important;
-    position: absolute;
-    top: 20px;
-    width: min(580px, 90%);
-    right: 20px;
-    min-height: 80px;
-    height: auto !important;
-    flex-wrap: wrap;
-    flex-direction: column;
-    border-radius: 16px;
-    border: 1px solid var(--findbar-ai-border) !important;
-    background: var(--findbar-ai-glass-bg);
-    backdrop-filter: blur(20px);
-    box-shadow: var(--findbar-ai-shadow);
-    opacity: 1;
-    animation: initial-animation 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    filter: blur(0);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-inline: 5px !important;
+  padding-top: 2px !important;
+  padding-bottom: 2px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  box-sizing: border-box;
+  position: fixed;
+  top: 1% !important;
+  right: 1% !important;
+  width: min-content !important;
+  min-width: 400px !important;
+  border-radius: var(--acrylic-radius) !important;
+  box-shadow: var(--acrylic-shadow) !important;
+  background: var(--acrylic-glass-bg) !important;
+  backdrop-filter: var(--acrylic-backdrop) var(--acrylic-glass-blur);
+  z-index: 9999;
+  opacity: 1;
 
 
     input {
@@ -183,22 +157,21 @@
     }
 
     .findbar-closebutton {
+      width: 28px !important;
+      height: 28px !important;
       outline: none !important;
       position: absolute !important;
-      top: 12px !important;
+      top: 8px !important;
       right: 0 !important;
       padding: var(--findbar-ai-button-padding) !important;
-      border-radius: var(--findbar-ai-button-border-radius) !important;
+      border-radius: 5px !important;
       background: var(--findbar-ai-button-bg) !important;
-      border: 2px solid var(--findbar-ai-border) !important;
       color: var(--findbar-ai-button-text) !important;
       font-weight: 600 !important;
       transition: all 0.2s ease !important;
 
       &:hover {
-        background: var(--findbar-ai-button-hover) !important;
-        border-color: var(--findbar-ai-border-hover) !important;
-        scale: 1.1 !important;
+        background: var(--tab-hover-background-color) !important;
       }
 
       &:active {
@@ -211,29 +184,31 @@
     }
 
     .findbar-container {
-      margin-left: 10px !important;
-      margin-right: 10px !important;
+      display: flex !important;
+      flex-direction: row !important;
+      justify-content: center !important;
+      margin-right: 27px !important;
       margin-bottom: 5px !important;
       flex-wrap: wrap;
       height: auto !important;
       row-gap: 10px;
 
       &> :first-child {
-        width: calc(100% - 40px) !important;
+        width: calc(100% - 10px) !important;
         margin-top: 8px !important;
         padding-bottom: 10px !important;
         border-bottom: 1px solid var(--findbar-ai-border) !important;
         position: relative;
 
         &::before {
+          /* AI Icon */
           content: "";
           width: 18px !important;
           min-width: 18px !important;
           background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23fff" d="M10.5 2c.58 0 1.15.058 1.699.17a1 1 0 1 1-.398 1.96a6.5 6.5 0 1 0 5.069 7.671a1 1 0 1 1 1.96.398a8.5 8.5 0 0 1-1.457 3.303l-.197.26l3.652 3.652a1 1 0 0 1-1.32 1.498l-.094-.084l-3.652-3.652A8.5 8.5 0 1 1 10.5 2M19 1a1 1 0 0 1 .898.56l.048.117l.13.378a3 3 0 0 0 1.684 1.8l.185.07l.378.129a1 1 0 0 1 .118 1.844l-.118.048l-.378.13a3 3 0 0 0-1.8 1.684l-.07.185l-.129.378a1 1 0 0 1-1.844.117l-.048-.117l-.13-.378a3 3 0 0 0-1.684-1.8l-.185-.07l-.378-.129a1 1 0 0 1-.118-1.844l.118-.048l.378-.13a3 3 0 0 0 1.8-1.684l.07-.185l.129-.378A1 1 0 0 1 19 1m0 3.196a5 5 0 0 1-.804.804q.448.355.804.804q.355-.448.804-.804A5 5 0 0 1 19 4.196" /></svg>') !important;
           background-repeat: no-repeat;
-          margin-top: 9px;
+          margin-top: 6px;
           margin-right: 15px;
-          margin-left: 5px;
         }
 
         /* not being able to hide this when input has value*/
@@ -253,7 +228,7 @@
         .findbar-textbox {
           background: none !important;
           padding: 0 !important;
-          font-size: 16px !important;
+          font-size: 14px !important;
           font-weight: 500 !important;
           box-shadow: none !important;
           width: 100% !important;
@@ -273,16 +248,14 @@
         }
 
         toolbarbutton {
-          width: 38px !important;
-          height: 32px !important;
+          width: 28px !important;
+          height: 28px !important;
           justify-content: center !important;
           align-content: center !important;
-          padding: 0 !important;
           margin-left: 6px !important;
-          margin-right: 0 !important;
           border-radius: var(--findbar-ai-button-border-radius) !important;
           background: var(--findbar-ai-button-bg) !important;
-          border: 2px solid var(--findbar-ai-border) !important;
+          border-radius: 4px !important;
           color: var(--findbar-ai-button-text) !important;
           font-weight: 600 !important;
           transition: all 0.2s ease !important;
@@ -292,9 +265,7 @@
           }
 
           &:hover {
-            background: var(--findbar-ai-button-hover) !important;
-            border-color: var(--findbar-ai-border-hover) !important;
-            scale: 1.1 !important;
+            background: var(--tab-hover-background-color) !important;
           }
 
           &:active {
@@ -320,21 +291,20 @@
         }
       }
 
-      .found-matches {
+      .found-matches, .findbar-find-status {
         font-size: 14px !important;
         font-weight: 500 !important;
         margin-top: 12px !important;
-        padding: 6px 12px;
+        flex-basis:  0 !important;
         margin: auto !important;
         border-radius: 12px;
         border: 1px solid var(--findbar-ai-border);
         color: var(--findbar-ai-text) !important;
         background: var(--findbar-ai-accent-muted);
+        padding-right: 12px !important;
 
         &:not([hidden])::before {
-          background-image: url("chrome://browser/skin/zen-icons/search-page.svg") !important;
-          background-repeat: no-repeat !important;
-          padding-left: 25px !important;
+          display: none !important;
         }
       }
 
@@ -345,13 +315,10 @@
         &:is([status="notfound"]) {
           font-size: 14px !important;
           font-weight: 500 !important;
-          margin-top: 12px !important;
-          padding: 6px 12px;
           margin: auto !important;
           border-radius: 12px;
           background: var(--findbar-ai-error-bg);
           color: var(--findbar-ai-error);
-          padding: 8px 12px;
           border-radius: 8px;
           border: 1px solid color-mix(in srgb, var(--findbar-ai-error) 30%, transparent 70%);
 
@@ -374,6 +341,12 @@
         font-size: 12px !important;
         font-weight: 500 !important;
       }
+      #findbar-ask {
+          background-color: var(--zen-primary-color) !important;
+          border: none !important;
+          margin-right: 5px !important;
+          overflow: visible !important;
+      }
     }
 
     &.ai-expanded .findbar-container {
@@ -391,11 +364,49 @@
     .findbar-ai-setup,
     .findbar-ai-chat {
       width: 100%;
-      padding: 8px 20px 20px 20px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
       gap: 14px;
+      .ai-chat-header {
+        height: 30px;
+        display: flex;
+        flex-direction: row;
+        align-items: center !important;
+        gap: 10px !important;
+        #model-selector {
+          color: var(--tab-selected-textcolor) !important;
+          display: flex !important;
+          width: min-content !important;
+          padding: 2px !important;
+          padding-inline: 0 !important;
+          margin: 0 !important;
+          font-weight: 400 !important;
+        }
+        .clear-chat-btn {
+          /* Not present in minimal mode */
+          border-radius: var(--findbar-ai-button-border-radius);
+          height: 20px !important;
+          border: none;
+          background: transparent;
+          color: var(--tab-selected-textcolor);
+          cursor: pointer;
+          font-weight: 600;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: var(--tab-hover-background-color) !important;
+          }
+        }
+        &::before {
+          content: "";
+          position: absolute !important;
+          top: 34px !important;
+          left: 0 !important;
+          width: 100% !important;
+          border-top: 1px solid rgba(255, 255, 255, 0.15) !important;   
+        }
+      }
     }
 
     .findbar-ai-setup {
@@ -436,11 +447,6 @@
         }
 
         button {
-          padding: var(--button-padding);
-          border-radius: var(--button-border-radius);
-          border: 2px solid var(--findbar-ai-border);
-          background: var(--findbar-ai-button-primary);
-          color: var(--findbar-ai-text);
           cursor: pointer;
           font-weight: 600;
           transition: all 0.2s ease;
@@ -494,52 +500,14 @@
     }
 
     .findbar-ai-chat {
-      .ai-chat-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-        gap: 12px;
-      }
-
-      .model-selector {
-        flex-grow: 1;
-      }
-
-      .clear-chat-btn {
-        padding: var(--findbar-ai-button-padding);
-        border-radius: var(--findbar-ai-button-border-radius);
-        border: 2px solid var(--findbar-ai-border);
-        background: var(--findbar-ai-button-bg);
-        color: var(--findbar-ai-button-text);
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.2s ease;
-
-        &:hover {
-          background: var(--findbar-ai-button-hover);
-          border-color: var(--findbar-ai-border-hover);
-          transform: translateY(-1px);
-        }
-
-        &:active {
-          transform: translateY(0);
-        }
-      }
-
       .ai-chat-messages {
         max-height: 320px;
         overflow-y: auto;
-        background: var(--findbar-ai-bg-secondary);
-        border-radius: 12px;
-        padding: 14px;
         display: flex;
         flex-direction: column;
         gap: 12px;
-        margin-bottom: 12px;
-        border: 1px solid var(--findbar-ai-border);
         scrollbar-width: thin;
-        scrollbar-color: var(--findbar-ai-accent) transparent;
+        scrollbar-color: inherit transparent;
 
         &:empty {
           display: none;
@@ -548,98 +516,91 @@
 
       .chat-message {
         max-width: 85%;
-        padding: 10px 14px;
-        border-radius: 16px;
+        padding: 1px 5px;
+        border-radius: 10px;
         word-wrap: break-word;
-        line-height: 1.4;
         font-size: 14px;
         position: relative;
       }
 
       .chat-message-user {
         align-self: flex-end;
-        background: color-mix(in srgb,
-            var(--findbar-ai-bg) 50%,
-            var(--zen-primary-color) 50%);
-        color: var(--findbar-ai-text);
+        background: var(--zen-primary-color);
+        color: var(--tab-selected-textcolor);
         border-bottom-right-radius: 4px;
         font-weight: 500;
-        box-shadow: 0 2px 8px var(--findbar-ai-accent-muted);
-        border: 1px solid var(--findbar-ai-border);
       }
 
       .chat-message-ai {
         align-self: flex-start;
-        background: var(--findbar-ai-input-bg);
-        color: var(--findbar-ai-text);
-        border: 1px solid var(--findbar-ai-border);
+        color: var(--tab-selected-textcolor);
         border-bottom-left-radius: 4px;
       }
 
       .chat-message-error {
         align-self: flex-start;
-        background: var(--findbar-ai-error-bg);
-        color: var(--findbar-ai-error);
-        border: 1px solid color-mix(in srgb, var(--findbar-ai-error) 30%, transparent 70%);
+        background: color-mix(in srgb, var(--zen-primary-color) 50%, transparent 50%);
+        color: var(--tab-selected-textcolor);
+        border: 1px solid var(--zen-primary-color);
       }
 
       .ai-chat-input-group {
         display: flex;
-        gap: 8px;
-        align-items: flex-end;
+        gap: 12px;
+        align-items: center !important;
+        padding-left: 6px !important;
+        padding-right: 6px !important;
+        padding-bottom: 3px !important;
+        &:after {
+          content: "";
+          position: absolute !important;
+          bottom: 57px !important;
+          @media -moz-pref("extension.findbar-ai.minimal") {
+            bottom: 28px !important;
+          }
+          left: 0% !important;
+          width: 100% !important;
+          border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+        }
 
         textarea {
           flex-grow: 1 !important;
-          border-radius: var(--button-border-radius) !important;
-          padding: 12px !important;
-          min-height: 44px !important;
+          display: flex !important;
+          align-items: center !important;
+          border-radius: 8 !important;
+          padding: 0 !important;
+          min-height: 20px !important;
           max-height: 160px !important;
+          height: 20px !important;
           resize: none !important;
-          border: 2px solid var(--findbar-ai-input-border) !important;
-          background: var(--findbar-ai-input-bg) !important;
-          color: var(--findbar-ai-text) !important;
+          border: none !important;
+          background: none !important;
+          color: var(--tab-selected-textcolor) !important;
           font-size: 14px !important;
-          line-height: 1.4 !important;
           transition: all 0.2s ease !important;
-
-          &:focus {
-            outline: none !important;
-            border-color: var(--findbar-ai-accent) !important;
-            box-shadow: 0 0 0 3px var(--findbar-ai-accent-muted) !important;
-          }
+          --focus-outline: none !important;
+         --focus-outline-inset: 0 !important;
 
           &::placeholder {
-            color: var(--findbar-ai-text-secondary) !important;
+            color: var(--toolbox-textcolor-inactive) !important;
           }
         }
 
         .send-btn {
-          height: 44px;
-          padding: var(--findbar-ai-button-padding);
-          border-radius: var(--findbar-ai-button-border-radius);
-          background: var(--findbar-ai-button-bg);
-          color: var(--findbar-ai-button-text);
-          border: 2px solid var(--findbar-ai-border);
-          cursor: pointer;
-          font-weight: 600;
-          transition: all 0.2s ease;
-          position: relative;
-          overflow: hidden;
-
-          &:hover:not(:disabled) {
-            background: var(--findbar-ai-button-hover);
-            border-color: var(--findbar-ai-border-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px var(--findbar-ai-accent-muted);
-          }
+          font-size: 12px !important;
+          margin-left: auto !important;
+          border: none !important;
+          background-color: var(--zen-primary-color) !important;
+          padding-inline-start: 5px !important;
+          padding-inline-end: 5px !important;
+          color: color-mix(in srgb, var(--zen-primary-color) 30%, white 70%);
 
           &:active:not(:disabled) {
             transform: translateY(0);
           }
 
           &:disabled {
-            background: var(--findbar-ai-text-secondary);
-            border-color: var(--findbar-ai-text-secondary);
+            background: color-mix(in srgb, var(--zen-primary-color) 30%, black 70%);
             cursor: not-allowed;
             opacity: 0.6;
           }
@@ -648,16 +609,17 @@
 
       .chat-message-loading {
         align-self: flex-start;
-        background: var(--findbar-ai-input-bg);
-        color: var(--findbar-ai-text);
-        border: 1px solid var(--findbar-ai-border);
-        border-bottom-left-radius: 4px;
+        background: transparent;
+        color: transparent;
+        width: 85% !important;
 
         .message-content {
           animation: pulse 1.5s ease-in-out infinite;
           background: linear-gradient(90deg,
               transparent,
-              var(--findbar-ai-accent-muted),
+              color-mix(in srgb,
+        var(--zen-primary-color) 20%,
+        transparent 80%),
               transparent);
           background-size: 200% 100%;
           animation: shimmer 2s infinite;
@@ -666,6 +628,7 @@
     }
 
     .citation-link {
+      /* To-do: Style This*/
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -683,34 +646,16 @@
     }
 
     #findbar-expand {
-      position: relative;
+      padding: 4px !important;
+      position: relative; 
       text-align: center;
       cursor: pointer;
-      margin: 8px 12px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      padding: var(--findbar-ai-button-padding);
-      border-radius: var(--findbar-ai-button-border-radius);
-      background: var(--findbar-ai-button-bg);
-      color: var(--findbar-ai-button-text);
-      border: 2px solid var(--findbar-ai-border);
+      border-radius: 4px;
+      background: var(--zen-primary-color);
       font-weight: 600;
-      box-shadow: 0 2px 8px var(--findbar-ai-accent-muted);
-
-      &::before {
-        content: "Expand";
-        display: block;
-        width: 100%;
-        text-align: center;
-        font-size: 16px;
-        font-weight: 700;
-      }
-
-      &:hover {
-        background: var(--findbar-ai-button-hover);
-        border-color: var(--findbar-ai-border-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px var(--findbar-ai-accent-muted);
-      }
+      border: none !important;
+      width: 100% !important;
 
       &:active {
         transform: translateY(0);
@@ -718,19 +663,18 @@
     }
 
     &.ai-expanded #findbar-expand::before {
-      content: "Collapse";
+          background-image: url("chrome://browser/skin/fullscreen-exit.svg") !important;
     }
 
     @media -moz-pref("extension.findbar-ai.minimal") {
       max-width: 420px !important;
       flex-direction: row !important;
-      min-height: 56px !important;
+      min-height: 36px !important;
       align-items: center !important;
-      border-radius: 28px !important;
-
+      
       .findbar-closebutton {
-        top: 12px !important;
         padding: 3px !important;
+        top: unset !important;
       }
 
       #findbar-expand {
@@ -741,20 +685,12 @@
           transform: translateY(0) !important;
           scale: 1.07 !important;
         }
-
-        &::before {
-          content: "Ask" !important;
-          font-size: 14px !important;
-        }
       }
 
       &.ai-expanded {
-        padding-top: 16px !important;
-        border-radius: 16px !important;
-
         .findbar-closebutton {
           display: flex !important;
-          top: 8px !important;
+          top: 4px !important;
         }
 
         #findbar-expand {
@@ -771,11 +707,7 @@
           width: calc(100% - 33px) !important;
 
           &::before {
-            margin-top: 2px !important;
-          }
-
-          toolbarbutton {
-            display: none !important;
+            margin-top: 5px !important;
           }
         }
 
@@ -784,9 +716,7 @@
           padding: 0 !important;
         }
 
-        checkbox,
-        label,
-        description {
+        checkbox {
           display: none !important;
         }
       }

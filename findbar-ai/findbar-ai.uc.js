@@ -77,6 +77,10 @@ const findbar = {
     this._isExpanded = value;
     if (!this.findbar) return;
 
+    if (this.expandButton) {
+      this.expandButton.textContent = value ? "Collapse" : "Expand";
+    }
+
     if (this._isExpanded) {
       this.findbar.classList.add("ai-expanded");
       this.show();
@@ -114,7 +118,14 @@ const findbar = {
     return PREFS.minimal;
   },
   set minimal(value) {
-    if (typeof value === "boolean") PREFS.minimal = value;
+    if (typeof value === "boolean") {
+      PREFS.minimal = value;
+      // Remove both buttons and add the correct one for the new mode
+      if (this.findbar) {
+        this.removeExpandButton();
+        this.addExpandButton();
+      }
+    }
   },
 
   updateFindbar() {
@@ -268,6 +279,7 @@ const findbar = {
   },
 
   async sendMessage(prompt) {
+    console.log('sendMessage called from:', new Error().stack, 'with prompt:', prompt);
     const container = this.chatContainer;
     if (!container || !prompt) return;
 
@@ -322,8 +334,8 @@ const findbar = {
     const html = `
       <div class="findbar-ai-chat">
         <div class="ai-chat-header">
-          <select id="model-selector" class="model-selector">${modelOptions}</select>
           <button id="clear-chat" class="clear-chat-btn">Clear</button>
+          <select id="model-selector" class="model-selector">${modelOptions}</select>
         </div>
         <div class="ai-chat-messages" id="chat-messages"></div>
         <div class="ai-chat-input-group">
@@ -514,27 +526,60 @@ const findbar = {
 
   addExpandButton() {
     if (!this.findbar) return false;
+
+    // Always remove both buttons before adding the correct one
+    this.removeExpandButton();
+
     const button_id = "findbar-expand";
-    if (this.findbar.getElement(button_id)) return true;
-    const button = parseElement(
-      `<button id="${button_id}" anonid="${button_id}"></button>`,
-    );
-    button.addEventListener("click", () => {
-      this.toggleExpanded();
-      if (this.minimal) {
-        const inpText = this?.findbar?._findField?.value?.trim();
-        this.sendMessage(inpText);
+    // Only add expand button if not in minimal mode
+    if (!this.minimal) {
+      const button = parseElement(
+        `<button id="${button_id}" anonid="${button_id}">Expand</button>`,
+      );
+      button.addEventListener("click", () => {
+        this.toggleExpanded();
+        button.textContent = this.expanded ? "Collapse" : "Expand";
+      });
+      // Set initial text
+      button.textContent = this.expanded ? "Collapse" : "Expand";
+      this.findbar.appendChild(button);
+      this.expandButton = button;
+    }
+
+    // Add Ask button in minimal mode, inside .findbar-container
+    if (this.minimal) {
+      const container = this.findbar.querySelector('.findbar-container');
+      if (container && !container.querySelector('#findbar-ask')) {
+        const askBtn = parseElement(
+          `<button id="findbar-ask" anonid="findbar-ask">Ask</button>`
+        );
+        askBtn.addEventListener("click", () => {
+          this.expanded = true;
+          this.showAIInterface();
+          const inpText = this?.findbar?._findField?.value?.trim();
+          if (inpText) {
+            this.sendMessage(inpText);
+          }
+        });
+        container.appendChild(askBtn);
+        this.askButton = askBtn;
       }
-    });
-    this.findbar.appendChild(button);
-    this.expandButton = button;
+    }
+
+    // Ensure found-matches is moved and label is updated
+    updateFoundMatchesDisplay();
     return true;
   },
 
   removeExpandButton() {
-    if (!this.expandButton) return false;
-    this.expandButton.remove();
-    this.expandButton = null;
+    if (this.askButton) {
+      this.askButton.remove();
+      this.askButton = null;
+    }
+    if (this.expandButton) {
+      this.expandButton.remove();
+      this.expandButton = null;
+    }
     return true;
   },
 
@@ -725,4 +770,69 @@ UC_API.Prefs.addListener(
   PREFS.ENABLED,
   findbar.handleEnabledChange.bind(findbar),
 );
+UC_API.Prefs.addListener(PREFS.MINIMAL, (pref) => {
+  findbar.minimal = pref.value;
+});
 window.findbar = findbar;
+
+// Add this utility function to handle the match label and DOM move
+function updateFoundMatchesDisplay(retry = 0) {
+  if (!findbar.findbar) return;
+  const matches = findbar.findbar.querySelector('.found-matches');
+  const status = findbar.findbar.querySelector('.findbar-find-status');
+  const wrapper = findbar.findbar.querySelector('hbox[anonid="findbar-textbox-wrapper"]');
+  if (!wrapper) {
+    if (retry < 10) setTimeout(() => updateFoundMatchesDisplay(retry + 1), 100);
+    return;
+  }
+  if (matches && matches.parentElement !== wrapper) wrapper.appendChild(matches);
+  if (status && status.parentElement !== wrapper) wrapper.appendChild(status);
+
+  if (status && status.getAttribute('status') === 'notfound') {
+    status.setAttribute('value', '0/0');
+    status.textContent = '0/0';
+  }
+
+  if (matches) {
+    const labelChild = matches.querySelector('label');
+    let labelValue = labelChild ? labelChild.getAttribute('value') : matches.getAttribute('value');
+    let newLabel = '';
+    if (labelValue) {
+      let normalized = labelValue.replace(/(\d+)\s+of\s+(\d+)(?:\s+match(?:es)?)?/i, '$1/$2');
+      newLabel = normalized === '1/1' ? '1/1' : normalized;
+    }
+    if (labelChild) {
+      if (labelChild.getAttribute('value') !== newLabel) labelChild.setAttribute('value', newLabel);
+      if (labelChild.textContent !== newLabel) labelChild.textContent = newLabel;
+    } else {
+      if (matches.getAttribute('value') !== newLabel) matches.setAttribute('value', newLabel);
+      if (matches.textContent !== newLabel) matches.textContent = newLabel;
+    }
+    if (matches._observer) matches._observer.disconnect();
+    const observer = new MutationObserver(() => updateFoundMatchesDisplay());
+    observer.observe(matches, { attributes: true, attributeFilter: ['value'] });
+    if (labelChild) observer.observe(labelChild, { attributes: true, attributeFilter: ['value'] });
+    if (status) observer.observe(status, { attributes: true, attributeFilter: ['status', 'value'] });
+    matches._observer = observer;
+  }
+}
+
+// Call this function after updating the findbar UI
+const origUpdateFindbar = findbar.updateFindbar.bind(findbar);
+findbar.updateFindbar = function(...args) {
+  const result = origUpdateFindbar(...args);
+  setTimeout(updateFoundMatchesDisplay, 0); // Wait for DOM update
+  return result;
+};
+
+// Add event listener to the findbar input to update matches label on every input
+const origAddExpandButton = findbar.addExpandButton.bind(findbar);
+findbar.addExpandButton = function(...args) {
+  const result = origAddExpandButton(...args);
+  // Attach input event listener to the findbar input field
+  if (this.findbar && this.findbar._findField) {
+    this.findbar._findField.removeEventListener('input', updateFoundMatchesDisplay);
+    this.findbar._findField.addEventListener('input', updateFoundMatchesDisplay);
+  }
+  return result;
+};
