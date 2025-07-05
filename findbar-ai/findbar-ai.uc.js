@@ -79,12 +79,15 @@ const findbar = {
     this._isExpanded = value;
     if (!this.findbar) return;
 
+    // Handle the button text for the non-minimal "Expand" button
     if (this.expandButton) {
       this.expandButton.textContent = value ? "Collapse" : "Expand";
     }
 
-    if (value && !this.minimal) {
-      this.findbar.classList.add("ai-expanded");
+    if (value) {
+      if (!this.minimal) {
+        this.findbar.classList.add("ai-expanded");
+      }
       this.show();
       this.showAIInterface();
       this.focusPrompt();
@@ -95,7 +98,7 @@ const findbar = {
       }
     } else {
       this.findbar.classList.remove("ai-expanded");
-      if (!this.minimal) this.removeAIInterface();
+      this.removeAIInterface();
       this.focusInput();
     }
   },
