@@ -258,6 +258,9 @@ browser {
           color: var(--findbar-ai-button-text) !important;
           font-weight: 600 !important;
           transition: all 0.2s ease !important;
+          &[disabled="true"]{
+            display: none !important;
+          }
 
           label {
             display: none !important;
