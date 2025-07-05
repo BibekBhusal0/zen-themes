@@ -55,6 +55,16 @@ function normalizeSchemaTypes(obj) {
   return obj;
 }
 
+// Generate a valid tool_call_id for Mistral: 9 chars, a-z, A-Z, 0-9
+function generateToolCallId() {
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let id = '';
+  for (let i = 0; i < 9; i++) {
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return id;
+}
+
 const mistral = {
   name: "mistral",
   label: "Mistral AI",
@@ -117,7 +127,7 @@ const mistral = {
               role: "tool",
               name: part.functionResponse.name,
               content: JSON.stringify(part.functionResponse.response),
-              tool_call_id: "call_" + part.functionResponse.name, // Mistral expects tool_call_id
+              tool_call_id: generateToolCallId(), // Use valid tool_call_id
             });
           }
         }
@@ -127,7 +137,7 @@ const mistral = {
         const tool_calls = entry.parts
           .filter((p) => p.functionCall)
           .map((p) => ({
-            id: "call_" + p.functionCall.name,
+            id: generateToolCallId(),
             function: {
               name: p.functionCall.name,
               arguments: JSON.stringify(p.functionCall.args),
@@ -154,15 +164,16 @@ const mistral = {
       }));
     }
 
-    const body = {
+    let body = {
       model: this.model,
       messages: messages,
-      response_format:
-        requestBody.generationConfig?.responseMimeType === "application/json"
-          ? { type: "json_object" }
-          : undefined,
-      ...(tools ? { tools } : {}),
     };
+
+    if (tools) {
+      body.tools = tools;
+    } else if (requestBody.generationConfig?.responseMimeType === "application/json") {
+      body.response_format = { type: "json_object" };
+    }
 
     let response;
     try {
