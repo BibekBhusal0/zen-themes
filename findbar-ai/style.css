@@ -75,7 +75,7 @@ browser {
 @media -moz-pref("extension.findbar-ai.enabled") {
   @media -moz-pref("extension.findbar-ai.context-menu-enabled") {
     #ai-findbar-context-menu-item {
-      --menu-image: url('chrome://browser/skin/trending.svg');
+      --menu-image: url("chrome://browser/skin/trending.svg");
     }
   }
 
@@ -98,7 +98,6 @@ browser {
     backdrop-filter: var(--acrylic-backdrop) var(--acrylic-glass-blur);
     z-index: 9999;
     opacity: 1;
-
 
     input {
       flex-grow: 1 !important;
@@ -142,7 +141,6 @@ browser {
         border-color: var(--findbar-ai-border-hover);
       }
     }
-
 
     &:is([hidden="true"]) {
       visibility: inherit !important;
@@ -258,7 +256,8 @@ browser {
           color: var(--findbar-ai-button-text) !important;
           font-weight: 600 !important;
           transition: all 0.2s ease !important;
-          &[disabled="true"]{
+
+          &[disabled="true"] {
             display: none !important;
           }
 
@@ -362,6 +361,13 @@ browser {
       .findbar-find-status:is([status="notfound"])::before,
       .found-matches:not([hidden])::before {
         filter: invert();
+      }
+    }
+
+    /* Hide header when there are no chat messages */
+    @media -moz-pref("extension.findbar-ai.minimal") {
+      .findbar-ai-chat:has(.ai-chat-messages:empty) .ai-chat-header {
+        display: none;
       }
     }
 
@@ -518,7 +524,11 @@ browser {
         scrollbar-color: inherit transparent;
 
         &:empty {
-          display: none;
+
+          /* When there are no messages, the parent .findbar-ai-chat should not have a header or separator line */
+          &~.ai-chat-input-group:after {
+            display: none;
+          }
         }
       }
 
@@ -547,7 +557,9 @@ browser {
 
       .chat-message-error {
         align-self: flex-start;
-        background: color-mix(in srgb, var(--zen-primary-color) 50%, transparent 50%);
+        background: color-mix(in srgb,
+            var(--zen-primary-color) 50%,
+            transparent 50%);
         color: var(--tab-selected-textcolor);
         border: 1px solid var(--zen-primary-color);
       }
@@ -611,7 +623,9 @@ browser {
           }
 
           &:disabled {
-            background: color-mix(in srgb, var(--zen-primary-color) 30%, black 70%);
+            background: color-mix(in srgb,
+                var(--zen-primary-color) 30%,
+                black 70%);
             cursor: not-allowed;
             opacity: 0.6;
           }
@@ -628,9 +642,7 @@ browser {
           animation: pulse 1.5s ease-in-out infinite;
           background: linear-gradient(90deg,
               transparent,
-              color-mix(in srgb,
-                var(--zen-primary-color) 20%,
-                transparent 80%),
+              color-mix(in srgb, var(--zen-primary-color) 20%, transparent 80%),
               transparent);
           background-size: 200% 100%;
           animation: shimmer 2s infinite;
@@ -679,39 +691,34 @@ browser {
 
     @media -moz-pref("extension.findbar-ai.minimal") {
       max-width: 420px !important;
-      flex-direction: row !important;
       min-height: 36px !important;
       align-items: center !important;
+      /* In minimal mode, the findbar is always a column */
+      flex-direction: column !important;
+
+      /* In minimal mode, expanded no longer hides the main findbar container */
+      &.ai-expanded .findbar-container {
+        display: flex !important;
+      }
 
       .findbar-closebutton {
         padding: 3px !important;
         top: unset !important;
+        /* Position relative to the findbar container, not the whole findbar */
+        position: relative !important;
+        align-self: flex-end;
+        margin-top: -30px;
+        margin-right: -2px;
       }
 
       #findbar-expand {
-        margin: 0 !important;
-        right: 40px !important;
-
-        &:hover {
-          transform: translateY(0) !important;
-          scale: 1.07 !important;
-        }
-      }
-
-      &.ai-expanded {
-        .findbar-closebutton {
-          display: flex !important;
-          top: 4px !important;
-        }
-
-        #findbar-expand {
-          display: none !important;
-        }
+        display: none !important;
       }
 
       .findbar-container {
         margin-bottom: 0 !important;
         height: 32px !important;
+        width: 100% !important;
 
         &> :first-child {
           border-bottom: 0 !important;
@@ -732,8 +739,23 @@ browser {
         }
       }
 
+      /* In minimal mode, hide the separate chat input group entirely */
+      .ai-chat-input-group {
+        display: none !important;
+      }
+
+      /* In minimal mode, hide the header if there are no messages */
+      .findbar-ai-chat:has(.ai-chat-messages:empty) {
+        display: none;
+      }
+
+      /* Minimal mode doesn't need the clear button or model selector in header */
       .model-selector,
       .clear-chat-btn {
+        display: none !important;
+      }
+
+      .ai-chat-header::before {
         display: none !important;
       }
     }

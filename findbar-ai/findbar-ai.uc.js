@@ -83,7 +83,7 @@ const findbar = {
       this.expandButton.textContent = value ? "Collapse" : "Expand";
     }
 
-    if (this._isExpanded) {
+    if (value && !this.minimal) {
       this.findbar.classList.add("ai-expanded");
       this.show();
       this.showAIInterface();
@@ -95,7 +95,8 @@ const findbar = {
       }
     } else {
       this.findbar.classList.remove("ai-expanded");
-      this.removeAIInterface();
+      if (!this.minimal) this.removeAIInterface();
+      this.focusInput();
     }
   },
   toggleExpanded() {
@@ -131,6 +132,7 @@ const findbar = {
   },
   handleMinimalPrefChange: function(pref) {
     this.minimal = pref.value;
+    this.updateFindbar();
   },
 
   updateFindbar() {
@@ -194,7 +196,7 @@ const findbar = {
   show() {
     if (!this.findbar) return false;
     this.findbar.hidden = false;
-    if (!this.expanded) this.findbar._findField.focus();
+    this.focusInput();
     return true;
   },
   hide() {
@@ -299,17 +301,10 @@ const findbar = {
   },
 
   async sendMessage(prompt) {
-    console.log(
-      "sendMessage called from:",
-      new Error().stack,
-      "with prompt:",
-      prompt,
-    );
-    const container = this.chatContainer;
-    if (!container || !prompt) return;
+    if (!prompt) return;
 
-    const promptInput = container.querySelector("#ai-prompt");
-    const sendBtn = container.querySelector("#send-prompt");
+    this.show();
+    this.expanded = true;
 
     const pageContext = {
       url: gBrowser.currentURI.spec,
@@ -317,11 +312,6 @@ const findbar = {
     };
 
     this.addChatMessage({ answer: prompt }, "user");
-    if (promptInput) promptInput.value = "";
-    if (sendBtn) {
-      sendBtn.textContent = "Sending...";
-      sendBtn.disabled = true;
-    }
 
     const loadingIndicator = this.createLoadingIndicator();
     const messagesContainer =
@@ -340,11 +330,7 @@ const findbar = {
       this.addChatMessage({ answer: `Error: ${e.message}` }, "error");
     } finally {
       loadingIndicator.remove();
-      if (sendBtn) {
-        sendBtn.textContent = "Send";
-        sendBtn.disabled = false;
-      }
-      this.focusPrompt();
+      this.focusInput();
     }
   },
 
@@ -356,6 +342,13 @@ const findbar = {
         }>${displayName}</option>`;
     }).join("");
 
+    const chatInputGroup = this.minimal
+      ? ""
+      : `<div class="ai-chat-input-group">
+          <textarea id="ai-prompt" placeholder="Ask AI anything..." rows="2"></textarea>
+          <button id="send-prompt" class="send-btn">Send</button>
+        </div>`;
+
     const html = `
       <div class="findbar-ai-chat">
         <div class="ai-chat-header">
@@ -363,34 +356,35 @@ const findbar = {
           <select id="model-selector" class="model-selector">${modelOptions}</select>
         </div>
         <div class="ai-chat-messages" id="chat-messages"></div>
-        <div class="ai-chat-input-group">
-          <textarea id="ai-prompt" placeholder="Ask AI anything..." rows="2"></textarea>
-          <button id="send-prompt" class="send-btn">Send</button>
-        </div>
+        ${chatInputGroup}
       </div>`;
     const container = parseElement(html);
 
     const modelSelector = container.querySelector("#model-selector");
     const chatMessages = container.querySelector("#chat-messages");
-    const promptInput = container.querySelector("#ai-prompt");
-    const sendBtn = container.querySelector("#send-prompt");
     const clearBtn = container.querySelector("#clear-chat");
 
     modelSelector.addEventListener("change", (e) => {
       llm.currentProvider.model = e.target.value;
     });
-    const handleSend = () => this.sendMessage(promptInput.value.trim());
-    sendBtn.addEventListener("click", handleSend);
-    promptInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        handleSend();
-      }
-    });
+
+    if (!this.minimal) {
+      const promptInput = container.querySelector("#ai-prompt");
+      const sendBtn = container.querySelector("#send-prompt");
+      const handleSend = () => this.sendMessage(promptInput.value.trim());
+      sendBtn.addEventListener("click", handleSend);
+      promptInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          handleSend();
+        }
+      });
+    }
 
     clearBtn.addEventListener("click", () => {
       container.querySelector("#chat-messages").innerHTML = "";
       llm.clearData();
+      this.expanded = false;
     });
 
     chatMessages.addEventListener("click", async (e) => {
@@ -466,7 +460,7 @@ const findbar = {
 
     if (!llm.currentProvider.apiKey) {
       this.apiKeyContainer = this.createAPIKeyInterface();
-      this.findbar.insertBefore(this.apiKeyContainer, this.expandButton);
+      this.findbar.insertBefore(this.apiKeyContainer, this.findbar.firstChild);
     } else {
       this.chatContainer = this.createChatInterface();
       const history = llm.getHistory();
@@ -496,8 +490,7 @@ const findbar = {
           this.addChatMessage(responsePayload, isModel ? "ai" : "user");
         }
       }
-      this.findbar.insertBefore(this.chatContainer, this.expandButton);
-      this.focusPrompt();
+      this.findbar.insertBefore(this.chatContainer, this.findbar.firstChild);
     }
   },
 
@@ -505,10 +498,20 @@ const findbar = {
     if (this.findbar) setTimeout(() => this.findbar._findField.focus(), 10);
   },
   focusPrompt() {
+    if (this.minimal) {
+      this.focusInput();
+      return;
+    }
     const promptInput = this.chatContainer?.querySelector("#ai-prompt");
     if (promptInput) setTimeout(() => promptInput.focus(), 10);
   },
   setPromptText(text) {
+    if (this.minimal) {
+      if (this.findbar?._findField) {
+        this.findbar._findField.value = text;
+      }
+      return;
+    }
     const promptInput = this?.chatContainer?.querySelector("#ai-prompt");
     if (promptInput && text) promptInput.value = text;
   },
@@ -555,23 +558,6 @@ const findbar = {
     // Always remove both buttons before adding the correct one
     this.removeExpandButton();
 
-    const button_id = "findbar-expand";
-    // Only add expand button if not in minimal mode
-    if (!this.minimal) {
-      const button = parseElement(
-        `<button id="${button_id}" anonid="${button_id}">Expand</button>`,
-      );
-      button.addEventListener("click", () => {
-        this.toggleExpanded();
-        button.textContent = this.expanded ? "Collapse" : "Expand";
-      });
-      // Set initial text
-      button.textContent = this.expanded ? "Collapse" : "Expand";
-      this.findbar.appendChild(button);
-      this.expandButton = button;
-    }
-
-    // Add Ask button in minimal mode, inside .findbar-container
     if (this.minimal) {
       const container = this.findbar.querySelector(".findbar-container");
       if (container && !container.querySelector("#findbar-ask")) {
@@ -579,18 +565,24 @@ const findbar = {
           `<button id="findbar-ask" anonid="findbar-ask">Ask</button>`,
         );
         askBtn.addEventListener("click", () => {
-          this.expanded = true;
-          this.showAIInterface();
-          const inpText = this?.findbar?._findField?.value?.trim();
-          if (inpText) {
-            this.sendMessage(inpText);
-          }
+          const inpText = this.findbar._findField.value.trim();
+          this.sendMessage(inpText);
+          this.findbar._findField.value = "";
+          this.focusInput();
         });
         container.appendChild(askBtn);
         this.askButton = askBtn;
       }
+    } else {
+      const button_id = "findbar-expand";
+      const button = parseElement(
+        `<button id="${button_id}" anonid="${button_id}">Expand</button>`,
+      );
+      button.addEventListener("click", () => this.toggleExpanded());
+      button.textContent = this.expanded ? "Collapse" : "Expand";
+      this.findbar.appendChild(button);
+      this.expandButton = button;
     }
-
     return true;
   },
 
@@ -608,9 +600,11 @@ const findbar = {
 
   handleInputKeyPress: function(e) {
     if (e?.key === "Enter" && e?.altKey) {
-      const inpText = this?.findbar?._findField?.value?.trim();
-      this.expanded = true;
+      e.preventDefault();
+      const inpText = this.findbar._findField.value.trim();
       this.sendMessage(inpText);
+      this.findbar._findField.value = "";
+      this.focusInput();
     }
   },
 
@@ -700,9 +694,9 @@ const findbar = {
     if (PREFS.contextMenuAutoSend) {
       this.sendMessage(finalMessage);
     } else {
-      const promptInput = this.chatContainer?.querySelector("#ai-prompt");
-      promptInput.value = finalMessage;
-      promptInput?.focus();
+      this.setPromptText(finalMessage);
+      this.show();
+      this.focusInput();
     }
   },
 
@@ -739,7 +733,11 @@ const findbar = {
       this.setPromptTextFromSelection();
     }
     if (e.key?.toLowerCase() === "escape") {
-      if (this.expanded) {
+      if (this.minimal) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.hide();
+      } else if (this.expanded) {
         e.preventDefault();
         e.stopPropagation();
         this.expanded = false;
